@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#408a71">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Teryaq Author</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="auth-gate" id="authGate">
+  <div class="auth-card">
+    <div class="auth-logo">T</div>
+    <h1>Teryaq Author</h1>
+    <p>Sign in once on this device, then continue working offline with your local workspace.</p>
+    <div class="field"><label>Email</label><input id="authEmail" type="email" autocomplete="username" placeholder="name@teryaq.com"></div>
+    <div class="field"><label>Password</label><input id="authPassword" type="password" autocomplete="current-password"></div>
+    <button class="btn primary auth-primary" id="signInBtn">Sign in</button>
+    <button class="btn hidden auth-primary" id="continueOfflineBtn">Continue Offline</button>
+    <div class="auth-error" id="authError"></div>
+    <details class="auth-setup">
+      <summary>First-time cloud setup on this device</summary>
+      <div class="field"><label>Supabase project URL</label><input id="authProjectUrl" placeholder="https://xxxxx.supabase.co"></div>
+      <div class="field"><label>Supabase anon key</label><textarea id="authAnonKey" rows="4" placeholder="Public anon key only — never use a service-role key"></textarea></div>
+      <p class="hint">This connection is stored locally on the device. The app never requires or stores the Supabase service-role key.</p>
+    </details>
+  </div>
+</div>
+<div class="app-shell hidden" id="appShell">
+  <header class="topbar">
+    <div class="brand">
+      <button class="brand-mark" id="homeBtn" title="Back to library">T</button>
+      <div><h1 id="docTitle">Teryaq Author</h1><small>Offline Scientific Authoring Workspace</small></div>
+    </div>
+    <div class="top-actions" id="homeActions">
+      <span class="account-label" id="accountLabel"></span>
+      <span class="sync-status" id="syncStatus">Offline</span>
+      <button class="btn" id="syncBtn">Sync Now</button>
+      <button class="btn" id="resolveConflictsBtn">Conflicts</button>
+      <button class="btn hidden" id="adminBtn">Admin</button>
+      <button class="btn" id="settingsBtn">Account & Sync</button>
+      <button class="btn" id="importBtn">Import .teryaq</button>
+      <input id="importFile" type="file" accept=".teryaq,.json,application/json" hidden>
+    </div>
+    <div class="top-actions hidden" id="editorActions">
+      <span class="save-status" id="saveStatus">Saved ✓</span>
+      <span class="sync-status" id="syncStatusEditor"></span>
+      <button class="btn" id="saveBtn">Save</button>
+      <button class="btn" id="syncBtnEditor">Sync</button>
+      <button class="btn" id="settingsBtnEditor">Account</button>
+      <button class="btn" id="validateBtn">Validate</button>
+      <button class="btn" id="historyBtn">History</button>
+      <button class="btn" id="backupBtn">Export .teryaq</button>
+      <button class="btn" id="saveTemplateBtn">Save as Template</button>
+      <button class="btn primary" id="printBtn">Print / PDF</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="view active" id="homeView">
+      <div class="home">
+        <div class="hero">
+          <h2>Local-first, account-based Teryaq authoring</h2>
+          <p>Sign in to your own workspace, work fully offline after the first authenticated login, autosave locally, and synchronize documents and versions whenever connectivity returns. Admins can inspect all synced work without exposing one user's local-only changes to another account.</p>
+        </div>
+        <div class="section-head"><h3>Templates</h3></div>
+        <div class="cards" id="templateCards"></div>
+        <div class="section-head"><h3>My Documents</h3><div class="searchbar"><input id="searchDocs" placeholder="Search by subject, chapter, or title…"></div></div>
+        <div class="cards" id="documentCards"></div>
+      </div>
+    </section>
+
+    <section class="view" id="editorView">
+      <div id="textEditorArea" class="editor-view hidden">
+        <div class="editor-layout">
+          <aside class="side-panel left-panel" id="leftPanel">
+            <button class="mobile-controls-toggle" id="mobileControlsToggle"><span>Editing Controls</span><span>⌄</span></button>
+            <div class="left-panel-inner">
+              <details class="control-group" open>
+                <summary>Styles</summary>
+                <div class="control-body">
+                  <button class="btn" data-style="Normal">Body</button><button class="btn" data-style="Heading1">H1</button><button class="btn" data-style="Heading2">H2</button><button class="btn" data-style="Heading3">H3</button><button class="btn" data-style="Heading4">H4</button><button class="btn" data-style="Subtitle">Side Q/A</button><button class="btn" data-style="TableCaption">Table Caption</button>
+                  <button class="btn" data-mark="SideNote">Side Note</button><button class="btn danger" data-mark="NotesToDelete">Note to Delete</button><button class="btn" data-mark="HighYield">High-Yield</button><button class="btn" data-mark="ClinicalCorrelation">Clinical Correlation</button>
+                </div>
+              </details>
+              <details class="control-group" open>
+                <summary>Text Formatting</summary>
+                <div class="control-body"><select id="fontSizeSelect"><option value="">Font size</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>16</option><option>18</option><option>20</option><option>22</option><option>24</option></select><button class="btn" id="boldBtn"><b>B</b> Bold</button><button class="btn" id="italicBtn"><i>I</i> Italic</button></div>
+              </details>
+              <details class="control-group" open>
+                <summary>Bullets & Numbering</summary>
+                <div class="control-body"><button class="btn" data-action="bullet" data-level="1">● Level 1</button><button class="btn" data-action="bullet" data-level="2">■ Level 2</button><button class="btn" data-action="bullet" data-level="3">◆ Level 3</button><button class="btn" id="numberBtn">1. Number</button></div>
+              </details>
+              <details class="control-group" open>
+                <summary>Figures</summary>
+                <div class="control-body"><button class="btn" id="mainFigBtn">+ Figure Placeholder</button><button class="btn" id="marginFigBtn">+ Margin Figure</button></div>
+              </details>
+              <details class="control-group" open>
+                <summary>Table</summary>
+                <div class="control-body"><button class="btn" id="newTableBtn">+ New Table</button><button class="btn" id="rowUpBtn">Row ↑</button><button class="btn" id="rowDownBtn">Row ↓</button><button class="btn" id="colLeftBtn">Col ←</button><button class="btn" id="colRightBtn">Col →</button><button class="btn danger" id="delRowBtn">Delete Row</button><button class="btn danger" id="delColBtn">Delete Col</button><div class="control-row"><input id="colWidthInput" type="number" min="5" max="95" value="33" style="width:72px;border:1px solid var(--line);border-radius:8px;padding:7px"><button class="btn" id="applyColWidthBtn">Apply Width %</button><button class="btn" id="equalColsBtn">Equal Columns</button></div></div>
+              </details>
+            </div>
+          </aside>
+
+          <section class="editor-main">
+            <section class="cover-card">
+              <div class="cover-title"><h2>Draft information</h2><span class="chip">Scientific Draft - Text Content</span></div>
+              <div class="cover-body">
+                <div class="meta-grid">
+                  <div class="field"><label>Name</label><input id="metaName"></div><div class="field"><label>Subject</label><input id="metaSubject"></div>
+                  <div class="field"><label>Start date</label><input id="metaStart" type="date"></div><div class="field"><label>End date</label><input id="metaEnd" type="date"></div>
+                  <div class="field"><label>Chapter number</label><input id="metaChapter"></div><div class="field"><label>Chapter title</label><input id="metaTitle"></div>
+                  <div class="field" style="grid-column:1/-1"><label>General notes</label><textarea id="metaNotes"></textarea></div>
+                </div>
+                <div class="heading-register" id="headingRegister"></div>
+                <div class="table-register" id="tableRegister"></div>
+              </div>
+            </section>
+            <div class="page-scale-host">
+              <div class="page-wrap" id="pageWrap"><section class="page" id="writingPage"><span class="page-label">Scientific draft writing page</span><div class="block-list" id="blockList"></div></section></div>
+            </div>
+            <div class="statusbar"><span>Autosaves locally. JSON is structured by blocks, headings, tables and figure placeholders.</span><span id="docSchema">Schema v1.0</span></div>
+          </section>
+
+          <aside class="side-panel right-panel" id="rightPanel">
+            <button class="mobile-outline-toggle" id="mobileOutlineToggle"><span>Document Outline</span><span>⌄</span></button>
+            <div class="right-panel-inner">
+              <div class="right-history"><button class="btn" data-action="undo">↶ Undo</button><button class="btn" data-action="redo">↷ Redo</button></div>
+              <div class="panel-title">Document Outline</div><div class="outline-list" id="outlineList"></div>
+            </div>
+          </aside>
+        </div>
+        <div class="mobile-history-float"><button class="btn" data-action="undo" aria-label="Undo">↶</button><button class="btn" data-action="redo" aria-label="Redo">↷</button></div>
+      </div>
+
+      <div id="figureEditorArea" class="hidden">
+        <div class="figure-editor-main">
+          <section class="outcomes-summary"><h2 style="margin:0 0 4px;font-size:16px">Summary of figure outcomes</h2><p style="margin:0 0 12px;color:var(--muted);font-size:12px">Each figure follows one of the five outcomes below.</p><div class="outcome-list"><div class="outcome"><strong>Order 1 — KEEP</strong>Keep the figure as it is when copyright is clear and it already fits Teryaq style.</div><div class="outcome"><strong>Order 2 — CHANGE</strong>Make specific minor changes when copyright is not an issue.</div><div class="outcome"><strong>Order 3 — RECREATE</strong>Recreate with AI using defined scientific-fidelity rules.</div><div class="outcome"><strong>Order 4 — DESIGN</strong>Create a new Teryaq-designed figure, especially charts and simple illustrations.</div><div class="outcome"><strong>Order 5 — SEARCH</strong>Search for a suitable figure when an appropriate one cannot be found by the draft writer.</div></div></section>
+          <details class="figure-guide"><summary>Instructions & Notes</summary><div class="inside"><p><b>Order 1:</b> only when the writer is certain there are no copyright issues and the style is suitable.</p><p><b>Order 3 defaults:</b> Tajawal/English; change skin color and gender when suitable; minor color change; preserve anatomy/histology exactly; alter only non-scientific visual features; remove logos/signatures/watermarks/unnecessary titles; white background; final image 1:1. Any exception or extra change must be stated in PROMPT → DETAILS.</p><p><b>Order 4:</b> clearly define the desired final output. <b>Order 5:</b> clearly describe what should be searched for.</p><p><b>Very important:</b> figure code contains only the figure number; title is mandatory; caption is optional.</p></div></details>
+          <details class="figure-guide"><summary>Steps of Creation</summary><div class="inside"><ol><li>Choose a clear, high-quality figure matching Teryaq usage.</li><li>Add it to the Figure area.</li><li>Write the figure code.</li><li>Write a short title; use Caption for extra clarification.</li><li>Always record the source.</li><li>Choose the correct Order.</li><li>Write details in PROMPT → DETAILS.</li><li>Choose copyright status; use “I don't know” when uncertain.</li><li>Add any extra notes.</li></ol></div></details>
+          <section class="cover-card" style="width:100%"><div class="cover-title"><h2>Draft information</h2><span class="chip">Scientific Draft - Figures</span></div><div class="cover-body"><div class="meta-grid"><div class="field"><label>Name</label><input id="figMetaName"></div><div class="field"><label>Subject</label><input id="figMetaSubject"></div><div class="field"><label>Chapter number</label><input id="figMetaChapter"></div><div class="field"><label>Chapter title</label><input id="figMetaTitle"></div><div class="field" style="grid-column:1/-1"><label>General notes</label><textarea id="figMetaNotes"></textarea></div></div></div></section>
+          <div class="figure-cards" id="figureCards"></div>
+          <div style="text-align:center;padding:18px"><button class="btn primary" onclick="(function(){const d=window.__dummy})()" id="addFigureBtn">+ Add Figure</button></div>
+        </div>
+        <aside class="fig-nav"><div style="font-size:10px;font-weight:900;text-align:center;margin-bottom:7px;color:var(--muted)">Figures</div><div id="figureNavButtons"></div></aside>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="validation-panel hidden" id="validationPanel"><div class="validation-box"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3>Validation</h3><button class="btn" id="closeValidation">Close</button></div><div class="issues" id="issues"></div></div></div>
+<div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
+<div class="toast" id="toast"></div>
+<script src="platform.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

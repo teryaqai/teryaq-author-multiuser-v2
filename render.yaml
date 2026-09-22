@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: teryaq-author
+    runtime: static
+    buildCommand: echo "No build required"
+    staticPublishPath: .
