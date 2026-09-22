@@ -1,5 +1,18 @@
 # TERYAQ Master Tool — Editor Acceptance Checklist
 
+## v2.3.4 cross-device sync race regression
+
+- [ ] Confirm the Dashboard and sidebar display `v2.3.4` on both devices.
+- [ ] On Device A, type while an intentionally delayed Sync request is in flight. Confirm the newest text remains in IndexedDB and its queue entry remains `pending` after the older request returns.
+- [ ] Stop typing and press Sync. Confirm `Synced ✓` appears only after the queue and conflicts are both empty and a cloud version number is shown.
+- [ ] On Device B, press Sync and confirm the exact newest Device A sentence appears without reopening the installed app.
+- [ ] Keep typing through several Autosave/Auto Sync cycles and confirm no false single-device conflict is created.
+- [ ] Confirm an equal-version background pull does not re-render the editor or remove keyboard focus.
+- [ ] Create a real simultaneous edit on Devices A and B and confirm a genuine conflict is still created.
+- [ ] Continue editing after the genuine conflict appears, then choose Keep local. Confirm the newest IndexedDB text, not the older conflict snapshot, is synchronized.
+- [ ] Repeat the continuous Arabic/English typing tests from v2.3.3 to confirm the focus fix remains intact.
+- [ ] Deploy over v2.3.3, reopen both installed PWAs online, and verify `app.v2.3.4.js`, `platform.v2.3.4.js`, and `styles.v2.3.4.css` are loaded.
+
 ## v2.3.3 continuous-typing regression
 
 - [ ] Confirm the Dashboard and sidebar both display `v2.3.3` on every test device.

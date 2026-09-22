@@ -1,7 +1,7 @@
 {
-  "appVersion": "2.3.3",
+  "appVersion": "2.3.4",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 3,
   "cloudMigrationVersion": 7,
-  "release": "nonblocking-autosave-focus-preservation"
+  "release": "race-safe-cross-device-sync-and-truthful-status"
 }

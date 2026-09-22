@@ -1,6 +1,19 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.3.3
+# TERYAQ Master Tool — Multi-user Offline-First v2.3.4
 
 This package provides an **account-separated, local-first workspace** with a persistent navigation portal, guided template creation, username profiles, recoverable Trash, bilingual help, Supabase synchronization, device registration, server-side version history, document-level conflict handling, workspace backups, and an admin dashboard with version downloads and synchronized Trash visibility.
+
+## v2.3.4 race-safe cross-device synchronization
+
+- A cloud response can no longer write an older document snapshot over text saved while that request was in flight.
+- Every successful push re-reads the latest IndexedDB revision atomically and compares its `localSaveToken` with the revision actually sent.
+- If newer local text exists, only `baseServerVersion` is advanced; the newest document remains `pending` and stays in the queue for the next push.
+- `Synced ✓` appears only when both the account queue and conflict store are empty. Remaining work is reported as pending instead of being presented as synchronized.
+- Remote documents replace a device copy only when the cloud version is newer and the local document is explicitly synchronized.
+- A newer remote version refreshes an open, clean editor without overwriting unsaved work. Equal-version pulls do not re-render the editor, preserving the v2.3.3 focus fix.
+- False single-device conflicts are prevented by atomically preserving the newest cloud base version during local saves.
+- Conflict resolution now reads the newest IndexedDB copy at click time, so edits made after the conflict appeared are not replaced by an older conflict snapshot.
+
+This is a client-side synchronization fix. It requires no new Supabase migration and does not change the editor, the 250 ms autosave timing, emergency drafts, or local content serialization.
 
 ## v2.3.3 non-blocking autosave hotfix
 
@@ -38,7 +51,7 @@ After an account has successfully authenticated at least once on a device, the c
 
 The app writes to IndexedDB first. Cloud synchronization is secondary. A loss of connectivity never blocks editing.
 
-Version 2.3.3 caches both `/` and `/index.html`, the bundled Tajawal fonts, and the complete application shell so an installed iPad, Safari, Chrome, or Edge app can relaunch while offline.
+Version 2.3.4 caches both `/` and `/index.html`, the bundled Tajawal fonts, and the complete application shell so an installed iPad, Safari, Chrome, or Edge app can relaunch while offline.
 
 ## What requires internet
 
