@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="styles.v2.4.3.css">
+  <link rel="stylesheet" href="styles.v2.4.4.css">
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
@@ -62,7 +62,7 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/icon-192.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.4.3</span></small></div>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.4.4</span></small></div>
       <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">×</button>
     </div>
@@ -135,7 +135,7 @@
   <main>
     <section class="view active" id="homeView">
       <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.4.3</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.4.4</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
         <div class="stat-grid" id="dashboardStats"></div>
         <div class="portal-grid two-thirds">
           <section class="portal-panel"><div class="section-head"><div><span class="eyebrow">Workspace</span><h3>Recent documents</h3></div><button class="text-button" data-nav="documents">View all →</button></div><div class="cards compact-cards" id="documentCards"></div></section>
@@ -156,7 +156,7 @@
       <div class="guide-library" id="guideLibrary">
         <details class="guide-topic" id="guide-start" open><summary><span class="guide-index">01</span><span><b>Getting started</b><small>تسجيل الدخول والتثبيت والبدء</small></span></summary><div class="guide-topic-body"><div><h4>First use on a device</h4><ol><li>Open the HTTPS Render link while connected to the internet.</li><li>On the login page, press <b>Cloud setup</b>. It opens beside Sign in on desktop or as a scrollable bottom sheet on mobile.</li><li>Enter the Supabase Project URL and publishable key, then save.</li><li>Sign in with the account created for you by the administrator.</li><li>Press <b>Sync Now</b> and wait until the status becomes <b>Synced ✓</b>.</li><li>Install the PWA from Chrome/Edge or Add to Home Screen on iPad.</li></ol></div><div dir="rtl"><h4>أول استخدام على الجهاز</h4><ol><li>افتح رابط Render الآمن HTTPS وأنت متصل بالإنترنت.</li><li>في صفحة الدخول اضغط <b>Cloud setup</b>؛ تظهر بجانب تسجيل الدخول على اللابتوب أو كنافذة سفلية قابلة للتمرير على الجوال.</li><li>أدخل Project URL وPublishable Key ثم احفظ الاتصال.</li><li>سجّل الدخول بالحساب الذي أنشأه أو وافق عليه الأدمن.</li><li>اضغط <b>Sync Now</b> وانتظر حتى تظهر <b>Synced ✓</b>.</li><li>ثبّت التطبيق من Chrome/Edge أو Add to Home Screen على الأيباد.</li></ol></div><div class="guide-note"><b>Important:</b> The cloud connection is saved separately on each browser/device. Never enter a service-role key.</div></div></details>
         <details class="guide-topic" id="guide-docs"><summary><span class="guide-index">02</span><span><b>Documents and templates</b><small>إنشاء المستندات والعمل داخلها</small></span></summary><div class="guide-topic-body"><div><h4>Create a document</h4><ol><li>Choose <b>New document</b>.</li><li>Select the required template box.</li><li>Press <b>Next</b>.</li><li>Complete Draft Information or the information requested by that template.</li><li>Choose <b>Create & continue</b> to open the editor.</li></ol><h4>Where are document actions?</h4><p>Go to <b>Documents</b>. Open and History & Versions are visible. Duplicate, Export, and Move to Trash are inside the ••• menu. Use the square checkboxes to select several visible documents or select all, then move the selected group to Trash.</p></div><div dir="rtl"><h4>إنشاء مستند</h4><ol><li>اختر <b>New document</b>.</li><li>اختر بوكس القالب المطلوب.</li><li>اضغط <b>Next</b>.</li><li>أكمل Draft Information أو المعلومات الخاصة بالقالب.</li><li>اضغط <b>Create & continue</b> لفتح المحرر.</li></ol><h4>أين أجد خيارات المستند؟</h4><p>من صفحة <b>Documents</b>. زر Open وHistory & Versions ظاهران، بينما Duplicate وExport وMove to Trash داخل قائمة •••. استخدم مربعات التحديد لاختيار عدة ملفات ظاهرة أو تحديد الكل، ثم انقل المجموعة المختارة إلى السلة.</p></div><div class="guide-note"><b>Autosave:</b> Editor changes are saved locally automatically. Save confirms the local save; cloud delivery is shown separately by the sync status.</div></div></details>
-        <details class="guide-topic" id="guide-editor"><summary><span class="guide-index">03</span><span><b>Editor and Arabic lists</b><small>المحرر والقوائم العربية</small></span></summary><div class="guide-topic-body"><div><h4>Editor layout</h4><ul><li><b>Top action bar:</b> Save, Sync, Validate, History / Versions, and one Export menu for Draft, PDF, Template, or standalone HTML.</li><li><b>Formatting ribbon:</b> all existing styles, text formatting, lists, figures, and table tools. Both top bars remain visible while you scroll.</li><li><b>Import DOCX Table:</b> choose a DOCX, select detected tables, review warnings, complete code/title/caption, then insert native editable tables. The file stays on your device.</li><li><b>Sidebar:</b> use its arrow to switch between icons-only and icons with labels.</li><li><b>Outline:</b> open the narrow tab on the right to navigate H1/H2 sections without permanently reducing page space.</li><li><b>Draft information:</b> remains separate from the A4 writing page.</li><li><b>Table information:</b> every inserted table gets a linked row for code, title, and optional caption. Editing the row updates that table's caption.</li><li><b>After a table:</b> choose <b>+ Continue writing</b>. New and imported tables also receive a normal paragraph immediately after them.</li></ul><h4>Formatting behavior</h4><p>Moving the controls does not change any style definition. Inline marks such as Side Note, Note to Delete, High-Yield, and Clinical Correlation still require selected text.</p></div><div dir="rtl"><h4>ترتيب المحرر</h4><ul><li><b>الشريط الأول:</b> الحفظ والمزامنة والتحقق والنسخ السابقة، وقائمة Export واحدة لمسودة TERYAQ أو PDF أو قالب أو HTML مستقل.</li><li><b>شريط التنسيق:</b> جميع الستايلات والتنسيقات والبوليت والنامبرنج والفيجر والجداول، ويبقى الشريطان ظاهرين أثناء النزول.</li><li><b>Import DOCX Table:</b> اختر ملف DOCX، حدّد الجداول، راجع التنبيهات، أدخل الكود والعنوان والـCaption ثم أدرجها كجداول TERYAQ قابلة للتعديل. الملف لا يغادر جهازك.</li><li><b>القائمة الجانبية:</b> استخدم السهم للتبديل بين الأيقونات فقط أو الأيقونات مع الأسماء.</li><li><b>Document Outline:</b> افتح اللسان الرفيع من اليمين للتنقل بين H1 وH2 من دون حجز مساحة دائمة.</li><li><b>Table information:</b> يظهر لكل جدول صف مرتبط للكود والعنوان والـCaption الاختياري، وأي تعديل عليه ينعكس على الجدول.</li><li><b>الكتابة بعد الجدول:</b> اضغط <b>+ Continue writing</b> أسفل الجدول؛ كما تُنشأ فقرة Body تلقائيًا بعد أي جدول جديد أو مستورد.</li></ul><h4>اتجاه البوليت والنامبرنج</h4><p>يعتمد الاتجاه على أول حرف فعلي في كل بند: إذا بدأ النص بالعربية تظهر العلامة من اليمين، وإذا بدأ بالإنجليزية تبقى من اليسار. يمكن أن يحتوي نفس المستند على بنود عربية وإنجليزية باتجاهين مختلفين.</p><h4>الرجوع</h4><p>استخدم زر <b>Back</b> أعلى المحرر للعودة؛ يتم حفظ التعديلات المحلية المعلقة قبل الخروج.</p></div></div></details>
+        <details class="guide-topic" id="guide-editor"><summary><span class="guide-index">03</span><span><b>Editor and Arabic lists</b><small>المحرر والقوائم العربية</small></span></summary><div class="guide-topic-body"><div><h4>Editor layout</h4><ul><li><b>Top action bar:</b> Save, Sync, Validate, History / Versions, and one Export menu for Draft, PDF, Template, or standalone HTML.</li><li><b>Ribbon tabs:</b> Home contains styles and lists, Insert contains figures and new/imported tables, Table appears for a selected table cell, and View contains View only, zoom, and Outline.</li><li><b>Import DOCX Table:</b> choose a DOCX, select detected tables, review warnings, complete code/title/caption, then insert native editable tables. The file stays on your device.</li><li><b>Sidebar:</b> use its arrow to switch between icons-only and icons with labels.</li><li><b>Outline:</b> choose <b>View → Outline</b> to navigate H1/H2 sections. The drawer overlays the workspace and never changes the A4 page width.</li><li><b>Draft information:</b> remains separate from the A4 writing page.</li><li><b>Table information:</b> every named table gets a linked row for code, title, and optional caption. Editing the row updates that table's caption.</li><li><b>After a table:</b> choose <b>+ Continue writing</b>. New and imported tables also receive a normal paragraph immediately after them.</li></ul><h4>Formatting behavior</h4><p>Moving the controls does not change any style definition. Inline marks such as Side Note, Note to Delete, High-Yield, and Clinical Correlation still require selected text.</p></div><div dir="rtl"><h4>ترتيب المحرر</h4><ul><li><b>الشريط الأول:</b> الحفظ والمزامنة والتحقق والنسخ السابقة، وقائمة Export واحدة لمسودة TERYAQ أو PDF أو قالب أو HTML مستقل.</li><li><b>تبويبات الشريط:</b> Home للستايلات والتنسيقات والقوائم، Insert للفيجر والجداول الجديدة أو المستوردة، Table لأدوات الجدول المحدد، وView للعرض فقط والزوم والـOutline.</li><li><b>Import DOCX Table:</b> اختر ملف DOCX، حدّد الجداول، راجع التنبيهات، أدخل الكود والعنوان والـCaption ثم أدرجها كجداول TERYAQ قابلة للتعديل. الملف لا يغادر جهازك.</li><li><b>القائمة الجانبية:</b> استخدم السهم للتبديل بين الأيقونات فقط أو الأيقونات مع الأسماء.</li><li><b>Document Outline:</b> افتحه من <b>View → Outline</b> للتنقل بين H1 وH2؛ يفتح فوق مساحة العمل ولا يغيّر عرض صفحة A4.</li><li><b>Table information:</b> يظهر لكل جدول مُسمّى صف مرتبط للكود والعنوان والـCaption الاختياري، وأي تعديل عليه ينعكس على الجدول.</li><li><b>الكتابة بعد الجدول:</b> اضغط <b>+ Continue writing</b> أسفل الجدول؛ كما تُنشأ فقرة Body تلقائيًا بعد أي جدول جديد أو مستورد.</li></ul><h4>اتجاه البوليت والنامبرنج</h4><p>يعتمد الاتجاه على أول حرف فعلي في كل بند: إذا بدأ النص بالعربية تظهر العلامة من اليمين، وإذا بدأ بالإنجليزية تبقى من اليسار. يمكن أن يحتوي نفس المستند على بنود عربية وإنجليزية باتجاهين مختلفين.</p><h4>الرجوع</h4><p>استخدم زر <b>Back</b> أعلى المحرر للعودة؛ يتم حفظ التعديلات المحلية المعلقة قبل الخروج.</p></div></div></details>
         <details class="guide-topic" id="guide-offline"><summary><span class="guide-index">04</span><span><b>Offline work</b><small>العمل على اللابتوب والأيباد دون إنترنت</small></span></summary><div class="guide-topic-body"><div><h4>Laptop</h4><ol><li>Install the app from Chrome or Edge while online.</li><li>Open the installed app once and complete a successful sign-in and sync.</li><li>When offline, launch the installed app—not a new private/incognito window.</li><li>If the login page appears, choose <b>Continue Offline</b>.</li><li>Work normally; changes show as Offline / saved locally.</li></ol><h4>iPad</h4><ol><li>Open the site in Safari while online.</li><li>Share → Add to Home Screen.</li><li>Open the new Home Screen icon once online.</li><li>Later launch the icon offline and choose Continue Offline if requested.</li></ol></div><div dir="rtl"><h4>ماذا يحدث أثناء الأوفلاين؟</h4><p>يُحفظ كل تعديل داخل IndexedDB على نفس الجهاز، وتدخل التغييرات في قائمة انتظار. لا يحتاج إنشاء المستند أو تعديله أو تصديره إلى الإنترنت بعد تجهيز الجهاز أول مرة. عند عودة الاتصال يبدأ Auto Sync تلقائيًا.</p><h4>تنبيه</h4><p>بيانات الأوفلاين مرتبطة بالجهاز والمتصفح والحساب. مسح بيانات الموقع أو حذف التطبيق قد يمسح العمل المحلي غير المتزامن، لذلك استخدم النسخ الاحتياطي قبل ذلك.</p></div></div></details>
         <details class="guide-topic" id="guide-sync"><summary><span class="guide-index">05</span><span><b>Sync status and Auto Sync</b><small>حالات المزامنة ومعناها</small></span></summary><div class="guide-topic-body"><div class="status-guide"><p><span class="chip sync-chip synced">synced</span> Saved locally and accepted by the cloud.</p><p><span class="chip sync-chip pending">pending</span> Safe on this device and waiting to upload.</p><p><span class="chip sync-chip local-only">local-only</span> Exists only on this device so far.</p><p><span class="chip sync-chip conflict">conflict</span> Another cloud change needs your decision.</p></div><div dir="rtl"><h4>Auto Sync</h4><p>يعمل افتراضيًا عند توفر الإنترنت: بعد الحفظ، وعند عودة الاتصال، وعند فتح التطبيق، مع فحص دوري. يمكنك تشغيله أو إيقافه من <b>Settings & Sync</b>.</p><h4>متى أضغط Sync Now؟</h4><p>بعد أول تسجيل دخول على جهاز جديد، وقبل تغيير الجهاز، وبعد حل تعارض، أو إذا بقيت حالة pending مدة غير طبيعية.</p></div><div class="guide-note"><b>Privacy:</b> Admins see only work that has reached Supabase. Local-only edits remain on the user's device.</div></div></details>
         <details class="guide-topic" id="guide-conflicts"><summary><span class="guide-index">06</span><span><b>Conflicts</b><small>كيف أعرف التعارض وأحله؟</small></span></summary><div class="guide-topic-body"><div><h4>Where it appears</h4><p>The affected document shows a red conflict status in Documents. The top conflict button lists all unresolved conflicts.</p><h4>Resolution choices</h4><ul><li><b>Keep local:</b> upload this device's copy as the next cloud version.</li><li><b>Use server:</b> discard the conflicting local copy and accept the cloud copy.</li><li><b>Save both:</b> keep the cloud copy on the original and preserve local work as a new document.</li></ul></div><div dir="rtl"><h4>متى يحدث؟</h4><p>عندما يعدّل جهازان المستند نفسه انطلاقًا من نفس النسخة قبل أن يتزامنا. لا يستبدل التطبيق أي نسخة تلقائيًا.</p><h4>الخيار الأكثر أمانًا عند الشك</h4><p>اختر <b>Save both</b> ثم راجع النسختين يدويًا، خصوصًا للمحتوى العلمي.</p></div></div></details>
@@ -177,29 +177,47 @@
       <div id="textEditorArea" class="editor-view hidden">
         <div class="editor-ribbon left-panel" id="leftPanel">
             <button class="mobile-controls-toggle" id="mobileControlsToggle"><span>Editing Controls</span><span>⌄</span></button>
+            <div class="editor-ribbon-tabs" role="tablist" aria-label="Document editing tools">
+              <button class="editor-ribbon-tab active" type="button" role="tab" data-ribbon-tab="home" aria-selected="true">Home</button>
+              <button class="editor-ribbon-tab" type="button" role="tab" data-ribbon-tab="insert" aria-selected="false">Insert</button>
+              <button class="editor-ribbon-tab" type="button" role="tab" data-ribbon-tab="table" aria-selected="false" disabled title="Select a table cell to use table tools">Table</button>
+              <button class="editor-ribbon-tab" type="button" role="tab" data-ribbon-tab="view" aria-selected="false">View</button>
+            </div>
             <div class="left-panel-inner">
-              <details class="control-group" open>
+              <details class="control-group ribbon-panel" data-ribbon-panel="home" open>
                 <summary>Styles</summary>
                 <div class="control-body">
                   <button class="btn" data-style="Normal">Body</button><button class="btn" data-style="Heading1">H1</button><button class="btn" data-style="Heading2">H2</button><button class="btn" data-style="Heading3">H3</button><button class="btn" data-style="Heading4">H4</button><button class="btn" data-style="Subtitle">Side Q/A</button><button class="btn" data-style="TableCaption">Table Caption</button>
                   <button class="btn" data-mark="SideNote">Side Note</button><button class="btn danger" data-mark="NotesToDelete">Note to Delete</button><button class="btn" data-mark="HighYield">High-Yield</button><button class="btn" data-mark="ClinicalCorrelation">Clinical Correlation</button>
                 </div>
               </details>
-              <details class="control-group" open>
+              <details class="control-group ribbon-panel" data-ribbon-panel="home" open>
                 <summary>Text Formatting</summary>
                 <div class="control-body"><select id="fontSizeSelect"><option value="">Font size</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>16</option><option>18</option><option>20</option><option>22</option><option>24</option></select><button class="btn" id="boldBtn"><b>B</b> Bold</button><button class="btn" id="italicBtn"><i>I</i> Italic</button></div>
               </details>
-              <details class="control-group" open>
+              <details class="control-group ribbon-panel" data-ribbon-panel="home" open>
                 <summary>Bullets & Numbering</summary>
                 <div class="control-body"><button class="btn" data-action="bullet" data-level="1">● Level 1</button><button class="btn" data-action="bullet" data-level="2">■ Level 2</button><button class="btn" data-action="bullet" data-level="3">◆ Level 3</button><button class="btn" id="numberBtn">1. Number</button></div>
               </details>
-              <details class="control-group" open>
-                <summary>Figures</summary>
-                <div class="control-body"><button class="btn" id="mainFigBtn">+ Figure Placeholder</button><button class="btn" id="marginFigBtn">+ Margin Figure</button></div>
+              <details class="control-group ribbon-panel" data-ribbon-panel="insert" open hidden>
+                <summary>Insert</summary>
+                <div class="control-body"><button class="btn" id="mainFigBtn">+ Figure Placeholder</button><button class="btn" id="marginFigBtn">+ Margin Figure</button><button class="btn" id="newTableBtn">+ New Table</button><button class="btn" id="importDocxTableBtn">Import DOCX Table</button></div>
               </details>
-              <details class="control-group" open>
-                <summary>Table</summary>
-                <div class="control-body"><button class="btn" id="newTableBtn">+ New Table</button><button class="btn" id="importDocxTableBtn">Import DOCX Table</button><button class="btn" id="rowUpBtn">Row ↑</button><button class="btn" id="rowDownBtn">Row ↓</button><button class="btn" id="colLeftBtn">Col ←</button><button class="btn" id="colRightBtn">Col →</button><button class="btn danger" id="delRowBtn">Delete Row</button><button class="btn danger" id="delColBtn">Delete Col</button><div class="control-row"><input id="colWidthInput" type="number" min="5" max="95" value="33" style="width:72px;border:1px solid var(--line);border-radius:8px;padding:7px"><button class="btn" id="applyColWidthBtn">Apply Width %</button><button class="btn" id="equalColsBtn">Equal Columns</button></div></div>
+              <details class="control-group ribbon-panel" data-ribbon-panel="table" open hidden>
+                <summary>Selected table</summary>
+                <div class="control-body"><button class="btn" id="rowUpBtn">Row ↑</button><button class="btn" id="rowDownBtn">Row ↓</button><button class="btn" id="colLeftBtn">Col ←</button><button class="btn" id="colRightBtn">Col →</button><button class="btn danger" id="delRowBtn">Delete Row</button><button class="btn danger" id="delColBtn">Delete Col</button><div class="control-row"><input id="colWidthInput" type="number" min="5" max="95" value="33" style="width:72px;border:1px solid var(--line);border-radius:8px;padding:7px"><button class="btn" id="applyColWidthBtn">Apply Width %</button><button class="btn" id="equalColsBtn">Equal Columns</button></div></div>
+              </details>
+              <details class="control-group ribbon-panel view-ribbon-panel" data-ribbon-panel="view" open hidden>
+                <summary>Document view</summary>
+                <div class="control-body">
+                  <button class="btn" id="viewOnlyBtn" type="button" aria-pressed="false">◉ View only</button>
+                  <button class="btn" id="zoomOutBtn" type="button" aria-label="Zoom out">−</button>
+                  <button class="btn view-zoom-label" id="zoomResetBtn" type="button" title="Reset zoom">100%</button>
+                  <button class="btn" id="zoomInBtn" type="button" aria-label="Zoom in">＋</button>
+                  <button class="btn primary" id="onePageBtn" type="button" aria-pressed="true">▯ One page</button>
+                  <button class="btn" id="twoPagesBtn" type="button" aria-pressed="false">▯▯ Two pages</button>
+                  <button class="btn" id="outlineViewBtn" type="button" aria-expanded="false" aria-controls="rightPanel">☷ Outline</button>
+                </div>
               </details>
             </div>
         </div>
@@ -231,12 +249,12 @@
           </section>
 
           <aside class="side-panel right-panel" id="rightPanel">
-            <button class="outline-drawer-toggle" id="outlineDrawerToggle" aria-expanded="false"><span>☷</span><b>Outline</b></button>
-            <button class="mobile-outline-toggle" id="mobileOutlineToggle"><span>Document Outline</span><span>⌄</span></button>
+            <div class="outline-drawer-head"><div class="panel-title">Document Outline</div><button class="outline-close" id="outlineCloseBtn" type="button" aria-label="Close document outline">×</button></div>
             <div class="right-panel-inner">
-              <div class="panel-title">Document Outline</div><div class="outline-list" id="outlineList"></div>
+              <div class="outline-list" id="outlineList"></div>
             </div>
           </aside>
+          <button class="outline-scrim hidden" id="outlineScrim" type="button" aria-label="Close document outline"></button>
         </div>
         <div class="mobile-history-float"><button class="btn" data-action="undo" aria-label="Undo">↶</button><button class="btn" data-action="redo" aria-label="Redo">↷</button></div>
       </div>
@@ -261,7 +279,7 @@
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
-<script src="platform.v2.4.3.js"></script>
-<script src="app.v2.4.3.js"></script>
+<script src="platform.v2.4.4.js"></script>
+<script src="app.v2.4.4.js"></script>
 </body>
 </html>

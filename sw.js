@@ -1,4 +1,4 @@
-const CACHE = 'teryaq-master-tool-v2.4.3';
+const CACHE = 'teryaq-master-tool-v2.4.4';
 const SCOPE_URL = new URL(self.registration.scope);
 const ROOT_URL = SCOPE_URL.href;
 const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
@@ -6,9 +6,9 @@ const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
 const CORE_ASSETS = [
   ROOT_URL,
   APP_SHELL_URL,
-  new URL('styles.v2.4.3.css', SCOPE_URL).href,
-  new URL('platform.v2.4.3.js', SCOPE_URL).href,
-  new URL('app.v2.4.3.js', SCOPE_URL).href,
+  new URL('styles.v2.4.4.css', SCOPE_URL).href,
+  new URL('platform.v2.4.4.js', SCOPE_URL).href,
+  new URL('app.v2.4.4.js', SCOPE_URL).href,
   new URL('vendor/jszip.min.js', SCOPE_URL).href,
   new URL('vendor/JSZip-LICENSE.md', SCOPE_URL).href,
   new URL('manifest.webmanifest', SCOPE_URL).href,

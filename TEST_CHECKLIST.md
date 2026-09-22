@@ -1,5 +1,20 @@
 # TERYAQ Master Tool — Editor Acceptance Checklist
 
+## v2.4.4 tabbed editor and overlay Outline
+
+- [ ] Confirm Dashboard and sidebar display `v2.4.4` and the browser loads `app.v2.4.4.js`, `platform.v2.4.4.js`, and `styles.v2.4.4.css`.
+- [ ] Open a text document and confirm Home, Insert, Table, and View tabs appear; all previous style buttons remain present with unchanged output.
+- [ ] Confirm Table is disabled until a table cell is selected, then becomes available.
+- [ ] Confirm no fixed/floating/black Outline button appears anywhere in the editor.
+- [ ] Open View → Outline and confirm the drawer overlays the workspace without changing the displayed A4 width.
+- [ ] Close Outline with ×, the backdrop, and Escape; repeat on mobile and confirm it opens as a bottom sheet.
+- [ ] Toggle View only and confirm Draft information, table information, document blocks, and table cells cannot be edited while text remains selectable.
+- [ ] Exit View only and confirm editing resumes without changing any content or document style.
+- [ ] Use display zoom, then print/export PDF; confirm zoom does not change print dimensions, margins, font sizes, or table widths.
+- [ ] In Documents, open `•••` for the first and last visible rows at desktop and mobile widths; confirm all actions remain visible without scrolling the table vertically.
+- [ ] Confirm empty legacy table metadata does not create blank rows in Table information, while named tables remain linked and editable.
+- [ ] Repeat the v2.3.3 continuous-typing test and v2.3.4 two-device synchronization test.
+
 ## v2.4.3 DOCX table import
 
 - [ ] Import a DOCX containing one simple table; preview dimensions and cell text are correct.

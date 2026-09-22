@@ -1,4 +1,12 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.4.3
+# TERYAQ Master Tool — Multi-user Offline-First v2.4.4
+
+## v2.4.4 tabbed editor and Outline access
+
+- Reorganizes the existing editor controls into Home, Insert, Table, and View tabs without changing any document style definition.
+- Removes the permanent side Outline tab; Outline now opens only from View and overlays the workspace without changing A4 width.
+- Adds a read-only viewing mode and display-only zoom while keeping the underlying 210 × 297 mm page and print styles unchanged.
+- Moves Documents `•••` actions to a viewport-level menu so actions are never clipped by the table container.
+- Omits unnamed legacy tables from the Table information summary while keeping those table blocks in the document.
 
 ## v2.4.3 DOCX tables and unified export
 
@@ -92,7 +100,7 @@ After an account has successfully authenticated at least once on a device, the c
 
 The app writes to IndexedDB first. Cloud synchronization is secondary. A loss of connectivity never blocks editing.
 
-Version 2.4.3 caches both `/` and `/index.html`, the bundled Tajawal fonts, the local JSZip DOCX reader, and the complete application shell so an installed iPad, Safari, Chrome, or Edge app can relaunch while offline.
+Version 2.4.4 caches both `/` and `/index.html`, the bundled Tajawal fonts, the local JSZip DOCX reader, and the complete application shell so an installed iPad, Safari, Chrome, or Edge app can relaunch while offline.
 
 ## What requires internet
 

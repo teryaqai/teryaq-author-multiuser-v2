@@ -1,7 +1,7 @@
 {
-  "appVersion": "2.4.3",
+  "appVersion": "2.4.4",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 3,
   "cloudMigrationVersion": 7,
-  "release": "docx-table-import-and-unified-export"
+  "release": "tabbed-editor-view-and-overlay-outline"
 }
