@@ -1,4 +1,4 @@
-const CACHE = 'teryaq-author-v2.1.2';
+const CACHE = 'teryaq-master-tool-v2.2.0';
 const SCOPE_URL = new URL(self.registration.scope);
 const ROOT_URL = SCOPE_URL.href;
 const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
@@ -63,7 +63,7 @@ self.addEventListener('fetch', event => {
         return response;
       } catch (_) {
         const cached = await cachedAppShell(request);
-        return cached || new Response('Teryaq Author is not cached yet. Connect once, reopen the app online, then try again offline.', {
+        return cached || new Response('TERYAQ Master Tool is not cached yet. Connect once, reopen the app online, then try again offline.', {
           status: 503,
           headers: { 'Content-Type': 'text/plain; charset=utf-8' },
         });

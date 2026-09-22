@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#408a71">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Teryaq Author">
-  <title>Teryaq Author</title>
+  <meta name="apple-mobile-web-app-title" content="TERYAQ Master Tool">
+  <title>TERYAQ Master Tool</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -24,7 +24,7 @@
 <div class="auth-gate" id="authGate">
   <div class="auth-card">
     <div class="auth-logo">T</div>
-    <h1>Teryaq Author</h1>
+    <h1>TERYAQ Master Tool</h1>
     <p>Sign in once on this device, then continue working offline with your local workspace.</p>
     <div class="field"><label>Email</label><input id="authEmail" type="email" autocomplete="username" placeholder="name@teryaq.com"></div>
     <div class="field"><label>Password</label><input id="authPassword" type="password" autocomplete="current-password"></div>
@@ -45,29 +45,42 @@
   <header class="topbar">
     <div class="brand">
       <button class="brand-mark" id="homeBtn" title="Back to library">T</button>
-      <div><h1 id="docTitle">Teryaq Author</h1><small>Offline Scientific Authoring Workspace</small></div>
+      <button class="btn back-button hidden" id="backBtn" title="Back to documents">← Back</button>
+      <div class="brand-copy"><h1 id="docTitle">TERYAQ Master Tool</h1><small>Offline Scientific Authoring Workspace</small></div>
     </div>
     <div class="top-actions" id="homeActions">
-      <span class="account-label" id="accountLabel"></span>
-      <span class="sync-status" id="syncStatus">Offline</span>
-      <button class="btn" id="syncBtn">Sync Now</button>
-      <button class="btn" id="resolveConflictsBtn">Conflicts</button>
-      <button class="btn hidden" id="adminBtn">Admin</button>
-      <button class="btn" id="settingsBtn">Account & Sync</button>
-      <button class="btn" id="importBtn">Import .teryaq</button>
+      <div class="status-cluster">
+        <span class="account-label" id="accountLabel"></span>
+        <span class="sync-status" id="syncStatus">Offline</span>
+      </div>
+      <div class="action-cluster">
+        <button class="btn primary" id="syncBtn">Sync Now</button>
+        <button class="btn conflict-summary hidden" id="resolveConflictsBtn">Conflicts</button>
+        <button class="btn hidden" id="adminBtn">Admin</button>
+        <button class="btn" id="settingsBtn">Account & Sync</button>
+        <button class="btn" id="importBtn">Import</button>
+      </div>
       <input id="importFile" type="file" accept=".teryaq,.json,application/json" hidden>
     </div>
     <div class="top-actions hidden" id="editorActions">
-      <span class="save-status" id="saveStatus">Saved ✓</span>
-      <span class="sync-status" id="syncStatusEditor"></span>
-      <button class="btn" id="saveBtn">Save</button>
-      <button class="btn" id="syncBtnEditor">Sync</button>
-      <button class="btn" id="settingsBtnEditor">Account</button>
-      <button class="btn" id="validateBtn">Validate</button>
-      <button class="btn" id="historyBtn">History</button>
-      <button class="btn" id="backupBtn">Export .teryaq</button>
-      <button class="btn" id="saveTemplateBtn">Save as Template</button>
-      <button class="btn primary" id="printBtn">Print / PDF</button>
+      <div class="status-cluster">
+        <span class="save-status" id="saveStatus">Saved ✓</span>
+        <span class="sync-status" id="syncStatusEditor"></span>
+      </div>
+      <div class="toolbar-cluster">
+        <div class="action-cluster primary-actions">
+          <button class="btn primary" id="saveBtn">Save</button>
+          <button class="btn" id="syncBtnEditor">Sync</button>
+          <button class="btn" id="settingsBtnEditor">Account & Sync</button>
+        </div>
+        <div class="action-cluster secondary-actions">
+          <button class="btn" id="validateBtn">Validate</button>
+          <button class="btn" id="historyBtn" title="Recovery snapshots and earlier document states">History / Versions</button>
+          <button class="btn" id="backupBtn">Export</button>
+          <button class="btn" id="saveTemplateBtn">Save as Template</button>
+          <button class="btn" id="printBtn">Print / PDF</button>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -75,11 +88,24 @@
     <section class="view active" id="homeView">
       <div class="home">
         <div class="hero">
-          <h2>Local-first, account-based Teryaq authoring</h2>
-          <p>Sign in to your own workspace, work fully offline after the first authenticated login, autosave locally, and synchronize documents and versions whenever connectivity returns. Admins can inspect all synced work without exposing one user's local-only changes to another account.</p>
+          <div class="hero-copy">
+            <span class="eyebrow">Dashboard</span>
+            <h2>Welcome, <span id="welcomeEmail"></span></h2>
+            <p>Create from a structured template, work offline, and let Teryaq synchronize safely whenever connectivity returns.</p>
+          </div>
+          <button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button>
         </div>
-        <div class="section-head"><h3>Templates</h3></div>
-        <div class="cards" id="templateCards"></div>
+        <details class="dashboard-guide" open>
+          <summary><span>Quick guide</span><span dir="rtl">دليل الاستخدام السريع</span></summary>
+          <div class="guide-grid">
+            <article class="guide-card"><span class="guide-number">1</span><div><h3>Start a document</h3><p>Select <b>New document</b>, choose a template, press Next, then complete the requested draft or script information.</p><div class="guide-ar" dir="rtl"><h3>ابدأ مستندًا</h3><p>اضغط <b>New document</b>، اختر القالب، ثم التالي، وبعدها أدخل معلومات الـDraft أو الـScript المطلوبة.</p></div></div></article>
+            <article class="guide-card"><span class="guide-number">2</span><div><h3>Save and sync</h3><p>Changes autosave on this device. <b>Sync</b> sends pending changes to the cloud; Auto Sync runs whenever the device is online.</p><div class="guide-ar" dir="rtl"><h3>الحفظ والمزامنة</h3><p>التعديلات تُحفظ تلقائيًا على الجهاز. زر <b>Sync</b> يرسلها للسحابة، وAuto Sync يعمل عند توفر الإنترنت.</p></div></div></article>
+            <article class="guide-card"><span class="guide-number">3</span><div><h3>Offline work</h3><p>Open the installed app once while online. Later, use <b>Continue Offline</b>; work stays local and syncs after reconnection.</p><div class="guide-ar" dir="rtl"><h3>العمل بدون إنترنت</h3><p>افتح التطبيق المثبّت مرة وأنت متصل. لاحقًا اختر <b>Continue Offline</b>؛ يبقى العمل محليًا ويتزامن بعد عودة الإنترنت.</p></div></div></article>
+            <article class="guide-card"><span class="guide-number">4</span><div><h3>History and versions</h3><p><b>History / Versions</b> contains recovery snapshots. Restore one if you need an earlier document state. Cloud versions are created by successful syncs.</p><div class="guide-ar" dir="rtl"><h3>السجل والنسخ</h3><p><b>History / Versions</b> يعرض لقطات الاستعادة. يمكنك استرجاع حالة أقدم، بينما نسخ السحابة تُنشأ عند نجاح المزامنة.</p></div></div></article>
+            <article class="guide-card"><span class="guide-number">5</span><div><h3>Conflicts</h3><p>A conflict appears on the affected document when two devices changed it. Choose local, server, or keep both.</p><div class="guide-ar" dir="rtl"><h3>التعارضات</h3><p>يظهر التعارض داخل المستند المتأثر عندما يعدّله جهازان. اختر النسخة المحلية أو السحابية أو احتفظ بالنسختين.</p></div></div></article>
+            <article class="guide-card"><span class="guide-number">6</span><div><h3>Validate, export, print</h3><p>Validate checks structure. Export creates a portable <b>.teryaq</b> file. Print / PDF produces the formatted output.</p><div class="guide-ar" dir="rtl"><h3>الفحص والتصدير والطباعة</h3><p>Validate يفحص البنية، وExport ينشئ ملف <b>.teryaq</b>، وPrint / PDF يجهّز النسخة المنسقة.</p></div></div></article>
+          </div>
+        </details>
         <div class="section-head"><h3>My Documents</h3><div class="searchbar"><input id="searchDocs" placeholder="Search by subject, chapter, or title…"></div></div>
         <div class="cards" id="documentCards"></div>
       </div>

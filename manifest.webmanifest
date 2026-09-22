@@ -1,6 +1,6 @@
 {
-  "name": "Teryaq Author",
-  "short_name": "Teryaq Author",
+  "name": "TERYAQ Master Tool",
+  "short_name": "TERYAQ Master",
   "id": "./",
   "description": "Account-based, offline-first scientific authoring workspace with local autosave, cloud synchronization, version history and admin visibility.",
   "start_url": "./",
