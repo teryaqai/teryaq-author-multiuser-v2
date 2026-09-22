@@ -1,4 +1,14 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.4.2
+# TERYAQ Master Tool — Multi-user Offline-First v2.4.3
+
+## v2.4.3 DOCX tables and unified export
+
+- Imports one or more tables from a `.docx` file entirely on-device; the source file is never uploaded.
+- Provides table selection, preview, required code/title metadata, optional caption, and a first-row header toggle before insertion.
+- Preserves plain text plus bold/italic runs and converts imported tables into native editable TERYAQ table blocks.
+- Flags merged and nested Word tables as **Needs review** and safely flattens unsupported cell structures.
+- Replaces the separate Draft, Template, and Print buttons with one accessible **Export** menu.
+- Adds a standalone `.html` export with embedded Tajawal fonts and no scripts, credentials, or Supabase configuration.
+- Preserves the v2.4.2 table continuation behavior, exact style contract, and the v2.3.4 save/sync implementation. No Supabase migration is required.
 
 ## v2.4.2 continue writing after tables
 
@@ -82,7 +92,7 @@ After an account has successfully authenticated at least once on a device, the c
 
 The app writes to IndexedDB first. Cloud synchronization is secondary. A loss of connectivity never blocks editing.
 
-Version 2.3.4 caches both `/` and `/index.html`, the bundled Tajawal fonts, and the complete application shell so an installed iPad, Safari, Chrome, or Edge app can relaunch while offline.
+Version 2.4.3 caches both `/` and `/index.html`, the bundled Tajawal fonts, the local JSZip DOCX reader, and the complete application shell so an installed iPad, Safari, Chrome, or Edge app can relaunch while offline.
 
 ## What requires internet
 

@@ -1,5 +1,28 @@
 # TERYAQ Master Tool — Editor Acceptance Checklist
 
+## v2.4.3 DOCX table import
+
+- [ ] Import a DOCX containing one simple table; preview dimensions and cell text are correct.
+- [ ] Import a DOCX containing multiple tables; only checked tables are inserted.
+- [ ] Code and title are required, caption is optional, and all three values populate Table information.
+- [ ] Header-row on/off changes the first row between header and normal cells in editor, PDF, and HTML.
+- [ ] Bold and italic cell content survives import; several Word paragraphs in one cell remain separated by line breaks.
+- [ ] Merged or nested Word tables show **Needs review** and import as a safe flat grid.
+- [ ] A table over 50 columns or 5,000 cells is not selectable.
+- [ ] Imported tables remain editable, autosave, sync, reopen on another device, support Undo/Redo, and have a writable Body paragraph after them.
+- [ ] Import works after an offline PWA relaunch because JSZip is cached locally.
+
+## v2.4.3 unified Export menu
+
+- [ ] One Export button replaces the previous three editor buttons and closes with outside click or Escape.
+- [ ] Export Draft saves first and downloads a valid, re-importable `.teryaq` file.
+- [ ] Export as PDF opens the existing A4 print dialog without changing document styles.
+- [ ] Save as Template creates the same reusable local template as before.
+- [ ] Export as HTML downloads one standalone file with embedded Tajawal fonts, no scripts, and no Supabase URL/key/token.
+- [ ] HTML preserves Arabic/English direction, lists, headings, figures, tables, captions, and screen/print layout.
+- [ ] The Export menu remains fully reachable as a mobile bottom sheet on narrow screens.
+- [ ] v2.3.3 uninterrupted typing and v2.3.4 cross-device sync checks still pass.
+
 ## v2.4.2 continue-after-table regression
 
 - [ ] Insert a table at the end of a document; a normal editable paragraph exists immediately after it.

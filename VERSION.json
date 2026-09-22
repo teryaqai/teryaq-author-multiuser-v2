@@ -1,7 +1,7 @@
 {
-  "appVersion": "2.4.2",
+  "appVersion": "2.4.3",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 3,
   "cloudMigrationVersion": 7,
-  "release": "continue-after-tables-and-responsive-login"
+  "release": "docx-table-import-and-unified-export"
 }
