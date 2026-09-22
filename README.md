@@ -1,4 +1,15 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.4.0
+# TERYAQ Master Tool — Multi-user Offline-First v2.4.1
+
+## v2.4.1 document library and account usability
+
+- Shows the TERYAQ logo in the application sidebar and login identity area.
+- Adds accessible show/hide-password icons to sign-in and both Account password fields.
+- Limits Chapter number entry to digits and dots in the creation wizard and both editors, including normalization of Arabic/Persian digits.
+- Adds row checkboxes, select-all, clear selection, and safe batch Move to Trash in Documents.
+- Removes a trashed document from the active conflict count while preserving the unresolved conflict inside its trash record; restoring that document restores its conflict state.
+- Retries an explicit cloud deletion against the newest server version instead of leaving a deleted item as an active conflict.
+- Explains backup, restore, device ID, role, sign-out, and local-data removal directly inside Settings & Sync.
+- Preserves the v2.4.0 editor layout, exact style contract, and the v2.3.4 race-safe save/sync implementation.
 
 ## v2.4.0 compact document workspace
 

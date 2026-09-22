@@ -1,5 +1,20 @@
 # TERYAQ Master Tool — Editor Acceptance Checklist
 
+## v2.4.1 document-library and account regression
+
+- [ ] Login and sidebar display the TERYAQ logo, including when the sidebar is collapsed.
+- [ ] The eye icon shows and hides the login password without changing the entered value.
+- [ ] Account eye icons independently show and hide New password and Confirm password.
+- [ ] Chapter number strips letters and symbols but accepts digits and dots in the wizard, text editor, and figure editor.
+- [ ] Arabic/Persian digits entered in Chapter number are normalized to Western digits.
+- [ ] Documents has per-row checkboxes, select-all, clear selection, and batch Move selected to Trash.
+- [ ] A normal deleted document leaves Documents, appears in Trash, and restores as pending.
+- [ ] A conflicted deleted document disappears from the active conflict count while in Trash.
+- [ ] Restoring that conflicted document restores the conflict badge and conflict-resolution choices.
+- [ ] A delete version mismatch retries against the latest cloud version without creating a visible active conflict.
+- [ ] Settings & Sync explains Workspace Backup, Restore, Pre-Upgrade Backups, Device ID, Role, and both sign-out choices.
+- [ ] Manual Save, Sync, Auto Sync, cross-device pull, and uninterrupted typing still pass the v2.3.4/v2.3.3 checks below.
+
 ## v2.4.0 document workspace regression
 
 - [ ] Dashboard and sidebar show `v2.4.0`; the sidebar expands and collapses without changing the active page.

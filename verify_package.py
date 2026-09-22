@@ -4,9 +4,9 @@ import re, sys
 root=Path(__file__).parent
 required=[
     'index.html','styles.css','platform.js','app.js',
-    'styles.v2.4.0.css','platform.v2.4.0.js','app.v2.4.0.js',
+    'styles.v2.4.1.css','platform.v2.4.1.js','app.v2.4.1.js',
     'sw.js','manifest.webmanifest','README.md','UPDATE_AND_MIGRATION_POLICY.md',
-    'AI_REVIEW_BRIEF.md','UPLOAD_v2.4.0.md','render.yaml','VERSION.json',
+    'AI_REVIEW_BRIEF.md','UPLOAD_v2.4.1.md','render.yaml','VERSION.json',
     'fonts/Tajawal-Regular.ttf','fonts/Tajawal-Medium.ttf','fonts/Tajawal-Bold.ttf'
 ]
 missing=[x for x in required if not (root/x).exists()]
@@ -18,7 +18,7 @@ ids=re.findall(r'\bid="([^"]+)"',html)
 dups=sorted({x for x in ids if ids.count(x)>1})
 if dups:
     print('DUPLICATE IDS:',dups);sys.exit(1)
-for x in ['authGate','appShell','appSidebar','sidebarCollapse','syncBtn','settingsBtn','adminBtn','trashBtn','documentsView','accountView','adminView','leftPanel','editorContentColumn','tableRegister','outlineDrawerToggle','modalBody','appVersionBadge','sidebarAppVersion']:
+for x in ['authGate','authPasswordToggle','appShell','appSidebar','sidebarCollapse','syncBtn','settingsBtn','adminBtn','trashBtn','documentsView','documentBulkBar','bulkDeleteDocuments','clearDocumentSelection','accountView','adminView','leftPanel','editorContentColumn','tableRegister','outlineDrawerToggle','modalBody','appVersionBadge','sidebarAppVersion']:
     if f'id="{x}"' not in html:
         print('MISSING HTML ID:',x);sys.exit(1)
 
@@ -35,6 +35,23 @@ for marker in ['repairDocumentIdentity',"localStatus!=='synced'",'Automatic back
 for marker in ['sameLocalRevision','reconcileSuccessfulPush','reconcileRemoteDocument','newer-local-pending','teryaq-document-sync-metadata','still pending']:
     if marker not in platform:
         print('MISSING V2.3.4 SYNC-RACE MARKER:',marker);sys.exit(1)
+for marker in ['conflictSnapshot','restoreConflict','restore-after-delete','Deletion is retrying against the latest cloud version.','reconcileTrashedConflicts','bindPasswordToggle','authPasswordToggle','backup-explainer']:
+    if marker not in platform:
+        print('MISSING V2.4.1 PLATFORM MARKER:',marker);sys.exit(1)
+for marker in ['existingTrash?.document','{...(existingTrash||{})','existingTrash?.title||deletedDoc.title']:
+    if marker not in platform:
+        print('REMOTE DELETE PULL MUST PRESERVE THE EXISTING LOCAL TRASH RECORD:',marker);sys.exit(1)
+delete_region=platform[platform.find('async function queueDelete'):platform.find('async function ownedDocuments')]
+for marker in ["await get('conflicts',id)",'hadConflict:Boolean','conflictSnapshot:',"await del('conflicts',id)"]:
+    if marker not in delete_region:
+        print('INCOMPLETE CONFLICT-AWARE TRASH MOVE:',marker);sys.exit(1)
+restore_region=platform[platform.find('async function restoreTrashItem'):platform.find('async function repairDocumentIdentity')]
+for marker in ['restoreConflict','status:restoreConflict?',"await put('conflicts',saved)"]:
+    if marker not in restore_region:
+        print('INCOMPLETE CONFLICT RESTORE:',marker);sys.exit(1)
+conflict_ui_region=platform[platform.find('async function resolveConflicts'):platform.find('async function exportWorkspaceBackup')]
+if "else await del('documents',c.documentId)" not in conflict_ui_region:
+    print('REMOTE-DELETE SAVE-BOTH MUST REMOVE THE ORIGINAL AFTER PRESERVING A COPY');sys.exit(1)
 push_region=platform[platform.find('async function pushQueueItem'):platform.find('function reconcileRemoteDocument')]
 if 'reconcileSuccessfulPush' not in push_region or "await put('documents',doc)" in push_region:
     print('UNSAFE PUSH RESPONSE: must reconcile the latest local revision instead of writing the sent snapshot');sys.exit(1)
@@ -72,11 +89,17 @@ for forbidden in ['editorView','querySelectorAll','readOnly','contenteditable']:
 for marker in ['SIDEBAR_COLLAPSED_KEY','syncEditorStickyOffsets','tableCaptionText','refreshRenderedTableCaption','observeWritingPage','Math.min(1.45','Table caption (optional)']:
     if marker not in app:
         print('MISSING V2.4 EDITOR MARKER:',marker);sys.exit(1)
+for marker in ['selectedDocumentIds','sanitizeChapterNumber','documents-select-all','deleteSelectedDocumentsToTrash','updateDocumentBulkBar']:
+    if marker not in app:
+        print('MISSING V2.4.1 DOCUMENT MARKER:',marker);sys.exit(1)
 
 styles=(root/'styles.css').read_text(encoding='utf-8')
 for marker in ['Compact document workspace v2.4','editor-ribbon','sidebar-collapsed','outline-drawer-toggle','table-register-header']:
     if marker not in styles:
         print('MISSING V2.4 STYLE MARKER:',marker);sys.exit(1)
+for marker in ['Identity, selection and account clarity v2.4.1','password-toggle','document-bulk-bar','selection-box','backup-explainer']:
+    if marker not in styles:
+        print('MISSING V2.4.1 STYLE MARKER:',marker);sys.exit(1)
 for protected in ['.p-Normal{font-size:11pt', '.p-Heading1{display:flex;gap:7px;align-items:flex-start;font-size:14pt', '.p-Heading2{display:flex;gap:7px;align-items:flex-start;font-size:13pt', '.p-Heading3{font-size:12pt', '.p-Heading4{font-size:11pt', '.p-TableCaption{font-size:9pt', '.mark-NotesToDelete{color:#FF0000;font-weight:700;font-size:9pt', '.mark-HighYield{color:#7030A0;font-weight:700', '.mark-ClinicalCorrelation{color:#39E794']:
     if protected not in styles:
         print('STYLE CONTRACT CHANGED OR MISSING:',protected);sys.exit(1)
@@ -86,12 +109,12 @@ for forbidden in ['.p-Normal{','.p-Heading1{','.p-Heading2{','.p-Heading3{','.p-
         print('V2.4 LAYOUT MUST NOT OVERRIDE DOCUMENT STYLE:',forbidden);sys.exit(1)
 
 version=(root/'VERSION.json').read_text(encoding='utf-8')
-if '"appVersion": "2.4.0"' not in version or "teryaq-master-tool-v2.4.0" not in (root/'sw.js').read_text(encoding='utf-8'):
-    print('VERSION/CACHE MISMATCH: expected v2.4.0');sys.exit(1)
-for source,versioned in [('app.js','app.v2.4.0.js'),('platform.js','platform.v2.4.0.js'),('styles.css','styles.v2.4.0.css')]:
+if '"appVersion": "2.4.1"' not in version or "teryaq-master-tool-v2.4.1" not in (root/'sw.js').read_text(encoding='utf-8'):
+    print('VERSION/CACHE MISMATCH: expected v2.4.1');sys.exit(1)
+for source,versioned in [('app.js','app.v2.4.1.js'),('platform.js','platform.v2.4.1.js'),('styles.css','styles.v2.4.1.css')]:
     if (root/source).read_bytes()!=(root/versioned).read_bytes():
         print('STALE VERSIONED ASSET:',versioned);sys.exit(1)
-for ref in ['styles.v2.4.0.css','platform.v2.4.0.js','app.v2.4.0.js']:
+for ref in ['styles.v2.4.1.css','platform.v2.4.1.js','app.v2.4.1.js']:
     if ref not in html:
         print('MISSING VERSIONED ASSET REFERENCE:',ref);sys.exit(1)
 for number in range(1,8):

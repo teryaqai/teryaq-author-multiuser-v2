@@ -1,4 +1,4 @@
-const CACHE = 'teryaq-master-tool-v2.4.0';
+const CACHE = 'teryaq-master-tool-v2.4.1';
 const SCOPE_URL = new URL(self.registration.scope);
 const ROOT_URL = SCOPE_URL.href;
 const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
@@ -6,20 +6,19 @@ const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
 const CORE_ASSETS = [
   ROOT_URL,
   APP_SHELL_URL,
-  new URL('styles.v2.4.0.css', SCOPE_URL).href,
-  new URL('platform.v2.4.0.js', SCOPE_URL).href,
-  new URL('app.v2.4.0.js', SCOPE_URL).href,
+  new URL('styles.v2.4.1.css', SCOPE_URL).href,
+  new URL('platform.v2.4.1.js', SCOPE_URL).href,
+  new URL('app.v2.4.1.js', SCOPE_URL).href,
   new URL('manifest.webmanifest', SCOPE_URL).href,
   new URL('VERSION.json', SCOPE_URL).href,
   new URL('fonts/Tajawal-Regular.ttf', SCOPE_URL).href,
   new URL('fonts/Tajawal-Medium.ttf', SCOPE_URL).href,
   new URL('fonts/Tajawal-Bold.ttf', SCOPE_URL).href,
-];
-
-const OPTIONAL_ASSETS = [
   new URL('icons/icon-192.png', SCOPE_URL).href,
   new URL('icons/icon-512.png', SCOPE_URL).href,
 ];
+
+const OPTIONAL_ASSETS = [];
 
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
