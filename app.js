@@ -4,7 +4,7 @@
 (() => {
 'use strict';
 
-const APP_VERSION = '2.1.0';
+const APP_VERSION = '2.1.1';
 const SCHEMA_VERSION = '2.0.0';
 const DB_NAME = 'TeryaqAuthorDB';
 const DB_VERSION = 2;

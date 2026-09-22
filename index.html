@@ -28,6 +28,8 @@
       <div class="field"><label>Supabase project URL</label><input id="authProjectUrl" placeholder="https://xxxxx.supabase.co"></div>
       <div class="field"><label>Supabase anon key</label><textarea id="authAnonKey" rows="4" placeholder="Public anon key only — never use a service-role key"></textarea></div>
       <p class="hint">This connection is stored locally on the device. The app never requires or stores the Supabase service-role key.</p>
+      <button class="btn auth-primary" id="saveInitialCloudConfig">Save connection</button>
+      <p class="hint" id="initialCloudConfigStatus"></p>
     </details>
   </div>
 </div>
