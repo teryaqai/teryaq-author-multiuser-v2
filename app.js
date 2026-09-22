@@ -4,7 +4,7 @@
 (() => {
 'use strict';
 
-const APP_VERSION = '2.1.1';
+const APP_VERSION = '2.1.2';
 const SCHEMA_VERSION = '2.0.0';
 const DB_NAME = 'TeryaqAuthorDB';
 const DB_VERSION = 2;
@@ -158,7 +158,6 @@ async function boot(){
   const auth=await TeryaqPlatform.initialize();
   window.addEventListener('teryaq-authenticated',async()=>{await afterAuthentication();});
   if(auth.authenticated)await afterAuthentication();
-  if('serviceWorker' in navigator && location.protocol!=='file:'){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
   window.addEventListener('resize',()=>{if(state.current?.templateId==='scientific-draft-text')updatePageScale()});
   setInterval(()=>{if(state.current && state.dirty && Date.now()-state.lastSnapshotAt>SNAPSHOT_INTERVAL_MS)createSnapshot('Auto snapshot')},60000);
 }

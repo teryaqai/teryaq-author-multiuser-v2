@@ -1,7 +1,7 @@
 {
-  "appVersion": "2.1.1",
+  "appVersion": "2.1.2",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 2,
   "cloudMigrationVersion": 7,
-  "release": "multi-user-continuous-auto-sync"
+  "release": "ipad-offline-relaunch-hardening"
 }

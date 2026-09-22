@@ -1,8 +1,9 @@
 {
   "name": "Teryaq Author",
   "short_name": "Teryaq Author",
+  "id": "./",
   "description": "Account-based, offline-first scientific authoring workspace with local autosave, cloud synchronization, version history and admin visibility.",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#eef1f4",

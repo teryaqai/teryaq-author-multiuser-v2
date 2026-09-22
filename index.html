@@ -6,11 +6,19 @@
   <meta name="theme-color" content="#408a71">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Teryaq Author">
   <title>Teryaq Author</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="styles.css">
+  <script>
+    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+      navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
+        console.error('Offline setup failed:', error);
+      });
+    }
+  </script>
 </head>
 <body>
 <div class="auth-gate" id="authGate">

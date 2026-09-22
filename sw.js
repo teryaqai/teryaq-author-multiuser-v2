@@ -1,10 +1,90 @@
-const CACHE='teryaq-author-v2.1.1';
-const ASSETS=['./','./index.html','./styles.css','./platform.js','./app.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
-self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()))});
-self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
-self.addEventListener('fetch',event=>{
-  if(event.request.method!=='GET')return;
-  const u=new URL(event.request.url);
-  if(u.pathname.includes('/auth/v1/')||u.pathname.includes('/rest/v1/')||u.pathname.includes('/storage/v1/'))return;
-  event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request).then(resp=>{const copy=resp.clone();caches.open(CACHE).then(c=>c.put(event.request,copy));return resp}).catch(()=>caches.match('./index.html'))));
+const CACHE = 'teryaq-author-v2.1.2';
+const SCOPE_URL = new URL(self.registration.scope);
+const ROOT_URL = SCOPE_URL.href;
+const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
+
+const CORE_ASSETS = [
+  ROOT_URL,
+  APP_SHELL_URL,
+  new URL('styles.css', SCOPE_URL).href,
+  new URL('platform.js', SCOPE_URL).href,
+  new URL('app.js', SCOPE_URL).href,
+  new URL('manifest.webmanifest', SCOPE_URL).href,
+];
+
+const OPTIONAL_ASSETS = [
+  new URL('icons/icon-192.png', SCOPE_URL).href,
+  new URL('icons/icon-512.png', SCOPE_URL).href,
+];
+
+self.addEventListener('install', event => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE);
+    await cache.addAll(CORE_ASSETS);
+    await Promise.allSettled(OPTIONAL_ASSETS.map(asset => cache.add(asset)));
+    await self.skipWaiting();
+  })());
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)));
+    await self.clients.claim();
+  })());
+});
+
+async function cachedAppShell(request) {
+  return (await caches.match(request, { ignoreSearch: true }))
+    || (await caches.match(APP_SHELL_URL, { ignoreSearch: true }))
+    || (await caches.match(ROOT_URL, { ignoreSearch: true }));
+}
+
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  if (request.method !== 'GET') return;
+
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+
+  // Safari/iPad may relaunch at /, /index.html, or a URL with a query string.
+  // Treat every navigation as the same cached application shell.
+  if (request.mode === 'navigate') {
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(request);
+        if (response && response.ok) {
+          const cache = await caches.open(CACHE);
+          await Promise.all([
+            cache.put(APP_SHELL_URL, response.clone()),
+            cache.put(ROOT_URL, response.clone()),
+          ]);
+        }
+        return response;
+      } catch (_) {
+        const cached = await cachedAppShell(request);
+        return cached || new Response('Teryaq Author is not cached yet. Connect once, reopen the app online, then try again offline.', {
+          status: 503,
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        });
+      }
+    })());
+    return;
+  }
+
+  event.respondWith((async () => {
+    const cached = await caches.match(request, { ignoreSearch: true });
+    if (cached) return cached;
+
+    try {
+      const response = await fetch(request);
+      if (response && response.ok) {
+        const cache = await caches.open(CACHE);
+        await cache.put(request, response.clone());
+      }
+      return response;
+    } catch (_) {
+      return caches.match(APP_SHELL_URL, { ignoreSearch: true });
+    }
+  })());
 });

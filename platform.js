@@ -1,11 +1,11 @@
-/* Teryaq Author Platform v2.1.1
+/* Teryaq Author Platform v2.1.2
    Account isolation, offline authentication cache, device registration,
    sync queue, conflict handling, workspace backups, admin read dashboard,
    and safe local-data migrations. No service-role key is ever used client-side. */
 (() => {
 'use strict';
 
-const APP_VERSION='2.1.1';
+const APP_VERSION='2.1.2';
 const DOCUMENT_SCHEMA_VERSION='2.0.0';
 const PLATFORM_SCHEMA=2;
 const DEVICE_KEY='deviceId';
