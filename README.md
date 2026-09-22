@@ -1,4 +1,13 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.3.4
+# TERYAQ Master Tool — Multi-user Offline-First v2.4.0
+
+## v2.4.0 compact document workspace
+
+- Keeps the document action bar and formatting ribbon visible while scrolling.
+- Moves the existing formatting controls into a compact Word-like ribbon without changing any style definition or inline-mark behavior.
+- Adds a collapsible icon-first navigation sidebar and a closed-by-default document outline drawer.
+- Displays the true A4 page at up to 145% workspace zoom while preserving its internal typography and A4 dimensions.
+- Keeps Draft information separate from the paper and adds a linked three-column Table information card for table code, title, and optional caption.
+- Preserves the v2.3.4 race-safe save, sync, recovery, ownership, and conflict behavior.
 
 This package provides an **account-separated, local-first workspace** with a persistent navigation portal, guided template creation, username profiles, recoverable Trash, bilingual help, Supabase synchronization, device registration, server-side version history, document-level conflict handling, workspace backups, and an admin dashboard with version downloads and synchronized Trash visibility.
 

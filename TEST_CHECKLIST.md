@@ -1,5 +1,19 @@
 # TERYAQ Master Tool — Editor Acceptance Checklist
 
+## v2.4.0 document workspace regression
+
+- [ ] Dashboard and sidebar show `v2.4.0`; the sidebar expands and collapses without changing the active page.
+- [ ] Open a Scientific Draft - Text Content document and confirm the action bar and full formatting ribbon remain sticky while scrolling.
+- [ ] Confirm Draft information and Table information are separate cards with the same displayed width as the A4 writing page.
+- [ ] Confirm the A4 page is visually enlarged on desktop, while Body, H1-H4, Side Q/A, Table Caption, Side Note, Note to Delete, High-Yield, and Clinical Correlation retain their v2.3.4 style definitions and behavior.
+- [ ] Confirm Side Note, Note to Delete, High-Yield, and Clinical Correlation still require a text selection and do not convert the whole paragraph.
+- [ ] Insert a table; code and title are required and caption is optional. Confirm all three values appear in the Table information card.
+- [ ] Edit code, title, and caption in the card and confirm the caption beneath the matching table updates without moving focus from the field.
+- [ ] Create two tables and confirm each has its own linked metadata row.
+- [ ] Open/close the right Outline drawer and navigate to an H1/H2 without reserving permanent document space.
+- [ ] Repeat on laptop, iPad/mobile width, offline mode, and after PWA relaunch.
+- [ ] Save, close, reopen, sync, and open on a second device; confirm content and table metadata persist.
+
 ## v2.3.4 cross-device sync race regression
 
 - [ ] Confirm the Dashboard and sidebar display `v2.3.4` on both devices.
