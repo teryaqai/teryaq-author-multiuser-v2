@@ -1,6 +1,19 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.3.1
+# TERYAQ Master Tool — Multi-user Offline-First v2.3.2
 
 This package provides an **account-separated, local-first workspace** with a persistent navigation portal, guided template creation, username profiles, recoverable Trash, bilingual help, Supabase synchronization, device registration, server-side version history, document-level conflict handling, workspace backups, and an admin dashboard with version downloads and synchronized Trash visibility.
+
+## v2.3.2 multi-device reliability release
+
+- Cloud pull now overwrites a local document only when its local state is explicitly `synced`. Pending, local-only, conflicting, errored, and unknown local states are preserved.
+- A remote deletion can no longer remove an unsynced local draft; it creates a recoverable conflict instead.
+- `Document ownership mismatch` is repaired without claiming or editing the other cloud record: the app backs up the local document, assigns a new globally unique document ID to the current account, preserves local History links, and retries synchronization.
+- Every local save is read back from IndexedDB and verified with a unique save token before the UI reports success.
+- The app requests persistent browser storage when supported.
+- The Dashboard and sidebar show the running app version so different devices can be compared.
+- Versioned JavaScript/CSS filenames force older installed PWAs to fetch the new release instead of reusing stale cached application code.
+- The main navigation sidebar remains available in the editor on desktop and as a drawer on smaller screens.
+
+The principal v2.3.2 data-loss fix addresses a multi-device race in v2.3.1 and earlier: after a stale device correctly created a conflict, the subsequent cloud pull could replace that local conflict because only `pending` was protected. v2.3.2 treats every non-`synced` local state as authoritative until the user resolves it.
 
 ## v2.3.1 save/sync hotfix
 
@@ -18,7 +31,7 @@ After an account has successfully authenticated at least once on a device, the c
 
 The app writes to IndexedDB first. Cloud synchronization is secondary. A loss of connectivity never blocks editing.
 
-Version 2.3.1 caches both `/` and `/index.html`, the bundled Tajawal fonts, and the complete application shell so an installed iPad, Safari, Chrome, or Edge app can relaunch while offline.
+Version 2.3.2 caches both `/` and `/index.html`, the bundled Tajawal fonts, and the complete application shell so an installed iPad, Safari, Chrome, or Edge app can relaunch while offline.
 
 ## What requires internet
 

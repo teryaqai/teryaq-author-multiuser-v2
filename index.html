@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.v2.3.2.css">
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
@@ -45,7 +45,7 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark" id="homeBtn" title="Dashboard">T</button>
-      <div><strong>TERYAQ</strong><small>Master Tool</small></div>
+      <div><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.3.2</span></small></div>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">×</button>
     </div>
     <nav class="sidebar-nav" aria-label="Main navigation">
@@ -109,7 +109,7 @@
   <main>
     <section class="view active" id="homeView">
       <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.3.2</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
         <div class="stat-grid" id="dashboardStats"></div>
         <div class="portal-grid two-thirds">
           <section class="portal-panel"><div class="section-head"><div><span class="eyebrow">Workspace</span><h3>Recent documents</h3></div><button class="text-button" data-nav="documents">View all →</button></div><div class="cards compact-cards" id="documentCards"></div></section>
@@ -139,7 +139,7 @@
         <details class="guide-topic" id="guide-account"><summary><span class="guide-index">09</span><span><b>Account, username, and password</b><small>الحساب واسم المستخدم وكلمة المرور</small></span></summary><div class="guide-topic-body"><div><h4>Username</h4><p>Account → Username → Save. It replaces the email in the greeting and sidebar. It does not change the sign-in email.</p><h4>Password</h4><p>Account → enter and confirm a password of at least eight characters. Internet is required, and the change applies to every device.</p></div><div dir="rtl"><h4>الخروج</h4><p><b>Sign out</b> يزيل الجلسة ويبقي مساحة العمل المحلية. أما <b>Sign out & Remove Local Data</b> فيحذف بيانات هذا الحساب من الجهاز فقط؛ لذلك تأكد من المزامنة أو النسخ الاحتياطي أولًا.</p></div></div></details>
         <details class="guide-topic" id="guide-admin"><summary><span class="guide-index">10</span><span><b>Admin workspace</b><small>دليل الأدمن</small></span></summary><div class="guide-topic-body"><div><h4>Current pages</h4><ul><li><b>Overview:</b> synchronized users, documents, revisions, and deleted counts.</li><li><b>Users:</b> usernames, emails, roles, and active document counts.</li><li><b>Documents:</b> all synchronized active documents with download and versions.</li><li><b>Versions:</b> latest cloud versions and downloads.</li><li><b>All Trash:</b> synchronized deleted documents from every account.</li></ul></div><div dir="rtl"><h4>حدود رؤية الأدمن</h4><p>لا يستطيع الأدمن رؤية تعديل ما زال محليًا على جهاز مستخدم. يجب أن تتم المزامنة أولًا. كما أن الأدمن في v2.3 يراجع وينزّل ولا يعدّل مستندات المستخدمين مباشرة.</p></div></div></details>
         <details class="guide-topic" id="guide-backups"><summary><span class="guide-index">11</span><span><b>Backups and moving devices</b><small>النسخ الاحتياطي وتغيير الجهاز</small></span></summary><div class="guide-topic-body"><div><h4>Before changing a device</h4><ol><li>Press Sync Now and confirm Synced ✓.</li><li>Settings & Sync → Export Workspace Backup.</li><li>Keep important .teryaq exports separately.</li><li>On the new device, configure Supabase, sign in, then Sync Now.</li></ol></div><div dir="rtl"><h4>ما الذي يحتويه Workspace Backup؟</h4><p>المستندات المحلية، القوالب، نقاط History، السلة، والتعارضات الخاصة بالحساب على هذا الجهاز. الاستعادة تُنشئ نسخة أمان محلية قبل الكتابة.</p></div></div></details>
-        <details class="guide-topic guide-problems" id="guide-fixes"><summary><span class="guide-index">12</span><span><b>Troubleshooting</b><small>المشكلة والحل خطوة بخطوة</small></span></summary><div class="guide-topic-body"><div class="problem-list"><h4>App does not open offline</h4><ol><li>Reconnect once.</li><li>Open the installed app and refresh.</li><li>Wait for the page to finish loading.</li><li>Close it, disconnect, and test again from the installed icon.</li></ol><h4>Sync error</h4><ol><li>Confirm the internet connection.</li><li>Open Settings & Sync and verify Project URL/key.</li><li>Press Sync Now.</li><li>If Conflict appears, resolve it from the affected document.</li></ol><h4>Document missing on another device</h4><ol><li>On the original device, confirm it is not pending/local-only.</li><li>Press Sync Now.</li><li>On the second device, sign into the same email and press Sync Now.</li></ol></div><div class="problem-list" dir="rtl"><h4>اختفى العمل بعد تسجيل الدخول</h4><ol><li>تأكد أنك داخل الحساب نفسه.</li><li>إذا كان العمل على جهاز آخر ولم يتزامن، افتح الجهاز الأصلي.</li><li>اختر Continue Offline عند الحاجة ثم اضغط Sync Now بعد عودة الإنترنت.</li></ol><h4>لا يظهر زر Admin</h4><ol><li>تحقق أن role للحساب هو admin في Supabase.</li><li>سجّل الخروج ثم الدخول لتحديث الصلاحية.</li><li>يحتاج Admin إلى اتصال إنترنت.</li></ol><h4>النص العربي أو البوليت في الاتجاه الخطأ</h4><p>تأكد أن أول حرف فعلي في البند عربي. الاتجاه يُحسب لكل بند على حدة؛ البنود التي تبدأ بالإنجليزية تبقى من اليسار.</p></div></div></details>
+        <details class="guide-topic guide-problems" id="guide-fixes"><summary><span class="guide-index">12</span><span><b>Troubleshooting</b><small>المشكلة والحل خطوة بخطوة</small></span></summary><div class="guide-topic-body"><div class="problem-list"><h4>App does not open offline</h4><ol><li>Reconnect once.</li><li>Open the installed app and refresh.</li><li>Confirm the Dashboard shows the expected version number.</li><li>Close every TERYAQ window, reopen the installed app online once, then test offline.</li></ol><h4>Sync or ownership error</h4><ol><li>Do not clear browser data; the local draft is preserved first.</li><li>Press Sync again. A document-ID ownership mismatch is repaired automatically as a new safe cloud identity.</li><li>If Conflict appears, open the affected document from Documents and review both copies.</li></ol><h4>Document missing on another device</h4><ol><li>On the original device, confirm it is not pending/local-only.</li><li>Press Sync and wait for a cloud version number.</li><li>On the second device, confirm the same app version, sign into the same email, and press Sync Now.</li></ol></div><div class="problem-list" dir="rtl"><h4>اختفى العمل بعد تسجيل الدخول أو الرجوع</h4><ol><li>لا تمسح بيانات الموقع أو التطبيق.</li><li>تحقق من رقم الإصدار الظاهر في Dashboard؛ يجب أن يكون نفسه على كل الأجهزة.</li><li>إذا ظهر Conflict فهذا يعني أن جهازًا آخر أرسل نسخة أحدث؛ تبقى المسودة المحلية محفوظة ولا تُستبدل تلقائيًا.</li><li>إذا كان العمل على جهاز آخر بحالة pending، افتح الجهاز الأصلي واضغط Sync وانتظر رقم النسخة السحابية.</li></ol><h4>Document ownership mismatch</h4><p>لا يعني أن شخصًا آخر عدّل الملف. يعني أن نفس Document ID مرتبط بمعرّف حساب سحابي آخر. من الإصدار 2.3.2 يحفظ التطبيق نسخة أمان، ينشئ Document ID جديدًا للحساب الحالي، ثم يعيد المزامنة دون استبدال السجل السحابي الآخر.</p><h4>النص العربي أو البوليت في الاتجاه الخطأ</h4><p>تأكد أن أول حرف فعلي في البند عربي. الاتجاه يُحسب لكل بند على حدة؛ البنود التي تبدأ بالإنجليزية تبقى من اليسار.</p></div></div></details>
       </div>
       <div class="guide-empty hidden" id="guideEmpty">No guide section matches your search. / لا يوجد قسم مطابق لبحثك.</div>
     </div></section>
@@ -229,7 +229,7 @@
 <div class="validation-panel hidden" id="validationPanel"><div class="validation-box"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3>Validation</h3><button class="btn" id="closeValidation">Close</button></div><div class="issues" id="issues"></div></div></div>
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
-<script src="platform.js"></script>
-<script src="app.js"></script>
+<script src="platform.v2.3.2.js"></script>
+<script src="app.v2.3.2.js"></script>
 </body>
 </html>

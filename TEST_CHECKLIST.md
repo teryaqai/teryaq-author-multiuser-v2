@@ -1,5 +1,16 @@
 # TERYAQ Master Tool — Editor Acceptance Checklist
 
+## v2.3.2 multi-device data-loss regression
+
+- [ ] Confirm the Dashboard and sidebar both display `v2.3.2` on every test device.
+- [ ] Edit and sync a document on Device A. Open the older version on Device B, edit and sync it, and confirm Device B keeps its local text and shows a Conflict rather than reverting to Device A's text.
+- [ ] Resolve the conflict with Save both; confirm both documents remain available and synchronize.
+- [ ] While a document has a non-synced local state, simulate a remote deletion and confirm the local draft remains with a remote-delete conflict.
+- [ ] Trigger an ownership mismatch using a copied/imported document ID. Confirm the app creates a local migration backup, assigns a new document ID, syncs it as cloud version 1, and never modifies the other owner's cloud row.
+- [ ] After Save, confirm IndexedDB read-back succeeds and the status becomes `Saved locally ✓` only afterward.
+- [ ] Deploy over v2.3.1, open an already-installed PWA online, and confirm it loads versioned `app.v2.3.2.js`, `platform.v2.3.2.js`, and `styles.v2.3.2.css`.
+- [ ] Confirm the navigation sidebar remains visible in the desktop editor and opens as a drawer on mobile.
+
 ## v2.3.1 save/sync hotfix
 
 - [ ] Type into a document and immediately press **Sync**. Confirm the order is `Saving…` → `Sending to cloud…` → `cloud version N ✓`.
