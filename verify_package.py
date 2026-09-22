@@ -20,6 +20,18 @@ for marker in ['AUTO_SYNC_KEY','AUTO_SYNC_INTERVAL_MS','autoSyncToggle','schedul
 for marker in ['updateDisplayName','restoreTrashItem','showTrashPage','showAccountPage']:
     if marker not in platform:
         print('MISSING V2.3 MARKER:',marker);sys.exit(1)
+app=(root/'app.js').read_text(encoding='utf-8')
+for marker in ['EMERGENCY_DRAFT_PREFIX','saveAndSyncCurrent','pagehide','beforeunload','cloud version']:
+    if marker not in app:
+        print('MISSING V2.3.1 HOTFIX MARKER:',marker);sys.exit(1)
+save_sync=re.search(r'async function saveAndSyncCurrent\(\)\{(.+?)\n\}',app,re.S)
+if not save_sync or save_sync.group(1).find('await saveCurrent(true)')<0 or save_sync.group(1).find('await saveCurrent(true)')>save_sync.group(1).find('TeryaqPlatform.syncNow()'):
+    print('INVALID HOTFIX ORDER: Sync must await local Save first');sys.exit(1)
+if "byId('syncBtnEditor').onclick=()=>saveAndSyncCurrent()" not in app:
+    print('INVALID EDITOR SYNC HANDLER');sys.exit(1)
+version=(root/'VERSION.json').read_text(encoding='utf-8')
+if '"appVersion": "2.3.1"' not in version or "teryaq-master-tool-v2.3.1" not in (root/'sw.js').read_text(encoding='utf-8'):
+    print('VERSION/CACHE MISMATCH: expected v2.3.1');sys.exit(1)
 for number in range(1,8):
     if not list((root/'supabase'/'migrations').glob(f'{number:03d}_*.sql')):
         print('MISSING CLOUD MIGRATION:',number);sys.exit(1)

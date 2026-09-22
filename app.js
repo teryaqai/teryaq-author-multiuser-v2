@@ -4,12 +4,13 @@
 (() => {
 'use strict';
 
-const APP_VERSION = '2.3.0';
+const APP_VERSION = '2.3.1';
 const SCHEMA_VERSION = '2.0.0';
 const DB_NAME = 'TeryaqAuthorDB';
 const DB_VERSION = 3;
 const SNAPSHOT_INTERVAL_MS = 5 * 60 * 1000;
 const MAX_HISTORY = 120;
+const EMERGENCY_DRAFT_PREFIX = 'teryaq:emergency-draft:';
 
 const STYLE_CONTRACT = {
   Normal:{label:'Body',size:11},
@@ -46,7 +47,8 @@ const state = {
   db:null, view:'home', docs:[], customTemplates:[], current:null, dirty:false,
   activeBlockId:null, activeTableId:null, activeCell:null, selectionBookmark:null,
   history:[], historyIndex:-1, typingTimer:null, saveTimer:null, lastSnapshotAt:0,
-  suppressHistory:false, search:''
+  suppressHistory:false, search:'', editRevision:0, savedRevision:0,
+  saveChain:Promise.resolve(true), saveInFlight:0, syncInFlight:false
 };
 
 const $ = sel => document.querySelector(sel);
@@ -59,6 +61,11 @@ const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>
 
 function toast(msg){ const el=byId('toast'); if(!el)return; el.textContent=msg; el.classList.add('show'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),1800); }
 function setSaveStatus(text){ const el=byId('saveStatus'); if(el) el.textContent=text; }
+function updateEditorLocks(){
+  const saving=state.saveInFlight>0,busy=saving||state.syncInFlight;
+  for(const id of ['saveBtn','syncBtnEditor','backBtn','settingsBtnEditor','validateBtn','historyBtn','backupBtn','saveTemplateBtn','printBtn']){const button=byId(id);if(button)button.disabled=busy}
+  const save=byId('saveBtn');if(save)save.textContent=saving?'Saving…':state.syncInFlight?'Sending…':'Save';
+}
 function fmtDate(iso){ if(!iso)return ''; try{return new Date(iso).toLocaleString();}catch{return iso;} }
 function fileSafe(s){ return String(s||'Teryaq_Document').trim().replace(/[^\w\-]+/g,'_').replace(/_+/g,'_').slice(0,80) || 'Teryaq_Document'; }
 
@@ -169,10 +176,19 @@ async function boot(){
   window.addEventListener('teryaq-authenticated',async()=>{await afterAuthentication();});
   if(auth.authenticated)await afterAuthentication();
   window.addEventListener('resize',()=>{if(state.current?.templateId==='scientific-draft-text')updatePageScale()});
+  window.addEventListener('pagehide',flushEmergencySave);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushEmergencySave()});
+  window.addEventListener('beforeunload',event=>{
+    if(!state.current||(state.dirty===false&&state.saveInFlight===0))return;
+    persistEmergencyDraft(state.current,state.editRevision);
+    if(state.dirty)void saveCurrent(false);
+    event.preventDefault();event.returnValue='';
+  });
   setInterval(()=>{if(state.current && state.dirty && Date.now()-state.lastSnapshotAt>SNAPSHOT_INTERVAL_MS)createSnapshot('Auto snapshot')},60000);
 }
 async function afterAuthentication(){
-  await TeryaqPlatform.claimAndMigrateLegacyData();await refreshLibrary();renderHome();TeryaqPlatform.updateSyncUi();
+  await TeryaqPlatform.claimAndMigrateLegacyData();const recovered=await recoverEmergencyDrafts();await refreshLibrary();renderHome();TeryaqPlatform.updateSyncUi();
+  if(recovered)toast(`Recovered ${recovered} emergency draft${recovered===1?'':'s'}`);
   if(navigator.onLine)TeryaqPlatform.syncNow({silent:true});
 }
 async function refreshLibrary(){
@@ -185,7 +201,8 @@ function bindGlobal(){
   byId('searchDocs').addEventListener('input',e=>{state.search=e.target.value.toLowerCase();renderDocuments()});
   byId('documentStatusFilter').addEventListener('change',()=>renderDocuments());
   byId('globalSearch').addEventListener('input',e=>{state.search=e.target.value.toLowerCase();byId('searchDocs').value=e.target.value;activateView('documents')});
-  byId('guideSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();$$('.guide-topic').forEach(card=>card.hidden=q&&!card.textContent.toLowerCase().includes(q))});
+  byId('guideSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();let visible=0;$$('.guide-topic').forEach(card=>{card.hidden=!!(q&&!card.textContent.toLowerCase().includes(q));if(!card.hidden){visible++;if(q)card.open=true}});byId('guideEmpty').classList.toggle('hidden',visible>0)});
+  $$('[data-guide-target]').forEach(button=>button.addEventListener('click',()=>{const section=byId(button.dataset.guideTarget);if(section){section.hidden=false;section.open=true;section.scrollIntoView({behavior:'smooth',block:'start'})}}));
   byId('closeValidation').onclick=()=>byId('validationPanel').classList.add('hidden');
   byId('closeModal').onclick=()=>{byId('modal').classList.add('hidden');byId('modal').querySelector('.modal-card')?.classList.remove('wizard-modal')};
   byId('syncBtn').onclick=()=>TeryaqPlatform.syncNow();
@@ -197,11 +214,12 @@ function bindGlobal(){
 // ---------------- Home/library ----------------
 function setSidebarOpen(open){byId('appShell').classList.toggle('sidebar-open',open);byId('sidebarScrim').classList.toggle('hidden',!open)}
 async function activateView(name){
-  if(state.current&&state.dirty&&name!=='editor')await saveCurrent(true);
+  if(state.current&&name!=='editor'&&!(await ensureCurrentSaved()))return false;
   if(name!=='editor')state.current=null;
   state.view=name;byId('appShell').classList.toggle('editor-mode',name==='editor');$$('.view').forEach(v=>v.classList.remove('active'));const view=byId(`${name}View`);if(view)view.classList.add('active');
   $$('.sidebar-link[data-nav]').forEach(b=>b.classList.toggle('active',b.dataset.nav===name));byId('editorActions').classList.toggle('hidden',name!=='editor');byId('homeActions').classList.toggle('hidden',name==='editor');byId('backBtn').classList.toggle('hidden',name!=='editor');setSidebarOpen(false);
   if(name!=='editor'){byId('docTitle').textContent=name==='home'?'TERYAQ Master Tool':name[0].toUpperCase()+name.slice(1);await renderActiveView()}
+  return true;
 }
 async function renderActiveView(){
   if(state.view==='home'){renderDashboard();renderDocuments()}
@@ -259,8 +277,14 @@ async function createFromTemplate(t,metadata={}){
   await idbPut('documents',doc);await TeryaqPlatform.queueDocument(doc);await refreshLibrary();openDocument(doc.id);
 }
 async function duplicateDocument(id){const d=await idbGet('documents',id);if(!d)return;const c=clone(d);c.id=uid('doc');c.title=(d.title||'Document')+' Copy';c.createdAt=c.updatedAt=nowIso();TeryaqPlatform.decorateNewDocument(c);await idbPut('documents',c);await TeryaqPlatform.queueDocument(c);await refreshLibrary();await renderActiveView();toast('Duplicated');}
-async function openDocument(id){const d=await idbGet('documents',id);if(!d)return;state.current=d;state.dirty=false;resetHistory();await activateView('editor');renderEditor();pushHistory('Open');}
-async function goHome(){if(state.current&&state.dirty)await saveCurrent(true);state.current=null;await refreshLibrary();renderHome();}
+async function openDocument(id){const d=await idbGet('documents',id);if(!d)return;state.current=d;state.dirty=false;state.editRevision=0;state.savedRevision=0;resetHistory();await activateView('editor');renderEditor();pushHistory('Open');}
+async function ensureCurrentSaved(){
+  if(!state.current)return true;
+  if(state.dirty)return saveCurrent(true);
+  if(state.saveInFlight)return state.saveChain;
+  return true;
+}
+async function goHome(){if(!(await ensureCurrentSaved()))return;state.current=null;await refreshLibrary();renderHome();}
 
 // ---------------- Current document save/history ----------------
 function currentSnapshot(){return state.current?clone({metadata:state.current.metadata,content:state.current.content,title:state.current.title,settings:state.current.settings}):null}
@@ -274,8 +298,85 @@ function undo(){if(state.historyIndex<=0)return;state.historyIndex--;restoreHist
 function redo(){if(state.historyIndex>=state.history.length-1)return;state.historyIndex++;restoreHistory(state.history[state.historyIndex].snap)}
 function restoreHistory(snap){state.suppressHistory=true;Object.assign(state.current,clone(snap));renderEditor(false);state.suppressHistory=false;markDirty(false);updateUndoRedo()}
 function updateUndoRedo(){const canU=state.historyIndex>0,canR=state.historyIndex>=0&&state.historyIndex<state.history.length-1;$$('[data-action="undo"]').forEach(b=>b.disabled=!canU);$$('[data-action="redo"]').forEach(b=>b.disabled=!canR)}
-function markDirty(history=true){if(!state.current)return;state.dirty=true;state.current.updatedAt=nowIso();setSaveStatus('Saving…');if(history)scheduleTypingHistory();clearTimeout(state.saveTimer);state.saveTimer=setTimeout(()=>saveCurrent(false),700)}
-async function saveCurrent(manual=false){if(!state.current)return;state.current.updatedAt=nowIso();TeryaqPlatform.markDocumentPending(state.current);await idbPut('documents',clone(state.current));await TeryaqPlatform.queueDocument(state.current);state.dirty=false;setSaveStatus(navigator.onLine?'Saved locally · sync pending':'Saved offline');TeryaqPlatform.updateSyncUi();if(manual)toast('Saved locally')}
+function emergencyKey(ownerId,documentId){return `${EMERGENCY_DRAFT_PREFIX}${encodeURIComponent(ownerId)}:${encodeURIComponent(documentId)}`}
+function persistEmergencyDraft(doc,revision=state.editRevision){
+  const ownerId=TeryaqPlatform.user()?.id||doc?.ownerId;if(!doc?.id||!ownerId)return false;
+  const payload={format:'TeryaqEmergencyDraft',savedAt:nowIso(),revision,ownerId,imagesOmitted:false,document:clone(doc)};
+  try{localStorage.setItem(emergencyKey(ownerId,doc.id),JSON.stringify(payload));return true}catch(_){
+    try{
+      for(const figure of payload.document?.content?.figures||[])if(figure.image){figure.image='';payload.imagesOmitted=true}
+      localStorage.setItem(emergencyKey(ownerId,doc.id),JSON.stringify(payload));return true
+    }catch(error){console.warn('Emergency draft storage unavailable:',error);return false}
+  }
+}
+function clearEmergencyDraft(documentId,maxRevision=Infinity){
+  const ownerId=TeryaqPlatform.user()?.id;if(!ownerId||!documentId)return;
+  const key=emergencyKey(ownerId,documentId);
+  try{const payload=JSON.parse(localStorage.getItem(key)||'null');if(!payload||Number(payload.revision||0)<=maxRevision)localStorage.removeItem(key)}catch(error){console.warn('Emergency draft cleanup unavailable:',error)}
+}
+function mergeEmergencyImages(recovered,local){
+  if(!local||!Array.isArray(recovered?.content?.figures))return recovered;
+  const images=new Map((local.content?.figures||[]).map(figure=>[figure.id,figure.image]));
+  for(const figure of recovered.content.figures)if(!figure.image&&images.get(figure.id))figure.image=images.get(figure.id);
+  return recovered;
+}
+async function recoverEmergencyDrafts(){
+  const ownerId=TeryaqPlatform.user()?.id;if(!ownerId)return 0;const prefix=`${EMERGENCY_DRAFT_PREFIX}${encodeURIComponent(ownerId)}:`;let recoveredCount=0;
+  let keys=[];try{keys=Object.keys(localStorage).filter(key=>key.startsWith(prefix))}catch(error){console.warn('Emergency draft scan unavailable:',error);return 0}
+  for(const key of keys){
+    try{
+      const payload=JSON.parse(localStorage.getItem(key)||'null'),draft=payload?.document;
+      if(payload?.format!=='TeryaqEmergencyDraft'||payload.ownerId!==ownerId||!draft?.id){localStorage.removeItem(key);continue}
+      const local=await idbGet('documents',draft.id);const draftTime=Date.parse(draft.updatedAt||payload.savedAt||0)||0,localTime=Date.parse(local?.updatedAt||0)||0;
+      if(!local||draftTime>localTime){
+        const restored=mergeEmergencyImages(clone(draft),local);restored.ownerId=ownerId;TeryaqPlatform.markDocumentPending(restored);await idbPut('documents',restored);await TeryaqPlatform.queueDocument(restored);recoveredCount++;
+      }
+      localStorage.removeItem(key);
+    }catch(error){console.warn('Emergency draft recovery failed:',error)}
+  }
+  return recoveredCount;
+}
+function flushEmergencySave(){
+  if(!state.current||!state.dirty)return;
+  persistEmergencyDraft(state.current,state.editRevision);void saveCurrent(false);
+}
+function markDirty(history=true){
+  if(!state.current)return;state.dirty=true;state.editRevision++;state.current.updatedAt=nowIso();persistEmergencyDraft(state.current,state.editRevision);setSaveStatus('Saving…');if(history)scheduleTypingHistory();clearTimeout(state.saveTimer);state.saveTimer=setTimeout(()=>saveCurrent(false),250)
+}
+async function saveCurrent(manual=false){
+  if(!state.current)return true;
+  clearTimeout(state.saveTimer);state.saveTimer=null;
+  const documentId=state.current.id,revision=state.editRevision,snapshot=clone(state.current);snapshot.updatedAt=nowIso();TeryaqPlatform.markDocumentPending(snapshot);
+  if(state.current?.id===documentId){state.current.updatedAt=snapshot.updatedAt;state.current.sync=clone(snapshot.sync)}
+  persistEmergencyDraft(snapshot,revision);state.saveInFlight++;updateEditorLocks();setSaveStatus('Saving…');
+  const task=state.saveChain.then(async()=>{
+    try{
+      await idbPut('documents',snapshot);await TeryaqPlatform.queueDocument(snapshot);
+      if(state.current?.id===documentId&&state.editRevision<=revision){state.dirty=false;state.savedRevision=revision;clearEmergencyDraft(documentId,revision);setSaveStatus(navigator.onLine?'Saved locally ✓ · sync pending':'Saved locally ✓ · offline')}
+      else if(state.current?.id===documentId)setSaveStatus('Newer changes waiting to save…');
+      TeryaqPlatform.updateSyncUi();if(manual&&state.current?.id===documentId&&state.editRevision<=revision)toast('Saved locally ✓');return true
+    }catch(error){
+      console.error(error);if(state.current?.id===documentId){state.dirty=true;persistEmergencyDraft(state.current,state.editRevision);setSaveStatus('Save failed · emergency draft kept')}
+      if(manual)alert(`Local save failed. Your emergency draft was kept on this device.\n\n${error.message}`);return false
+    }
+  });
+  state.saveChain=task.catch(()=>false);
+  try{return await task}finally{state.saveInFlight=Math.max(0,state.saveInFlight-1);updateEditorLocks()}
+}
+async function saveAndSyncCurrent(){
+  if(!state.current)return;const documentId=state.current.id;
+  if(!(await saveCurrent(true)))return;
+  state.syncInFlight=true;updateEditorLocks();setSaveStatus('Sending to cloud…');
+  try{
+    let result=await TeryaqPlatform.syncNow(),stored=await idbGet('documents',documentId);
+    if(result?.ok&&stored?.sync?.status==='pending'&&navigator.onLine){result=await TeryaqPlatform.syncNow();stored=await idbGet('documents',documentId)}
+    if(stored&&state.current?.id===documentId)state.current.sync=clone(stored.sync||{});
+    if(result?.ok&&stored?.sync?.status==='synced'){
+      const version=Number(stored.sync.baseServerVersion||0);setSaveStatus(version?`Saved locally ✓ · cloud version ${version} ✓`:'Saved locally ✓ · synced ✓');toast(version?`Synced · cloud version ${version}`:'Synced ✓')
+    }else if(stored?.sync?.status==='conflict')setSaveStatus('Saved locally ✓ · sync conflict needs review');
+    else setSaveStatus(navigator.onLine?'Saved locally ✓ · sync pending':'Saved locally ✓ · offline');
+  }finally{state.syncInFlight=false;updateEditorLocks()}
+}
 async function snapshotDocument(doc,reason='Snapshot'){const s={id:uid('snap'),ownerId:TeryaqPlatform.user()?.id||doc.ownerId,documentId:doc.id,createdAt:nowIso(),reason,document:clone(doc)};await idbPut('snapshots',s);state.lastSnapshotAt=Date.now();return s}
 async function createSnapshot(reason='Manual snapshot'){if(!state.current)return;await saveCurrent(false);await snapshotDocument(state.current,reason);toast('Recovery snapshot created')}
 
@@ -288,7 +389,7 @@ function renderEditor(resetSelection=true){
 }
 function bindEditorActionButtons(){
   byId('saveBtn').onclick=()=>saveCurrent(true);byId('validateBtn').onclick=()=>showValidation();byId('backupBtn').onclick=()=>exportDocumentPackage(state.current);byId('printBtn').onclick=()=>printCurrent();byId('historyBtn').onclick=()=>showSnapshots();byId('saveTemplateBtn').onclick=()=>saveAsTemplate();
-  byId('syncBtnEditor').onclick=()=>TeryaqPlatform.syncNow();byId('settingsBtnEditor').onclick=()=>activateView('settings');
+  byId('syncBtnEditor').onclick=()=>saveAndSyncCurrent();byId('settingsBtnEditor').onclick=()=>activateView('settings');updateEditorLocks();
 }
 
 

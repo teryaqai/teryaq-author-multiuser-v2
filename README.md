@@ -1,6 +1,16 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.3.0
+# TERYAQ Master Tool — Multi-user Offline-First v2.3.1
 
 This package provides an **account-separated, local-first workspace** with a persistent navigation portal, guided template creation, username profiles, recoverable Trash, bilingual help, Supabase synchronization, device registration, server-side version history, document-level conflict handling, workspace backups, and an admin dashboard with version downloads and synchronized Trash visibility.
+
+## v2.3.1 save/sync hotfix
+
+- **Sync** now performs a serialized local save first, waits for it to finish, and only then sends the queued document to Supabase.
+- Save, Sync, Back, and Settings controls are temporarily locked while the current document is being committed, with visible `Saving…`, `Saved locally ✓`, and cloud-version feedback.
+- Every edit also keeps an emergency draft in device storage. A newer emergency draft is recovered automatically after the next authenticated launch.
+- `pagehide`, app backgrounding, and exit attempts trigger an immediate local flush; the browser also warns when unsaved work is still pending.
+- Successful editor sync displays the accepted Supabase document version.
+
+This hotfix changes no database schema and requires no new Supabase migration.
 
 ## What works locally/offline
 
@@ -8,7 +18,7 @@ After an account has successfully authenticated at least once on a device, the c
 
 The app writes to IndexedDB first. Cloud synchronization is secondary. A loss of connectivity never blocks editing.
 
-Version 2.3.0 caches both `/` and `/index.html`, the bundled Tajawal fonts, and the complete application shell so an installed iPad, Safari, Chrome, or Edge app can relaunch while offline.
+Version 2.3.1 caches both `/` and `/index.html`, the bundled Tajawal fonts, and the complete application shell so an installed iPad, Safari, Chrome, or Edge app can relaunch while offline.
 
 ## What requires internet
 

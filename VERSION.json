@@ -1,7 +1,7 @@
 {
-  "appVersion": "2.3.0",
+  "appVersion": "2.3.1",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 3,
   "cloudMigrationVersion": 7,
-  "release": "portal-ui-username-recoverable-trash-admin-trash-and-direction-aware-lists"
+  "release": "serialized-save-sync-emergency-draft-and-lifecycle-hotfix"
 }

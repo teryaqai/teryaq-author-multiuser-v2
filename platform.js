@@ -1,11 +1,11 @@
-/* TERYAQ Master Tool Platform v2.3.0
+/* TERYAQ Master Tool Platform v2.3.1
    Account isolation, offline authentication cache, device registration,
    sync queue, conflict handling, workspace backups, admin read dashboard,
    and safe local-data migrations. No service-role key is ever used client-side. */
 (() => {
 'use strict';
 
-const APP_VERSION='2.3.0';
+const APP_VERSION='2.3.1';
 const DOCUMENT_SCHEMA_VERSION='2.0.0';
 const PLATFORM_SCHEMA=3;
 const DEVICE_KEY='deviceId';
@@ -20,6 +20,7 @@ let currentUser=null;
 let session=null;
 let dataChangedCb=null;
 let syncRunning=false;
+let syncPromise=null;
 let autoSyncInterval=null;
 let autoSyncTimeout=null;
 
@@ -227,14 +228,24 @@ async function checkServerCompatibility(){
 }
 
 async function syncNow({silent=false}={}){
-  if(syncRunning)return;const cfg=await getConfig();if(!currentUser||!configured(cfg)||!isOnline()){updateSyncUi();if(!silent&&!isOnline())alert('You are offline. Your work remains saved locally and will sync when the connection returns.');return}
-  syncRunning=true;setSyncLabel('Syncing…');
-  try{
-    await ensureSessionFresh();await checkServerCompatibility();await registerDevice();
-    const q=(await all('syncQueue')).filter(x=>x.ownerId===currentUser.id).sort((a,b)=>String(a.queuedAt).localeCompare(String(b.queuedAt)));
-    for(const item of q)await pushQueueItem(item);
-    await pullRemote();await settingPut(LAST_SYNC_KEY,now());setSyncLabel('Synced ✓');emitDataChanged();
-  }catch(e){console.error(e);setSyncLabel('Sync error');const docs=await ownedDocuments();for(const d of docs){if(d.sync?.status==='pending'){d.sync.lastError=e.message;await put('documents',d)}}if(!silent)alert(`Sync failed: ${e.message}`)}finally{syncRunning=false;updateSyncUi()}
+  if(syncPromise)return syncPromise;
+  syncPromise=(async()=>{
+    const cfg=await getConfig();
+    if(!currentUser||!configured(cfg)||!isOnline()){
+      updateSyncUi();if(!silent&&!isOnline())alert('You are offline. Your work remains saved locally and will sync when the connection returns.');
+      return {ok:false,reason:!currentUser?'signed-out':!configured(cfg)?'not-configured':'offline'}
+    }
+    syncRunning=true;setSyncLabel('Syncing…');
+    try{
+      await ensureSessionFresh();await checkServerCompatibility();await registerDevice();
+      const q=(await all('syncQueue')).filter(x=>x.ownerId===currentUser.id).sort((a,b)=>String(a.queuedAt).localeCompare(String(b.queuedAt)));
+      for(const item of q)await pushQueueItem(item);
+      await pullRemote();await settingPut(LAST_SYNC_KEY,now());setSyncLabel('Synced ✓');emitDataChanged();return {ok:true}
+    }catch(e){
+      console.error(e);setSyncLabel('Sync error');const docs=await ownedDocuments();for(const d of docs){if(d.sync?.status==='pending'){d.sync.lastError=e.message;await put('documents',d)}}if(!silent)alert(`Sync failed: ${e.message}`);return {ok:false,reason:'error',error:e.message}
+    }finally{syncRunning=false;updateSyncUi()}
+  })();
+  try{return await syncPromise}finally{syncPromise=null}
 }
 
 function setSyncLabel(text){for(const id of ['syncStatus','syncStatusEditor']){const el=byId(id);if(el)el.textContent=text}}
