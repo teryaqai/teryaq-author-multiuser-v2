@@ -1,5 +1,25 @@
 # TERYAQ Master Tool — Editor Acceptance Checklist
 
+## v2.4.2 continue-after-table regression
+
+- [ ] Insert a table at the end of a document; a normal editable paragraph exists immediately after it.
+- [ ] Press `+ Continue writing` under a new table; the caret moves to the paragraph after the table.
+- [ ] Open an older document whose final block is a table; the same button creates and focuses a new Body paragraph.
+- [ ] When an editable paragraph already follows a table, the button focuses it without creating a duplicate paragraph.
+- [ ] If a figure or another table follows, the button inserts a Body paragraph between the two blocks.
+- [ ] The button does not appear in Print / PDF output.
+- [ ] Table code, title, caption, cell editing, row/column controls, save, sync, Undo/Redo, and styles remain unchanged.
+
+## v2.4.2 responsive login and cloud setup
+
+- [ ] On a short laptop viewport, the complete sign-in card remains reachable and no field is hidden behind the taskbar.
+- [ ] When Supabase is not configured, Cloud setup opens automatically as a separate desktop side card.
+- [ ] After saving the connection, the login card reports `Connection saved on this device` and sign-in still works.
+- [ ] On a phone or narrow tablet, Cloud setup opens as a bottom sheet with independent scrolling and a close button.
+- [ ] Escape, the close button, and the mobile scrim close Cloud setup without clearing its fields.
+- [ ] Continue Offline appears only when a cached account exists and identifies that account before opening it.
+- [ ] Continue Offline opens only that account's local documents and queued changes.
+
 ## v2.4.1 document-library and account regression
 
 - [ ] Login and sidebar display the TERYAQ logo, including when the sidebar is collapsed.

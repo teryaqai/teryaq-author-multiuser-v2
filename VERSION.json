@@ -1,7 +1,7 @@
 {
-  "appVersion": "2.4.1",
+  "appVersion": "2.4.2",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 3,
   "cloudMigrationVersion": 7,
-  "release": "document-selection-conflict-trash-and-account-usability"
+  "release": "continue-after-tables-and-responsive-login"
 }

@@ -1,4 +1,15 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.4.1
+# TERYAQ Master Tool — Multi-user Offline-First v2.4.2
+
+## v2.4.2 continue writing after tables
+
+- Ensures every newly inserted table has an editable Body paragraph immediately after it.
+- Adds a visible `+ Continue writing` control beneath every table, including tables created in older documents.
+- The control focuses the following editable block or safely creates a new Body paragraph when none exists.
+- The control is editor-only and is excluded from Print / PDF output.
+- Separates sign-in from first-time Supabase setup so connection fields cannot be clipped on short laptop screens.
+- Shows Cloud setup as a desktop side card and a scrollable mobile bottom sheet.
+- Identifies the cached account before **Continue Offline** opens its isolated local workspace.
+- Preserves all v2.4.1 library/account fixes, the exact document style contract, and the v2.3.4 save/sync implementation.
 
 ## v2.4.1 document library and account usability
 
@@ -139,7 +150,7 @@ Replace `YOUR_ADMIN_EMAIL` with the exact account email. The final query must re
 
 ## 2. Configure each device
 
-Open the app while online. On the login screen expand **First-time cloud setup on this device** and enter:
+Open the app while online. On the login screen press **Cloud setup**. It opens as a side card on desktop and as a scrollable bottom sheet on mobile. Enter:
 
 - Supabase Project URL
 - Supabase **anon/public key**
