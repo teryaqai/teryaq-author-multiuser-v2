@@ -4,7 +4,7 @@ import re, sys
 root=Path(__file__).parent
 required=[
     'index.html','styles.css','platform.js','app.js',
-    'styles.v2.3.2.css','platform.v2.3.2.js','app.v2.3.2.js',
+    'styles.v2.3.3.css','platform.v2.3.3.js','app.v2.3.3.js',
     'sw.js','manifest.webmanifest','README.md','UPDATE_AND_MIGRATION_POLICY.md',
     'AI_REVIEW_BRIEF.md','render.yaml','VERSION.json',
     'fonts/Tajawal-Regular.ttf','fonts/Tajawal-Medium.ttf','fonts/Tajawal-Bold.ttf'
@@ -42,14 +42,25 @@ if not save_sync or save_sync.group(1).find('await saveCurrent(true)')<0 or save
     print('INVALID HOTFIX ORDER: Sync must await local Save first');sys.exit(1)
 if "byId('syncBtnEditor').onclick=()=>saveAndSyncCurrent()" not in app:
     print('INVALID EDITOR SYNC HANDLER');sys.exit(1)
+for forbidden in ['busyWasReadonly','busyContenteditable']:
+    if forbidden in app:
+        print('AUTOSAVE FOCUS REGRESSION:',forbidden);sys.exit(1)
+if 'blockingSaveInFlight' not in app:
+    print('MISSING NONBLOCKING AUTOSAVE MARKER');sys.exit(1)
+lock_fn=re.search(r'function updateEditorLocks\(\)\{(.+?)\n\}',app,re.S)
+if not lock_fn:
+    print('MISSING EDITOR LOCK FUNCTION');sys.exit(1)
+for forbidden in ['editorView','querySelectorAll','readOnly','contenteditable']:
+    if forbidden in lock_fn.group(1):
+        print('EDITOR SURFACE MUST NOT BE MUTATED DURING AUTOSAVE:',forbidden);sys.exit(1)
 
 version=(root/'VERSION.json').read_text(encoding='utf-8')
-if '"appVersion": "2.3.2"' not in version or "teryaq-master-tool-v2.3.2" not in (root/'sw.js').read_text(encoding='utf-8'):
-    print('VERSION/CACHE MISMATCH: expected v2.3.2');sys.exit(1)
-for source,versioned in [('app.js','app.v2.3.2.js'),('platform.js','platform.v2.3.2.js'),('styles.css','styles.v2.3.2.css')]:
+if '"appVersion": "2.3.3"' not in version or "teryaq-master-tool-v2.3.3" not in (root/'sw.js').read_text(encoding='utf-8'):
+    print('VERSION/CACHE MISMATCH: expected v2.3.3');sys.exit(1)
+for source,versioned in [('app.js','app.v2.3.3.js'),('platform.js','platform.v2.3.3.js'),('styles.css','styles.v2.3.3.css')]:
     if (root/source).read_bytes()!=(root/versioned).read_bytes():
         print('STALE VERSIONED ASSET:',versioned);sys.exit(1)
-for ref in ['styles.v2.3.2.css','platform.v2.3.2.js','app.v2.3.2.js']:
+for ref in ['styles.v2.3.3.css','platform.v2.3.3.js','app.v2.3.3.js']:
     if ref not in html:
         print('MISSING VERSIONED ASSET REFERENCE:',ref);sys.exit(1)
 for number in range(1,8):

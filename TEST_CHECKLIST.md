@@ -1,5 +1,15 @@
 # TERYAQ Master Tool — Editor Acceptance Checklist
 
+## v2.3.3 continuous-typing regression
+
+- [ ] Confirm the Dashboard and sidebar both display `v2.3.3` on every test device.
+- [ ] Type continuously in an English paragraph for at least 15 seconds; confirm multiple autosaves occur without losing focus, moving the caret, or requiring another click.
+- [ ] Repeat with Arabic text, including an RTL bullet and a numbered item; confirm uninterrupted typing and correct direction.
+- [ ] Pause longer than 250 ms in the middle of a word, then continue; confirm autosave does not interrupt the field.
+- [ ] Repeat in Draft information, a table cell, and every Figures form field.
+- [ ] Press manual Save, then Sync; confirm the top action buttons prevent duplicate actions while the editable surface never changes to `readonly` or `contenteditable=false`.
+- [ ] Deploy over v2.3.2, reopen each installed PWA online, and confirm it loads `app.v2.3.3.js`, `platform.v2.3.3.js`, and `styles.v2.3.3.css`.
+
 ## v2.3.2 multi-device data-loss regression
 
 - [ ] Confirm the Dashboard and sidebar both display `v2.3.2` on every test device.
@@ -14,7 +24,7 @@
 ## v2.3.1 save/sync hotfix
 
 - [ ] Type into a document and immediately press **Sync**. Confirm the order is `Saving…` → `Sending to cloud…` → `cloud version N ✓`.
-- [ ] While `Saving…` is visible, confirm Save, Sync, Back, and Settings are disabled.
+- [ ] After explicitly pressing Save, confirm Save, Sync, Back, and Settings are briefly disabled; during background autosave, confirm typing remains enabled.
 - [ ] Type, immediately background/close the installed app, then reopen it. Confirm the newest text is present or automatically recovered as an emergency draft.
 - [ ] Make a change, press Back immediately, and confirm the document list opens only after local save completes.
 - [ ] Work offline, close/reopen, and confirm the draft remains available with `Saved locally ✓ · offline`.

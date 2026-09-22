@@ -1,7 +1,7 @@
 {
-  "appVersion": "2.3.2",
+  "appVersion": "2.3.3",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 3,
   "cloudMigrationVersion": 7,
-  "release": "conflict-safe-pull-ownership-repair-visible-version-and-cache-bust"
+  "release": "nonblocking-autosave-focus-preservation"
 }
