@@ -42,13 +42,37 @@
   </div>
 </div>
 <div class="app-shell hidden" id="appShell">
+  <aside class="app-sidebar" id="appSidebar">
+    <div class="sidebar-brand">
+      <button class="brand-mark" id="homeBtn" title="Dashboard">T</button>
+      <div><strong>TERYAQ</strong><small>Master Tool</small></div>
+      <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">×</button>
+    </div>
+    <nav class="sidebar-nav" aria-label="Main navigation">
+      <button class="sidebar-link active" data-nav="home"><span>⌂</span>Dashboard</button>
+      <button class="sidebar-link" data-nav="documents"><span>▤</span>Documents</button>
+      <button class="sidebar-link" data-nav="templates"><span>▦</span>Templates</button>
+      <button class="sidebar-link" data-nav="trash" id="trashBtn"><span>♲</span>Trash</button>
+      <button class="sidebar-link" data-nav="guide"><span>?</span>Guide</button>
+      <button class="sidebar-link" data-nav="settings" id="settingsBtn"><span>⚙</span>Settings & Sync</button>
+      <button class="sidebar-link" data-nav="account"><span>●</span>Account</button>
+      <button class="sidebar-link hidden" data-nav="admin" id="adminBtn"><span>◆</span>Admin</button>
+    </nav>
+    <div class="sidebar-account">
+      <span class="user-avatar" id="sidebarAvatar">T</span>
+      <div><b id="sidebarUsername">User</b><small id="sidebarEmail"></small></div>
+    </div>
+  </aside>
+  <div class="sidebar-scrim hidden" id="sidebarScrim"></div>
+  <div class="app-frame">
   <header class="topbar">
     <div class="brand">
-      <button class="brand-mark" id="homeBtn" title="Back to library">T</button>
+      <button class="mobile-menu" id="sidebarToggle" aria-label="Open menu">☰</button>
       <button class="btn back-button hidden" id="backBtn" title="Back to documents">← Back</button>
       <div class="brand-copy"><h1 id="docTitle">TERYAQ Master Tool</h1><small>Offline Scientific Authoring Workspace</small></div>
     </div>
     <div class="top-actions" id="homeActions">
+      <label class="global-search"><span>⌕</span><input id="globalSearch" placeholder="Search documents…"></label>
       <div class="status-cluster">
         <span class="account-label" id="accountLabel"></span>
         <span class="sync-status" id="syncStatus">Offline</span>
@@ -56,8 +80,6 @@
       <div class="action-cluster">
         <button class="btn primary" id="syncBtn">Sync Now</button>
         <button class="btn conflict-summary hidden" id="resolveConflictsBtn">Conflicts</button>
-        <button class="btn hidden" id="adminBtn">Admin</button>
-        <button class="btn" id="settingsBtn">Account & Sync</button>
         <button class="btn" id="importBtn">Import</button>
       </div>
       <input id="importFile" type="file" accept=".teryaq,.json,application/json" hidden>
@@ -71,7 +93,7 @@
         <div class="action-cluster primary-actions">
           <button class="btn primary" id="saveBtn">Save</button>
           <button class="btn" id="syncBtnEditor">Sync</button>
-          <button class="btn" id="settingsBtnEditor">Account & Sync</button>
+          <button class="btn" id="settingsBtnEditor">Settings & Sync</button>
         </div>
         <div class="action-cluster secondary-actions">
           <button class="btn" id="validateBtn">Validate</button>
@@ -86,30 +108,35 @@
 
   <main>
     <section class="view active" id="homeView">
-      <div class="home">
-        <div class="hero">
-          <div class="hero-copy">
-            <span class="eyebrow">Dashboard</span>
-            <h2>Welcome, <span id="welcomeEmail"></span></h2>
-            <p>Create from a structured template, work offline, and let Teryaq synchronize safely whenever connectivity returns.</p>
-          </div>
-          <button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button>
+      <div class="portal-page">
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="stat-grid" id="dashboardStats"></div>
+        <div class="portal-grid two-thirds">
+          <section class="portal-panel"><div class="section-head"><div><span class="eyebrow">Workspace</span><h3>Recent documents</h3></div><button class="text-button" data-nav="documents">View all →</button></div><div class="cards compact-cards" id="documentCards"></div></section>
+          <aside class="portal-panel"><span class="eyebrow">Quick help</span><h3>Need a hand?</h3><p class="muted">The bilingual guide explains offline work, syncing, conflicts, history, versions, and recovery.</p><button class="btn" data-nav="guide">Open guide / افتح الدليل</button></aside>
         </div>
-        <details class="dashboard-guide" open>
-          <summary><span>Quick guide</span><span dir="rtl">دليل الاستخدام السريع</span></summary>
-          <div class="guide-grid">
-            <article class="guide-card"><span class="guide-number">1</span><div><h3>Start a document</h3><p>Select <b>New document</b>, choose a template, press Next, then complete the requested draft or script information.</p><div class="guide-ar" dir="rtl"><h3>ابدأ مستندًا</h3><p>اضغط <b>New document</b>، اختر القالب، ثم التالي، وبعدها أدخل معلومات الـDraft أو الـScript المطلوبة.</p></div></div></article>
-            <article class="guide-card"><span class="guide-number">2</span><div><h3>Save and sync</h3><p>Changes autosave on this device. <b>Sync</b> sends pending changes to the cloud; Auto Sync runs whenever the device is online.</p><div class="guide-ar" dir="rtl"><h3>الحفظ والمزامنة</h3><p>التعديلات تُحفظ تلقائيًا على الجهاز. زر <b>Sync</b> يرسلها للسحابة، وAuto Sync يعمل عند توفر الإنترنت.</p></div></div></article>
-            <article class="guide-card"><span class="guide-number">3</span><div><h3>Offline work</h3><p>Open the installed app once while online. Later, use <b>Continue Offline</b>; work stays local and syncs after reconnection.</p><div class="guide-ar" dir="rtl"><h3>العمل بدون إنترنت</h3><p>افتح التطبيق المثبّت مرة وأنت متصل. لاحقًا اختر <b>Continue Offline</b>؛ يبقى العمل محليًا ويتزامن بعد عودة الإنترنت.</p></div></div></article>
-            <article class="guide-card"><span class="guide-number">4</span><div><h3>History and versions</h3><p><b>History / Versions</b> contains recovery snapshots. Restore one if you need an earlier document state. Cloud versions are created by successful syncs.</p><div class="guide-ar" dir="rtl"><h3>السجل والنسخ</h3><p><b>History / Versions</b> يعرض لقطات الاستعادة. يمكنك استرجاع حالة أقدم، بينما نسخ السحابة تُنشأ عند نجاح المزامنة.</p></div></div></article>
-            <article class="guide-card"><span class="guide-number">5</span><div><h3>Conflicts</h3><p>A conflict appears on the affected document when two devices changed it. Choose local, server, or keep both.</p><div class="guide-ar" dir="rtl"><h3>التعارضات</h3><p>يظهر التعارض داخل المستند المتأثر عندما يعدّله جهازان. اختر النسخة المحلية أو السحابية أو احتفظ بالنسختين.</p></div></div></article>
-            <article class="guide-card"><span class="guide-number">6</span><div><h3>Validate, export, print</h3><p>Validate checks structure. Export creates a portable <b>.teryaq</b> file. Print / PDF produces the formatted output.</p><div class="guide-ar" dir="rtl"><h3>الفحص والتصدير والطباعة</h3><p>Validate يفحص البنية، وExport ينشئ ملف <b>.teryaq</b>، وPrint / PDF يجهّز النسخة المنسقة.</p></div></div></article>
-          </div>
-        </details>
-        <div class="section-head"><h3>My Documents</h3><div class="searchbar"><input id="searchDocs" placeholder="Search by subject, chapter, or title…"></div></div>
-        <div class="cards" id="documentCards"></div>
+        <section class="portal-panel"><div class="section-head"><div><span class="eyebrow">Quick start</span><h3>Start from a template</h3></div><button class="text-button" data-nav="templates">All templates →</button></div><div class="template-quick-grid" id="dashboardTemplates"></div></section>
       </div>
     </section>
+
+    <section class="view" id="documentsView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">Library</span><h2>Documents</h2><p>Find every active document and open its history, sync state, or conflict.</p></div><button class="btn primary" id="documentsNewBtn">+ New document</button></div><div class="stat-grid mini" id="documentStats"></div><section class="portal-panel"><div class="table-toolbar"><input id="searchDocs" placeholder="Search by subject, chapter, or title…"><select id="documentStatusFilter"><option value="">All statuses</option><option value="synced">Synced</option><option value="pending">Waiting sync</option><option value="conflict">Conflicts</option><option value="local-only">Local only</option></select></div><div class="responsive-table" id="documentsTable"></div></section></div></section>
+    <section class="view" id="templatesView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">Create</span><h2>Templates</h2><p>Choose a structured template, then complete its basic information.</p></div></div><div class="template-picker" id="templatesPageGrid"></div></div></section>
+    <section class="view" id="newDocumentView"><div class="portal-page"><div id="newDocumentBody"></div></div></section>
+    <section class="view" id="trashView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">Recovery</span><h2>Trash</h2><p>Deleted documents stay recoverable. Restore one to your Documents list.</p></div></div><section class="portal-panel"><div id="trashPageBody"></div></section></div></section>
+    <section class="view" id="guideView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">Help center</span><h2>Guide / دليل الاستخدام</h2><p>Search the full bilingual guide whenever you need help.</p></div></div><label class="guide-search"><span>⌕</span><input id="guideSearch" placeholder="Search the guide / ابحث في الدليل"></label><div class="guide-library" id="guideLibrary">
+      <article class="guide-topic"><h3>Getting started · البدء</h3><p>Use New document, choose a template, press Next, complete Draft or Script Information, then create the document.</p><p dir="rtl">اضغط New document، اختر القالب، ثم التالي، وأدخل معلومات المستند قبل فتح المحرر.</p></article>
+      <article class="guide-topic"><h3>Offline work · العمل دون إنترنت</h3><p>Open the installed PWA once while online. Later open the installed app and choose Continue Offline. Every edit is saved in IndexedDB and queued for sync.</p><p dir="rtl">افتح التطبيق المثبت مرة واحدة وأنت متصل. لاحقًا افتحه واختر Continue Offline؛ تُحفظ التعديلات محليًا وتنتظر عودة الإنترنت.</p></article>
+      <article class="guide-topic"><h3>Sync · المزامنة</h3><p>Auto Sync sends queued work whenever the device is online. Sync Now runs it immediately. “Waiting sync” is safe local work that has not reached Supabase yet.</p><p dir="rtl">المزامنة التلقائية ترسل التعديلات عند توفر الإنترنت. زر Sync Now يبدأها فورًا. حالة Waiting sync تعني أن العمل محفوظ محليًا ولم يصل للسحابة بعد.</p></article>
+      <article class="guide-topic"><h3>Conflicts · التعارضات</h3><p>A conflict is shown on its affected document. Choose Keep local, Use server, or Save both. Nothing is overwritten automatically.</p><p dir="rtl">يظهر التعارض على المستند المتأثر. اختر النسخة المحلية أو السحابية أو الاحتفاظ بالنسختين، ولا يتم الاستبدال تلقائيًا.</p></article>
+      <article class="guide-topic"><h3>History and Versions · السجل والنسخ</h3><p>History contains local recovery snapshots. A cloud Version is an immutable state created after an accepted sync. Open a document and use History / Versions.</p><p dir="rtl">History يحتوي نقاط استعادة محلية. أما Version فهي نسخة سحابية ثابتة تُنشأ بعد المزامنة الناجحة. ستجدها داخل المستند عبر History / Versions.</p></article>
+      <article class="guide-topic"><h3>Trash · سلة المحذوفات</h3><p>Deleting moves the document to Trash. Restore returns it to Documents and queues the recovery for cloud sync.</p><p dir="rtl">حذف المستند ينقله إلى السلة، والاستعادة تعيده إلى Documents وتضعه في قائمة المزامنة.</p></article>
+      <article class="guide-topic"><h3>Account and password · الحساب وكلمة المرور</h3><p>Account lets you change the username shown in the greeting. Password changes require an internet connection and apply to every device.</p><p dir="rtl">من صفحة Account تستطيع تعديل اسم المستخدم الظاهر في الترحيب. تغيير كلمة المرور يحتاج إنترنت وينطبق على كل الأجهزة.</p></article>
+      <article class="guide-topic"><h3>Admin · الأدمن</h3><p>Admins can review synced users, documents, cloud versions, and deleted documents. Local-only work stays private until it syncs.</p><p dir="rtl">يستطيع الأدمن مراجعة المستخدمين والمستندات المتزامنة والنسخ والمحذوفات. العمل المحلي فقط لا يظهر حتى تتم مزامنته.</p></article>
+      <article class="guide-topic"><h3>Troubleshooting · حل المشاكل</h3><p>If offline launch fails, reconnect once, refresh the installed app, then test again. If sync fails, verify Settings & Sync and press Sync Now.</p><p dir="rtl">إذا لم يفتح التطبيق دون إنترنت، اتصل مرة واحدة وحدّث التطبيق المثبت ثم جرّب مجددًا. عند فشل المزامنة راجع Settings & Sync واضغط Sync Now.</p></article>
+    </div></div></section>
+    <section class="view" id="settingsView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">Preferences</span><h2>Settings & Sync</h2><p>Manage automatic synchronization, cloud connection, backups, and this device.</p></div></div><div id="settingsPageBody"></div></div></section>
+    <section class="view" id="accountView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">Profile</span><h2>Account</h2><p>Update the name shown across TERYAQ and secure your account.</p></div></div><div id="accountPageBody"></div></div></section>
+    <section class="view" id="adminView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">Administration</span><h2>Admin workspace</h2><p>Read-only oversight of synced accounts, documents, versions, and deleted items.</p></div></div><div id="adminPageBody"></div></div></section>
 
     <section class="view" id="editorView">
       <div id="textEditorArea" class="editor-view hidden">
@@ -187,6 +214,7 @@
       </div>
     </section>
   </main>
+  </div>
 </div>
 
 <div class="validation-panel hidden" id="validationPanel"><div class="validation-box"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3>Validation</h3><button class="btn" id="closeValidation">Close</button></div><div class="issues" id="issues"></div></div></div>

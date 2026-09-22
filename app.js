@@ -4,10 +4,10 @@
 (() => {
 'use strict';
 
-const APP_VERSION = '2.2.0';
+const APP_VERSION = '2.3.0';
 const SCHEMA_VERSION = '2.0.0';
 const DB_NAME = 'TeryaqAuthorDB';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const SNAPSHOT_INTERVAL_MS = 5 * 60 * 1000;
 const MAX_HISTORY = 120;
 
@@ -80,6 +80,7 @@ function openDb(){
       if(!db.objectStoreNames.contains('devices')){s=db.createObjectStore('devices',{keyPath:'id'});s.createIndex('ownerId','ownerId');}
       if(!db.objectStoreNames.contains('syncQueue')){s=db.createObjectStore('syncQueue',{keyPath:'id'});s.createIndex('ownerId','ownerId');}
       if(!db.objectStoreNames.contains('tombstones')){s=db.createObjectStore('tombstones',{keyPath:'id'});s.createIndex('ownerId','ownerId');}
+      if(!db.objectStoreNames.contains('trash')){s=db.createObjectStore('trash',{keyPath:'id'});s.createIndex('ownerId','ownerId');s.createIndex('deletedAt','deletedAt');}
       if(!db.objectStoreNames.contains('conflicts')){s=db.createObjectStore('conflicts',{keyPath:'id'});s.createIndex('ownerId','ownerId');}
       if(!db.objectStoreNames.contains('migrationBackups')){s=db.createObjectStore('migrationBackups',{keyPath:'id'});s.createIndex('ownerId','ownerId');s.createIndex('createdAt','createdAt');}
     };
@@ -145,6 +146,13 @@ function elementToRuns(el){
   [...el.childNodes].forEach(c=>walk(c,[])); return normalizeRuns(out);
 }
 function plainText(runs){return (runs||[]).map(r=>r.text).join('')}
+function textDirection(text){
+  const firstStrong=String(text||'').match(/[A-Za-z\u00C0-\u02AF\u0370-\u052F\u0590-\u08FF\uFB1D-\uFDFD\uFE70-\uFEFC]/u)?.[0]||'';
+  return /[\u0590-\u08FF\uFB1D-\uFDFD\uFE70-\uFEFC]/u.test(firstStrong)?'rtl':'ltr';
+}
+function applyBlockDirection(el,text){
+  const direction=textDirection(text);el.setAttribute('dir',direction);const editable=el.matches?.('.editable')?el:el.querySelector?.('.editable');if(editable)editable.setAttribute('dir',direction);return direction;
+}
 function splitRuns(runs,offset){
   const left=[],right=[];let pos=0;
   for(const r of runs||[]){const end=pos+r.text.length;if(offset<=pos)right.push(clone(r));else if(offset>=end)left.push(clone(r));else{const cut=offset-pos;if(cut)left.push({text:r.text.slice(0,cut),marks:[...(r.marks||[])]});if(cut<r.text.length)right.push({text:r.text.slice(cut),marks:[...(r.marks||[])]});}pos=end;}
@@ -155,7 +163,7 @@ function splitRuns(runs,offset){
 async function boot(){
   state.db=await openDb();
   TeryaqPlatform.attachDb(state.db);
-  TeryaqPlatform.setDataChangedCallback(async()=>{if(TeryaqPlatform.user()){await refreshLibrary();if(state.view==='home')renderDocuments();}});
+  TeryaqPlatform.setDataChangedCallback(async()=>{if(TeryaqPlatform.user()){await refreshLibrary();await renderActiveView();}});
   bindGlobal();
   const auth=await TeryaqPlatform.initialize();
   window.addEventListener('teryaq-authenticated',async()=>{await afterAuthentication();});
@@ -173,48 +181,74 @@ async function refreshLibrary(){
   state.customTemplates=(await idbAll('templates')).filter(t=>t.ownerId===u.id).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
 }
 function bindGlobal(){
-  byId('homeBtn').onclick=()=>goHome();byId('backBtn').onclick=()=>goHome();byId('newDocumentBtn').onclick=()=>showNewDocumentWizard();byId('importBtn').onclick=()=>byId('importFile').click(); byId('importFile').onchange=e=>e.target.files[0]&&importPackage(e.target.files[0]);
+  byId('homeBtn').onclick=()=>goHome();byId('backBtn').onclick=()=>goHome();byId('newDocumentBtn').onclick=()=>showNewDocumentWizard();byId('documentsNewBtn').onclick=()=>showNewDocumentWizard();byId('importBtn').onclick=()=>byId('importFile').click(); byId('importFile').onchange=e=>e.target.files[0]&&importPackage(e.target.files[0]);
   byId('searchDocs').addEventListener('input',e=>{state.search=e.target.value.toLowerCase();renderDocuments()});
+  byId('documentStatusFilter').addEventListener('change',()=>renderDocuments());
+  byId('globalSearch').addEventListener('input',e=>{state.search=e.target.value.toLowerCase();byId('searchDocs').value=e.target.value;activateView('documents')});
+  byId('guideSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();$$('.guide-topic').forEach(card=>card.hidden=q&&!card.textContent.toLowerCase().includes(q))});
   byId('closeValidation').onclick=()=>byId('validationPanel').classList.add('hidden');
   byId('closeModal').onclick=()=>{byId('modal').classList.add('hidden');byId('modal').querySelector('.modal-card')?.classList.remove('wizard-modal')};
-  byId('syncBtn').onclick=()=>TeryaqPlatform.syncNow();byId('settingsBtn').onclick=()=>TeryaqPlatform.showSettings();byId('adminBtn').onclick=()=>TeryaqPlatform.showAdminDashboard();
+  byId('syncBtn').onclick=()=>TeryaqPlatform.syncNow();
   byId('resolveConflictsBtn').onclick=()=>TeryaqPlatform.resolveConflicts();
+  $$('[data-nav]').forEach(button=>button.addEventListener('click',()=>activateView(button.dataset.nav)));
+  byId('sidebarToggle').onclick=()=>setSidebarOpen(true);byId('sidebarClose').onclick=()=>setSidebarOpen(false);byId('sidebarScrim').onclick=()=>setSidebarOpen(false);
 }
 
 // ---------------- Home/library ----------------
+function setSidebarOpen(open){byId('appShell').classList.toggle('sidebar-open',open);byId('sidebarScrim').classList.toggle('hidden',!open)}
+async function activateView(name){
+  if(state.current&&state.dirty&&name!=='editor')await saveCurrent(true);
+  if(name!=='editor')state.current=null;
+  state.view=name;byId('appShell').classList.toggle('editor-mode',name==='editor');$$('.view').forEach(v=>v.classList.remove('active'));const view=byId(`${name}View`);if(view)view.classList.add('active');
+  $$('.sidebar-link[data-nav]').forEach(b=>b.classList.toggle('active',b.dataset.nav===name));byId('editorActions').classList.toggle('hidden',name!=='editor');byId('homeActions').classList.toggle('hidden',name==='editor');byId('backBtn').classList.toggle('hidden',name!=='editor');setSidebarOpen(false);
+  if(name!=='editor'){byId('docTitle').textContent=name==='home'?'TERYAQ Master Tool':name[0].toUpperCase()+name.slice(1);await renderActiveView()}
+}
+async function renderActiveView(){
+  if(state.view==='home'){renderDashboard();renderDocuments()}
+  else if(state.view==='documents')renderDocuments();
+  else if(state.view==='templates')renderTemplatesPage();
+  else if(state.view==='trash')await TeryaqPlatform.showTrashPage('trashPageBody');
+  else if(state.view==='settings')await TeryaqPlatform.showSettingsPage('settingsPageBody');
+  else if(state.view==='account')await TeryaqPlatform.showAccountPage('accountPageBody');
+  else if(state.view==='admin')await TeryaqPlatform.showAdminDashboard('overview','adminPageBody');
+}
 function renderHome(){
-  state.view='home'; byId('docTitle').textContent='TERYAQ Master Tool';byId('welcomeEmail').textContent=TeryaqPlatform.user()?.email||''; $$('.view').forEach(v=>v.classList.remove('active')); byId('homeView').classList.add('active');
-  byId('editorActions').classList.add('hidden'); byId('homeActions').classList.remove('hidden');byId('backBtn').classList.add('hidden');
-  renderDocuments();
+  const u=TeryaqPlatform.user();byId('welcomeEmail').textContent=u?.displayName?.trim()||u?.email||'';activateView('home');
+}
+function renderDashboard(){
+  const u=TeryaqPlatform.user(),docs=state.docs,pending=docs.filter(d=>['pending','local-only'].includes(d.sync?.status)).length,conflicts=docs.filter(d=>d.sync?.status==='conflict').length;
+  byId('welcomeEmail').textContent=u?.displayName?.trim()||u?.email||'';
+  byId('dashboardStats').innerHTML=`<article class="stat-card"><span class="stat-icon">▤</span><div><b>${docs.length}</b><small>Documents</small></div></article><article class="stat-card indigo"><span class="stat-icon">D</span><div><b>${docs.filter(d=>d.templateId==='scientific-draft-text').length}</b><small>Text drafts</small></div></article><article class="stat-card gold"><span class="stat-icon">↻</span><div><b>${pending}</b><small>Waiting sync</small></div></article><article class="stat-card wine"><span class="stat-icon">!</span><div><b>${conflicts}</b><small>Conflicts</small></div></article>`;
+  const host=byId('dashboardTemplates');host.innerHTML='';BUILTIN_TEMPLATES.forEach(t=>{const card=document.createElement('article');card.className='quick-template';card.innerHTML=`<span class="template-icon">${t.editor==='structured-form'?'FIG':'DOC'}</span><div><h4>${esc(t.name)}</h4><p>${esc(t.description)}</p></div><button class="btn small primary">Use</button>`;card.querySelector('button').onclick=()=>showNewDocumentWizard(t.id);host.appendChild(card)})
 }
 function renderDocuments(){
-  const host=byId('documentCards');host.innerHTML='';let docs=state.docs;
+  let docs=state.docs;
   if(state.search)docs=docs.filter(d=>JSON.stringify([d.title,d.metadata?.subject,d.metadata?.chapterTitle,d.metadata?.chapterNumber]).toLowerCase().includes(state.search));
-  if(!docs.length){host.innerHTML='<div class="empty-state"><b>No saved documents yet.</b><br>Use the New document button to choose a template and begin.</div>';return;}
-  for(const d of docs){
-    const t=getTemplate(d.templateId);const hasConflict=d.sync?.status==='conflict';const card=document.createElement('div');card.className=`doc-card${hasConflict?' has-conflict':''}`;
-    card.innerHTML=`${hasConflict?'<div class="document-conflict-alert"><b>Sync conflict / تعارض مزامنة</b><span>Another device changed this document. Review the choices before continuing.</span></div>':''}<h4>${esc(d.title||'Untitled')}</h4><p>${esc(t?.name||d.templateId)}${d.metadata?.subject?' · '+esc(d.metadata.subject):''}${d.metadata?.chapterNumber?' · CH '+esc(d.metadata.chapterNumber):''}</p><div class="meta"><span class="chip">Edited ${esc(fmtDate(d.updatedAt))}</span><span class="chip sync-chip ${esc(d.sync?.status||'local-only')}">${esc(d.sync?.status||'local-only')}</span></div><div class="card-actions"><button class="btn primary small open">Open</button>${hasConflict?'<button class="btn small resolve">Resolve this conflict</button>':''}<button class="btn small duplicate">Duplicate</button><button class="btn small backup">Export .teryaq</button><button class="btn danger small delete">Delete</button></div>`;
-    card.querySelector('.open').onclick=()=>openDocument(d.id); card.querySelector('.duplicate').onclick=()=>duplicateDocument(d.id); card.querySelector('.backup').onclick=()=>exportDocumentPackage(d); const resolve=card.querySelector('.resolve');if(resolve)resolve.onclick=()=>TeryaqPlatform.resolveConflicts(d.id);
-    card.querySelector('.delete').onclick=async()=>{if(confirm(`Delete “${d.title}”?`)){await snapshotDocument(d,'Before deletion');await TeryaqPlatform.queueDelete(d);await refreshLibrary();renderDocuments();}};
-    host.appendChild(card);
-  }
+  const status=state.view==='documents'?(byId('documentStatusFilter')?.value||''):'';if(status)docs=docs.filter(d=>(d.sync?.status||'local-only')===status);
+  const cardHost=byId('documentCards');if(cardHost){cardHost.innerHTML='';const recent=docs.slice(0,4);if(!recent.length)cardHost.innerHTML='<div class="empty-state"><b>No saved documents yet.</b><br>Create your first document from a template.</div>';recent.forEach(d=>cardHost.appendChild(documentCard(d)))}
+  const stats=byId('documentStats');if(stats)stats.innerHTML=`<article class="stat-card"><span class="stat-icon">▤</span><div><b>${state.docs.length}</b><small>Active</small></div></article><article class="stat-card gold"><span class="stat-icon">↻</span><div><b>${state.docs.filter(d=>d.sync?.status==='pending').length}</b><small>Waiting sync</small></div></article><article class="stat-card wine"><span class="stat-icon">!</span><div><b>${state.docs.filter(d=>d.sync?.status==='conflict').length}</b><small>Conflicts</small></div></article><article class="stat-card indigo"><span class="stat-icon">○</span><div><b>${state.docs.filter(d=>d.sync?.status==='local-only').length}</b><small>Local only</small></div></article>`;
+  const table=byId('documentsTable');if(!table)return;if(!docs.length){table.innerHTML='<div class="empty-state">No documents match these filters.</div>';return}table.innerHTML=`<table class="documents-table"><thead><tr><th>Document</th><th>Template</th><th>Edited</th><th>Status</th><th>Actions</th></tr></thead><tbody>${docs.map(d=>`<tr data-doc-id="${esc(d.id)}"><td class="doc-main"><b>${esc(d.title||'Untitled')}</b><small>${esc(d.metadata?.subject||'No subject')}</small></td><td>${esc(getTemplate(d.templateId)?.name||d.templateId)}</td><td>${esc(fmtDate(d.updatedAt))}</td><td><button class="chip sync-chip ${esc(d.sync?.status||'local-only')} row-status">${esc(d.sync?.status||'local-only')}</button></td><td><div class="row-actions"><button class="btn primary small row-open">Open</button><button class="btn small row-history">History & Versions</button><details class="more-menu"><summary class="btn small">•••</summary><div class="more-popover"><button class="row-duplicate">Duplicate</button><button class="row-export">Export .teryaq</button><button class="row-delete danger">Move to Trash</button></div></details></div></td></tr>`).join('')}</tbody></table>`;
+  table.querySelectorAll('tr[data-doc-id]').forEach(row=>{const d=state.docs.find(x=>x.id===row.dataset.docId);row.querySelector('.row-open').onclick=()=>openDocument(d.id);row.querySelector('.row-history').onclick=async()=>{await openDocument(d.id);showSnapshots()};row.querySelector('.row-status').onclick=()=>d.sync?.status==='conflict'&&TeryaqPlatform.resolveConflicts(d.id);row.querySelector('.row-duplicate').onclick=()=>duplicateDocument(d.id);row.querySelector('.row-export').onclick=()=>exportDocumentPackage(d);row.querySelector('.row-delete').onclick=()=>deleteDocumentToTrash(d)})
 }
+function documentCard(d){const t=getTemplate(d.templateId),hasConflict=d.sync?.status==='conflict',card=document.createElement('div');card.className=`doc-card${hasConflict?' has-conflict':''}`;card.innerHTML=`${hasConflict?'<div class="document-conflict-alert"><b>Sync conflict / تعارض مزامنة</b><span>Review this document before continuing.</span></div>':''}<h4>${esc(d.title||'Untitled')}</h4><p>${esc(t?.name||d.templateId)}${d.metadata?.subject?' · '+esc(d.metadata.subject):''}</p><div class="meta"><span class="chip">${esc(fmtDate(d.updatedAt))}</span><span class="chip sync-chip ${esc(d.sync?.status||'local-only')}">${esc(d.sync?.status||'local-only')}</span></div><div class="card-actions"><button class="btn primary small open">Open</button>${hasConflict?'<button class="btn small resolve">Resolve conflict</button>':''}</div>`;card.querySelector('.open').onclick=()=>openDocument(d.id);card.querySelector('.resolve')?.addEventListener('click',()=>TeryaqPlatform.resolveConflicts(d.id));return card}
+async function deleteDocumentToTrash(d){if(confirm(`Move “${d.title}” to Trash?`)){await snapshotDocument(d,'Before deletion');await TeryaqPlatform.queueDelete(d);await refreshLibrary();await renderActiveView();toast('Moved to Trash')}}
+function renderTemplatesPage(){const host=byId('templatesPageGrid');host.innerHTML='';[...BUILTIN_TEMPLATES,...state.customTemplates].forEach(t=>{const item=document.createElement('article');item.className='template-choice-wrap';item.innerHTML=`<button class="template-choice" type="button"><span class="template-icon">${t.editor==='structured-form'?'FIG':'DOC'}</span><span><strong>${esc(t.name)}</strong><small>${esc(t.description||'Reusable custom template')}</small><span class="template-meta">${esc(t.category||'Custom')} · v${esc(t.version||'1.0.0')}</span></span><span class="choice-check">→</span></button>${t.custom?'<button class="btn danger small delete-template">Delete custom template</button>':''}`;item.querySelector('.template-choice').onclick=()=>showNewDocumentWizard(t.id);item.querySelector('.delete-template')?.addEventListener('click',async()=>{if(confirm(`Delete custom template “${t.name}”?`)){await idbDelete('templates',t.id);await refreshLibrary();renderTemplatesPage()}});host.appendChild(item)})}
 function templateInformationFields(t){
   const metadata=t.custom?t.baseDocument?.metadata:(t.id==='scientific-draft-figures'?{name:'',subject:'',chapterNumber:'',chapterTitle:'',generalNotes:''}:blankMeta());
   const definitions={name:['Name','text'],startDate:['Start date','date'],endDate:['End date','date'],subject:['Subject','text'],chapterNumber:['Chapter number','text'],chapterTitle:['Chapter title','text'],generalNotes:['General notes','textarea']};
   return Object.keys(metadata||{}).filter(key=>definitions[key]).map(key=>({key,label:definitions[key][0],type:definitions[key][1],required:['name','subject','chapterNumber','chapterTitle'].includes(key)}));
 }
 function showNewDocumentWizard(selectedId=''){
-  const templates=[...BUILTIN_TEMPLATES,...state.customTemplates];let selected=selectedId&&templates.some(t=>t.id===selectedId)?selectedId:'';const body=byId('modalBody');const modalCard=byId('modal').querySelector('.modal-card');modalCard.classList.add('wizard-modal');
+  const templates=[...BUILTIN_TEMPLATES,...state.customTemplates];let selected=selectedId&&templates.some(t=>t.id===selectedId)?selectedId:'';const body=byId('newDocumentBody');activateView('newDocument');
   const renderChoice=()=>{
-    body.innerHTML=`<div class="wizard-head"><div><span class="eyebrow">New document</span><h3>Choose a template</h3><p>Select one template, then continue to its required information.</p></div><div class="wizard-steps"><span class="active">1 · Template</span><span>2 · Information</span></div></div><div class="template-picker"></div><div class="wizard-footer"><span class="wizard-note">You can save any document as a reusable custom template later.</span><button class="btn primary" id="wizardNext" ${selected?'':'disabled'}>Next →</button></div>`;
+    body.innerHTML=`<section class="wizard-page-card"><div class="wizard-head"><div><span class="eyebrow">New document</span><h3>Choose a template</h3><p>Select one template, then continue to its required information.</p></div><div class="wizard-steps"><span class="active">1 · Template</span><span>2 · Information</span></div></div><div class="template-picker"></div><div class="wizard-footer"><button class="btn" id="wizardCancel">← Documents</button><button class="btn primary" id="wizardNext" ${selected?'':'disabled'}>Next →</button></div></section>`;
     const picker=body.querySelector('.template-picker');
     templates.forEach(t=>{const item=document.createElement('article');item.className='template-choice-wrap';item.innerHTML=`<button class="template-choice${selected===t.id?' selected':''}" type="button" aria-pressed="${selected===t.id}"><span class="template-icon">${t.editor==='structured-form'?'FIG':'DOC'}</span><span><strong>${esc(t.name)}</strong><small>${esc(t.description||'Reusable custom template')}</small><span class="template-meta">${esc(t.category||'Custom')} · v${esc(t.version||'1.0.0')}</span></span><span class="choice-check">✓</span></button>${t.custom?'<button class="btn danger small delete-template" type="button">Delete custom template</button>':''}`;
       item.querySelector('.template-choice').onclick=()=>{selected=t.id;renderChoice()};const del=item.querySelector('.delete-template');if(del)del.onclick=async()=>{if(confirm(`Delete custom template “${t.name}”?`)){await idbDelete('templates',t.id);await refreshLibrary();selected='';showNewDocumentWizard()}};picker.appendChild(item)});
-    byId('wizardNext').onclick=()=>renderInformation(templates.find(t=>t.id===selected));
+    byId('wizardCancel').onclick=()=>activateView('documents');byId('wizardNext').onclick=()=>renderInformation(templates.find(t=>t.id===selected));
   };
-  const renderInformation=t=>{const fields=templateInformationFields(t);body.innerHTML=`<div class="wizard-head"><div><span class="eyebrow">New document</span><h3>${esc(t.informationTitle||'Draft information')}</h3><p>Complete the basic information before opening the editor.</p></div><div class="wizard-steps"><span>1 · Template</span><span class="active">2 · Information</span></div></div><div class="selected-template-summary"><b>${esc(t.name)}</b><span>${esc(t.category||'Custom')}</span></div><form class="wizard-form" id="documentInfoForm">${fields.map(f=>`<div class="field${f.type==='textarea'?' span-2':''}"><label for="wizard-${esc(f.key)}">${esc(f.label)}${f.required?' *':''}</label>${f.type==='textarea'?`<textarea id="wizard-${esc(f.key)}" data-key="${esc(f.key)}" rows="4"></textarea>`:`<input id="wizard-${esc(f.key)}" data-key="${esc(f.key)}" type="${f.type}" ${f.required?'required':''}>`}</div>`).join('')}<div class="wizard-footer span-2"><button class="btn" type="button" id="wizardBack">← Back</button><button class="btn primary" type="submit">Create & continue</button></div></form>`;byId('wizardBack').onclick=renderChoice;byId('documentInfoForm').onsubmit=async e=>{e.preventDefault();const metadata={};body.querySelectorAll('[data-key]').forEach(el=>metadata[el.dataset.key]=el.value.trim());await createFromTemplate(t,metadata);byId('modal').classList.add('hidden');modalCard.classList.remove('wizard-modal')}};
-  renderChoice();byId('modal').classList.remove('hidden');
+  const renderInformation=t=>{const fields=templateInformationFields(t);body.innerHTML=`<section class="wizard-page-card"><div class="wizard-head"><div><span class="eyebrow">New document</span><h3>${esc(t.informationTitle||'Draft information')}</h3><p>Complete the basic information before opening the editor.</p></div><div class="wizard-steps"><span>1 · Template</span><span class="active">2 · Information</span></div></div><div class="selected-template-summary"><b>${esc(t.name)}</b><span>${esc(t.category||'Custom')}</span></div><form class="wizard-form" id="documentInfoForm">${fields.map(f=>`<div class="field${f.type==='textarea'?' span-2':''}"><label for="wizard-${esc(f.key)}">${esc(f.label)}${f.required?' *':''}</label>${f.type==='textarea'?`<textarea id="wizard-${esc(f.key)}" data-key="${esc(f.key)}" rows="4"></textarea>`:`<input id="wizard-${esc(f.key)}" data-key="${esc(f.key)}" type="${f.type}" ${f.required?'required':''}>`}</div>`).join('')}<div class="wizard-footer span-2"><button class="btn" type="button" id="wizardBack">← Back</button><button class="btn primary" type="submit">Create & continue</button></div></form></section>`;byId('wizardBack').onclick=renderChoice;byId('documentInfoForm').onsubmit=async e=>{e.preventDefault();const metadata={};body.querySelectorAll('[data-key]').forEach(el=>metadata[el.dataset.key]=el.value.trim());await createFromTemplate(t,metadata)}};
+  renderChoice();
 }
 async function createFromTemplate(t,metadata={}){
   let doc;
@@ -224,8 +258,8 @@ async function createFromTemplate(t,metadata={}){
   TeryaqPlatform.decorateNewDocument(doc);
   await idbPut('documents',doc);await TeryaqPlatform.queueDocument(doc);await refreshLibrary();openDocument(doc.id);
 }
-async function duplicateDocument(id){const d=await idbGet('documents',id);if(!d)return;const c=clone(d);c.id=uid('doc');c.title=(d.title||'Document')+' Copy';c.createdAt=c.updatedAt=nowIso();TeryaqPlatform.decorateNewDocument(c);await idbPut('documents',c);await TeryaqPlatform.queueDocument(c);await refreshLibrary();renderDocuments();toast('Duplicated');}
-async function openDocument(id){const d=await idbGet('documents',id);if(!d)return;state.current=d;state.dirty=false;resetHistory();state.view='editor';$$('.view').forEach(v=>v.classList.remove('active'));byId('editorView').classList.add('active');byId('homeActions').classList.add('hidden');byId('editorActions').classList.remove('hidden');byId('backBtn').classList.remove('hidden');renderEditor();pushHistory('Open');}
+async function duplicateDocument(id){const d=await idbGet('documents',id);if(!d)return;const c=clone(d);c.id=uid('doc');c.title=(d.title||'Document')+' Copy';c.createdAt=c.updatedAt=nowIso();TeryaqPlatform.decorateNewDocument(c);await idbPut('documents',c);await TeryaqPlatform.queueDocument(c);await refreshLibrary();await renderActiveView();toast('Duplicated');}
+async function openDocument(id){const d=await idbGet('documents',id);if(!d)return;state.current=d;state.dirty=false;resetHistory();await activateView('editor');renderEditor();pushHistory('Open');}
 async function goHome(){if(state.current&&state.dirty)await saveCurrent(true);state.current=null;await refreshLibrary();renderHome();}
 
 // ---------------- Current document save/history ----------------
@@ -254,7 +288,7 @@ function renderEditor(resetSelection=true){
 }
 function bindEditorActionButtons(){
   byId('saveBtn').onclick=()=>saveCurrent(true);byId('validateBtn').onclick=()=>showValidation();byId('backupBtn').onclick=()=>exportDocumentPackage(state.current);byId('printBtn').onclick=()=>printCurrent();byId('historyBtn').onclick=()=>showSnapshots();byId('saveTemplateBtn').onclick=()=>saveAsTemplate();
-  byId('syncBtnEditor').onclick=()=>TeryaqPlatform.syncNow();byId('settingsBtnEditor').onclick=()=>TeryaqPlatform.showSettings();
+  byId('syncBtnEditor').onclick=()=>TeryaqPlatform.syncNow();byId('settingsBtnEditor').onclick=()=>activateView('settings');
 }
 
 
@@ -279,7 +313,7 @@ function renderBlocks(){
   if(!state.current.content.blocks.length){const b=normalBlock();state.current.content.blocks.push(b);host.appendChild(renderBlock(b,{h1:0,h2:0,numSeq:0}));}
 }
 function renderBlock(block,ctx){
-  let el=document.createElement('div');el.className='doc-block';el.dataset.blockId=block.id;el.dataset.type=block.type;if(['paragraph','bullet','number'].includes(block.type))el.setAttribute('dir','auto');
+  let el=document.createElement('div');el.className='doc-block';el.dataset.blockId=block.id;el.dataset.type=block.type;if(['paragraph','bullet','number'].includes(block.type))applyBlockDirection(el,plainText(block.runs||[]));
   if(block.type==='paragraph'){
     el.classList.add(`p-${block.style||'Normal'}`);if(block.style==='Heading1'||block.style==='Heading2'){
       const n=document.createElement('span');n.className='heading-num';n.textContent=(block.style==='Heading1'?ctx.h1:ctx.h2)+'.';el.appendChild(n);
@@ -298,14 +332,14 @@ function renderBlock(block,ctx){
   return el;
 }
 function editableForBlock(block){
-  const ed=document.createElement('div');ed.className='editable';ed.contentEditable='true';ed.spellcheck=true;ed.setAttribute('dir','auto');ed.dataset.placeholder='Type here…';ed.innerHTML=runsToHtml(block.runs||[]);
-  ed.addEventListener('input',()=>{block.runs=elementToRuns(ed);captureSelection();markDirty();if(block.style?.startsWith('Heading')){renderOutline();renderRegisters();}});
+  const ed=document.createElement('div');ed.className='editable';ed.contentEditable='true';ed.spellcheck=true;applyBlockDirection(ed,plainText(block.runs||[]));ed.dataset.placeholder='Type here…';ed.innerHTML=runsToHtml(block.runs||[]);
+  ed.addEventListener('input',()=>{block.runs=elementToRuns(ed);applyBlockDirection(ed.closest('.doc-block')||ed,plainText(block.runs));captureSelection();markDirty();if(block.style?.startsWith('Heading')){renderOutline();renderRegisters();}});
   ed.addEventListener('focus',()=>{setActiveBlock(block.id);captureSelection()});ed.addEventListener('keyup',captureSelection);ed.addEventListener('mouseup',captureSelection);ed.addEventListener('touchend',()=>setTimeout(captureSelection,0));
   ed.addEventListener('paste',e=>handlePaste(e,block,ed));ed.addEventListener('keydown',e=>handleBlockKeydown(e,block,ed));
   return ed;
 }
 function handlePaste(e,block,ed){
-  e.preventDefault();const text=(e.clipboardData||window.clipboardData).getData('text/plain').replace(/\r\n?/g,'\n');insertPlainTextAtSelection(ed,text);block.runs=elementToRuns(ed);captureSelection();markDirty();
+  e.preventDefault();const text=(e.clipboardData||window.clipboardData).getData('text/plain').replace(/\r\n?/g,'\n');insertPlainTextAtSelection(ed,text);block.runs=elementToRuns(ed);applyBlockDirection(ed.closest('.doc-block')||ed,plainText(block.runs));captureSelection();markDirty();
 }
 function insertPlainTextAtSelection(ed,text){
   const sel=window.getSelection();if(!sel.rangeCount||!ed.contains(sel.anchorNode)){ed.focus();const r=document.createRange();r.selectNodeContents(ed);r.collapse(false);sel.removeAllRanges();sel.addRange(r);}const r=sel.getRangeAt(0);r.deleteContents();const parts=text.split('\n');const frag=document.createDocumentFragment();parts.forEach((p,i)=>{if(i)frag.appendChild(document.createElement('br'));frag.appendChild(document.createTextNode(p));});const last=frag.lastChild;r.insertNode(frag);if(last){r.setStartAfter(last);r.collapse(true);sel.removeAllRanges();sel.addRange(r)}}
@@ -416,7 +450,7 @@ async function showSnapshots(){if(!state.current)return;const snaps=(await idbBy
 function printCurrent(){const issues=validateCurrent();if(issues.some(i=>i.level==='error')&&!confirm('Validation has errors. Print anyway?'))return;const html=state.current.templateId==='scientific-draft-text'?buildTextPrintHtml(state.current):buildFigurePrintHtml(state.current);const w=window.open('','_blank');if(!w)return alert('Please allow popups for printing.');w.document.open();w.document.write(html);w.document.close();setTimeout(()=>{w.focus();w.print()},450)}
 function basePrintCss(){return `@page{size:A4;margin:21mm 16mm 18mm}*{box-sizing:border-box}body{margin:0;font-family:Tajawal,Arial,sans-serif;color:#000;font-size:11pt;line-height:1.30}.cover{page-break-after:always}.meta{width:100%;border-collapse:collapse}.meta td{border:1px solid #000;padding:6px}.meta td:first-child{width:28%;font-weight:bold}.reg{width:100%;border-collapse:collapse;margin-top:14px}.reg td,.reg th{border:1px solid #000;padding:5px}.h1{font-size:14pt;font-weight:bold;color:#C45911;margin:12pt 0 0}.h2{font-size:13pt;font-weight:bold;color:#538135;margin:2pt 0 0}.h3{font-size:12pt;font-weight:bold;color:#2E74B5;margin:2pt 0 0}.h4{font-size:11pt;font-style:italic;color:#2F5496}.subtitle{color:#7F7F7F}.caption{font-size:9pt;font-style:italic;color:#767171}.fig{background:#FFED29;color:#176A98;text-align:center;font-weight:bold;padding:7px 10px;margin:8pt 0 10pt;-webkit-print-color-adjust:exact;print-color-adjust:exact;break-inside:avoid}.bullet{display:grid;grid-template-columns:18px minmax(0,1fr);gap:5px;text-align:start}.l1{margin-inline-start:26pt}.l2{margin-inline-start:44pt}.l3{margin-inline-start:62pt}.num{display:grid;grid-template-columns:25px minmax(0,1fr);gap:5px;margin-inline-start:20pt;text-align:start}table.data{width:100%;border-collapse:collapse;table-layout:fixed;margin:3pt 0}table.data td,table.data th{border:1px solid #000;padding:5pt 6pt;vertical-align:top;overflow-wrap:anywhere}table.data thead{display:table-header-group}table.data tr{break-inside:avoid}.SideNote{color:#BF8F00}.NotesToDelete{color:#FF0000;font-weight:bold;font-size:9pt}.HighYield{color:#7030A0;font-weight:bold;text-decoration:underline}.ClinicalCorrelation{color:#39E794}h1,h2,h3,h4{break-after:avoid}`}
 function runsPrintHtml(runs){return normalizeRuns(runs).map(r=>{let h=esc(r.text).replace(/\n/g,'<br>');const m=r.marks||[];if(m.includes('bold'))h=`<strong>${h}</strong>`;if(m.includes('italic'))h=`<em>${h}</em>`;for(const x of ['SideNote','NotesToDelete','HighYield','ClinicalCorrelation'])if(m.includes(x))h=`<span class="${x}">${h}</span>`;const fs=m.find(x=>x.startsWith('font:'));if(fs)h=`<span style="font-size:${esc(fs.split(':')[1])}pt">${h}</span>`;return h}).join('')}
-function buildTextPrintHtml(d){let h1=0,h2=0,num=0;const headings=[],tables=[];let body='';for(const b of d.content.blocks){if(b.type==='paragraph'){let cls='';let prefix='';if(b.style==='Heading1'){h1++;h2=0;cls='h1';prefix=h1+'. ';headings.push({n:h1,title:plainText(b.runs)})}else if(b.style==='Heading2'){h2++;cls='h2';prefix=h2+'. '}else if(b.style==='Heading3')cls='h3';else if(b.style==='Heading4')cls='h4';else if(b.style==='Subtitle')cls='subtitle';else if(b.style==='TableCaption')cls='caption';body+=`<div class="${cls}" dir="auto">${prefix}${runsPrintHtml(b.runs)}</div>`;num=0}else if(b.type==='bullet'){body+=`<div class="bullet l${b.level}" dir="auto"><span>${STYLE_CONTRACT.BulletLevels[b.level].marker}</span><div>${runsPrintHtml(b.runs)}</div></div>`;num=0}else if(b.type==='number'){num++;body+=`<div class="num" dir="auto"><span>${num}.</span><div>${runsPrintHtml(b.runs)}</div></div>`}else if(b.type==='figure_placeholder'){body+=`<div class="fig">[POSITION OF ${b.placement==='margin'?'MARGIN ':''}FIGURE ${esc(b.code)}]</div>`;num=0}else if(b.type==='table'){tables.push(b);body+=tablePrintHtml(b);num=0}}
+function buildTextPrintHtml(d){let h1=0,h2=0,num=0;const headings=[],tables=[];let body='';for(const b of d.content.blocks){const direction=textDirection(plainText(b.runs||[]));if(b.type==='paragraph'){let cls='';let prefix='';if(b.style==='Heading1'){h1++;h2=0;cls='h1';prefix=h1+'. ';headings.push({n:h1,title:plainText(b.runs)})}else if(b.style==='Heading2'){h2++;cls='h2';prefix=h2+'. '}else if(b.style==='Heading3')cls='h3';else if(b.style==='Heading4')cls='h4';else if(b.style==='Subtitle')cls='subtitle';else if(b.style==='TableCaption')cls='caption';body+=`<div class="${cls}" dir="${direction}">${prefix}${runsPrintHtml(b.runs)}</div>`;num=0}else if(b.type==='bullet'){body+=`<div class="bullet l${b.level}" dir="${direction}"><span>${STYLE_CONTRACT.BulletLevels[b.level].marker}</span><div>${runsPrintHtml(b.runs)}</div></div>`;num=0}else if(b.type==='number'){num++;body+=`<div class="num" dir="${direction}"><span>${num}.</span><div>${runsPrintHtml(b.runs)}</div></div>`}else if(b.type==='figure_placeholder'){body+=`<div class="fig">[POSITION OF ${b.placement==='margin'?'MARGIN ':''}FIGURE ${esc(b.code)}]</div>`;num=0}else if(b.type==='table'){tables.push(b);body+=tablePrintHtml(b);num=0}}
   const m=d.metadata||{};const metaRows=[['Name',m.name],['Start date',m.startDate],['End date',m.endDate],['Subject',m.subject],['Chapter number',m.chapterNumber],['Chapter title',m.chapterTitle]].map(x=>`<tr><td>${esc(x[0])}</td><td>${esc(x[1]||'')}</td></tr>`).join('');const reg=Array.from({length:Math.max(12,headings.length)},(_,i)=>`<tr><td style="width:9%"><b>${i+1}</b></td><td>${esc(headings[i]?.title||'')}</td></tr>`).join('');const treg=tables.length?tables.map(t=>`<tr><td><b>${esc(t.code||'')}</b></td><td>${esc(t.title||'')}</td></tr>`).join(''):'<tr><td><b>Table code</b></td><td><b>Table title</b></td></tr>';
   return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(d.title)}</title><style>${basePrintCss()}</style></head><body><section class="cover"><table class="meta">${metaRows}</table><table class="reg"><tr><th colspan="2" style="text-align:left">Headings 1</th></tr>${reg}</table><table class="reg">${treg}</table></section><main>${body}</main></body></html>`}
 function tablePrintHtml(b){const rows=b.rows.map((r,ri)=>`<tr>${r.map((c,ci)=>`<${ri===0?'th':'td'} style="width:${b.widths?.[ci]||''}%">${runsPrintHtml(c.runs)}</${ri===0?'th':'td'}>`).join('')}</tr>`).join('');return `<table class="data"><tbody>${rows}</tbody></table>${b.code||b.title?`<div class="caption">Table ${esc(b.code||'')}${b.code&&b.title?' - ':''}${esc(b.title||'')}</div>`:''}`}

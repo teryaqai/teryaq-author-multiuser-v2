@@ -1,7 +1,7 @@
 {
-  "appVersion": "2.2.0",
+  "appVersion": "2.3.0",
   "documentSchemaVersion": "2.0.0",
-  "localDatabaseVersion": 2,
+  "localDatabaseVersion": 3,
   "cloudMigrationVersion": 7,
-  "release": "guided-creation-bilingual-guide-and-document-conflicts"
+  "release": "portal-ui-username-recoverable-trash-admin-trash-and-direction-aware-lists"
 }

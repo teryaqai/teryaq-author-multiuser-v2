@@ -1,4 +1,4 @@
-const CACHE = 'teryaq-master-tool-v2.2.0';
+const CACHE = 'teryaq-master-tool-v2.3.0';
 const SCOPE_URL = new URL(self.registration.scope);
 const ROOT_URL = SCOPE_URL.href;
 const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
@@ -10,6 +10,10 @@ const CORE_ASSETS = [
   new URL('platform.js', SCOPE_URL).href,
   new URL('app.js', SCOPE_URL).href,
   new URL('manifest.webmanifest', SCOPE_URL).href,
+  new URL('VERSION.json', SCOPE_URL).href,
+  new URL('fonts/Tajawal-Regular.ttf', SCOPE_URL).href,
+  new URL('fonts/Tajawal-Medium.ttf', SCOPE_URL).href,
+  new URL('fonts/Tajawal-Bold.ttf', SCOPE_URL).href,
 ];
 
 const OPTIONAL_ASSETS = [
