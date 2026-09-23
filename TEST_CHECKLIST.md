@@ -1,8 +1,15 @@
 # TERYAQ Master Tool — Editor Acceptance Checklist
 
+## v2.4.7 Admin stability and ordering checks
+
+- [ ] Dashboard and sidebar display `v2.4.7`; Network loads `app.v2.4.7.js`, `platform.v2.4.7.js`, and `styles.v2.4.7.css`.
+- [ ] Open Admin → Content Options, begin typing in an Author or Course field, wait through two automatic sync intervals (at least 30 seconds), and confirm the tab, focus, and typed text remain unchanged.
+- [ ] Confirm each former bare numeric field is labelled **Display order** and explains that smaller numbers appear first.
+- [ ] Confirm Author name, Course name, Chapter number, and Chapter title are visibly labelled at desktop and mobile widths.
+- [ ] Save a Course and confirm only the Content Options list refreshes after the explicit save succeeds.
+
 ## v2.4.6 Content Options and hierarchy checks
 
-- [ ] Dashboard and sidebar display `v2.4.6`; Network loads `app.v2.4.6.js`, `platform.v2.4.6.js`, and `styles.v2.4.6.css`.
 - [ ] Apply `009_content_options_repair_course_hierarchy.sql`; Content Options loads without a setup warning.
 - [ ] Add an Author and confirm a visible success message remains after the list refreshes.
 - [ ] Add two Courses and confirm both appear in the Course list.

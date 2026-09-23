@@ -1,4 +1,12 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.4.6
+# TERYAQ Master Tool — Multi-user Offline-First v2.4.7
+
+## v2.4.7 stable Admin editing and clear ordering
+
+- Prevents the 15-second automatic sync check from rebuilding **Admin → Content Options** while an administrator is typing.
+- Preserves the active Admin tab, focused field, and unsaved text during background sync checks.
+- Replaces the unexplained numeric fields with visible **Display order** labels and an explanation: smaller numbers appear first.
+- Adds visible labels for Author/Course name, Chapter number, Chapter title, and Display order on desktop and mobile.
+- Requires no new Supabase migration; migration 009 from v2.4.6 remains the latest database migration.
 
 ## v2.4.6 working Content Options and Course → Chapter hierarchy
 
