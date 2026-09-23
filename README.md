@@ -1,4 +1,16 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.4.4
+# TERYAQ Master Tool — Multi-user Offline-First v2.4.5
+
+## v2.4.5 dynamic metadata, print-faithful view, and cross-device sync
+
+- Adds **Delete Table** to the Table tab with confirmation and session Undo support.
+- Restricts Table, Figure, and Margin Figure codes to numbers and dots, including typed, prompted, and DOCX-imported values.
+- Replaces free typing for Author, Subject, Chapter number, and Chapter title with administrator-managed cloud choices. Multiple authors are supported.
+- Adds **Admin → Content Options** for adding, editing, sorting, activating, and deactivating authors, subjects, and chapters without a GitHub/Render deployment.
+- Adds migration `008_dynamic_content_options.sql` with authenticated read access and administrator-only writes.
+- Replaces the old zoom-only One Page / Two Pages controls with fixed 210 × 297 mm A4 preview pages built from the same structured document and print style contract.
+- Keeps mobile preview as one scaled A4 page without changing internal typography, wrapping rules, table widths, or document data.
+- Makes cloud synchronization always active while online, retries queued Android/background changes automatically, refreshes when the app becomes visible or focused, checks other devices every 15 seconds, and exposes the latest attempt/error in Settings & Sync.
+- Preserves local-first saving, the persistent queue, server version checks, explicit conflict resolution, and the v2.3.4 race-safe push reconciliation.
 
 ## v2.4.4 tabbed editor and Outline access
 
@@ -100,7 +112,7 @@ After an account has successfully authenticated at least once on a device, the c
 
 The app writes to IndexedDB first. Cloud synchronization is secondary. A loss of connectivity never blocks editing.
 
-Version 2.4.4 caches both `/` and `/index.html`, the bundled Tajawal fonts, the local JSZip DOCX reader, and the complete application shell so an installed iPad, Safari, Chrome, or Edge app can relaunch while offline.
+Version 2.4.5 caches both `/` and `/index.html`, the bundled Tajawal fonts, the local JSZip DOCX reader, and the complete application shell so an installed iPad, Safari, Chrome, or Edge app can relaunch while offline.
 
 ## What requires internet
 
@@ -133,6 +145,7 @@ Apply the SQL migrations **in numerical order**:
 5. `005_attachment_rls_hardening.sql`
 6. `006_data_api_grants.sql`
 7. `007_auto_rls_function_hardening.sql`
+8. `008_dynamic_content_options.sql`
 
 Do not combine future schema changes into these files after production use begins. Add `005_...sql`, `006_...sql`, etc.
 
@@ -224,14 +237,16 @@ A modified document becomes:
 
 If offline it remains safely local as `pending`.
 
-**Auto Sync** is enabled by default. While online, the app:
+**Automatic Sync** is always enabled while online. The app:
 
 - synchronizes shortly after each locally saved change;
 - synchronizes immediately when connectivity returns or the app becomes visible;
-- checks every 30 seconds for changes made by other devices;
+- checks every 15 seconds for changes made by other devices;
 - leaves offline changes safely queued until the connection returns.
+- retries temporary Android, network, timeout, and background-resume failures without removing the queued change;
+- shows the last successful sync, latest attempt, and latest error in **Settings & Sync**.
 
-Users can turn Auto Sync on or off from **Settings & Sync** and can always press **Sync Now**.
+Users can always press **Sync Now** for an immediate check.
 
 ## 6A. Change an account password
 

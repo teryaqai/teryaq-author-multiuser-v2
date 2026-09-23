@@ -1,7 +1,7 @@
 {
-  "appVersion": "2.4.4",
+  "appVersion": "2.4.5",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 3,
-  "cloudMigrationVersion": 7,
-  "release": "tabbed-editor-view-and-overlay-outline"
+  "cloudMigrationVersion": 8,
+  "release": "dynamic-content-options-true-a4-view-and-resilient-sync"
 }

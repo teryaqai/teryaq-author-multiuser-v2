@@ -1,8 +1,24 @@
 # TERYAQ Master Tool — Editor Acceptance Checklist
 
+## v2.4.5 acceptance checks
+
+- [ ] Dashboard and sidebar display `v2.4.5`; Network loads `app.v2.4.5.js`, `platform.v2.4.5.js`, and `styles.v2.4.5.css`.
+- [ ] Apply migration `008_dynamic_content_options.sql`; confirm authenticated users can read active options and only admins can insert/update them.
+- [ ] Admin → Content Options can add, edit, sort, activate, and deactivate authors, subjects, and chapters without a new application deployment.
+- [ ] A second signed-in device receives updated options after automatic sync/foreground refresh.
+- [ ] New-document and both editor metadata areas use selectors for Author, Subject, Chapter number, and Chapter title; selecting a Subject filters chapters and selecting either chapter field updates the other.
+- [ ] Multiple authors persist through save, sync, export/import, print, and HTML export.
+- [ ] Table, Figure, and Margin Figure codes strip every character except digits and dots in prompts, editor fields, register fields, and DOCX metadata.
+- [ ] Table → Delete Table requires confirmation, removes its Table information row, and one Undo restores the complete table and metadata.
+- [ ] View Only renders fixed 210 × 297 mm A4 pages; One Page and Two Pages change arrangement only, while mobile forces one scaled page without reflow.
+- [ ] View Only page count, line wrapping, table widths, figures, heading numbering, and captions match Export as PDF for the same test document.
+- [ ] Android Chrome saves a change, backgrounds/resumes the app, reaches `Synced ✓`, and the laptop receives it without manual reload or Sync Now.
+- [ ] Offline Android changes remain queued across a browser restart and upload automatically when connectivity returns.
+- [ ] Settings & Sync shows last successful sync, last attempt, queue count, conflicts, and latest error; a temporary timeout retries without losing the queue.
+
 ## v2.4.4 tabbed editor and overlay Outline
 
-- [ ] Confirm Dashboard and sidebar display `v2.4.4` and the browser loads `app.v2.4.4.js`, `platform.v2.4.4.js`, and `styles.v2.4.4.css`.
+- [ ] Confirm the tabbed editor and overlay Outline behavior from v2.4.4 remain intact.
 - [ ] Open a text document and confirm Home, Insert, Table, and View tabs appear; all previous style buttons remain present with unchanged output.
 - [ ] Confirm Table is disabled until a table cell is selected, then becomes available.
 - [ ] Confirm no fixed/floating/black Outline button appears anywhere in the editor.

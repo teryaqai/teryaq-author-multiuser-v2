@@ -37,13 +37,15 @@
 - [ ] PDF/print and `.teryaq` export work offline.
 
 ## Sync
-- [ ] Auto Sync is enabled by default for a new installation.
+- [ ] Automatic Sync is always enabled for new and upgraded installations, including devices where the old toggle was off.
 - [ ] A saved online edit synchronizes without pressing Sync Now.
 - [ ] Reconnect and verify the pending queue synchronizes automatically.
-- [ ] A remote change is pulled by the 30-second online check.
+- [ ] A remote change is pulled by the 15-second online check.
 - [ ] Returning to the visible app triggers a sync check.
-- [ ] Turning Auto Sync off leaves changes waiting until Sync Now.
-- [ ] Sync Now works whether Auto Sync is on or off.
+- [ ] Automatic Sync runs after save, online, foreground, focus/pageshow, and the 15-second periodic check.
+- [ ] Sync Now forces an immediate attempt without creating a duplicate queue item.
+- [ ] A temporary timeout leaves the item queued, records the error, and retries automatically.
+- [ ] Android Chrome background/resume drains its queue and a laptop signed into the same account pulls the accepted cloud version.
 - [ ] Pending becomes Synced.
 - [ ] Server `current_version` increments.
 - [ ] `document_versions` receives immutable versions.
