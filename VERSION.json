@@ -1,7 +1,7 @@
 {
-  "appVersion": "2.4.5",
+  "appVersion": "2.4.6",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 3,
-  "cloudMigrationVersion": 8,
-  "release": "dynamic-content-options-true-a4-view-and-resilient-sync"
+  "cloudMigrationVersion": 9,
+  "release": "working-content-options-and-course-chapter-hierarchy"
 }

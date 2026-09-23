@@ -1,5 +1,19 @@
 # TERYAQ Master Tool — Editor Acceptance Checklist
 
+## v2.4.6 Content Options and hierarchy checks
+
+- [ ] Dashboard and sidebar display `v2.4.6`; Network loads `app.v2.4.6.js`, `platform.v2.4.6.js`, and `styles.v2.4.6.css`.
+- [ ] Apply `009_content_options_repair_course_hierarchy.sql`; Content Options loads without a setup warning.
+- [ ] Add an Author and confirm a visible success message remains after the list refreshes.
+- [ ] Add two Courses and confirm both appear in the Course list.
+- [ ] Select Course A under Chapters by Course, add a chapter, and confirm it appears only under Course A.
+- [ ] Add a chapter with the same title under Course B and confirm both remain separate.
+- [ ] In New document, choose a Course and confirm the Chapter list contains only that Course's chapters.
+- [ ] Change the Course and confirm the selected Chapter clears before the new filtered list appears.
+- [ ] Confirm one Chapter selector displays `number — title` and stores both fields in the document metadata.
+- [ ] Open a v2.4.5 document and confirm its existing Subject/Chapter values remain visible as the current Course/Chapter.
+- [ ] Trigger a duplicate or invalid save and confirm the exact error is displayed at the top of Content Options.
+
 ## v2.4.5 acceptance checks
 
 - [ ] Dashboard and sidebar display `v2.4.5`; Network loads `app.v2.4.5.js`, `platform.v2.4.5.js`, and `styles.v2.4.5.css`.

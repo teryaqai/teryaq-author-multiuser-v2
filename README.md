@@ -1,4 +1,15 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.4.5
+# TERYAQ Master Tool — Multi-user Offline-First v2.4.6
+
+## v2.4.6 working Content Options and Course → Chapter hierarchy
+
+- Renames the user-facing **Subject** option to **Course** while retaining backward compatibility with existing documents and database rows.
+- Replaces the separate Chapter number/title selectors with one Chapter selector that displays `number — title`.
+- Filters the Chapter selector strictly by the chosen Course, so identically named chapters in different courses remain distinct.
+- Reorganizes **Admin → Content Options** into Authors, Courses, and **Chapters by Course**.
+- Adds a visible persistent success/error message for every add/save operation instead of losing feedback during rerendering.
+- Adds migration `009_content_options_repair_course_hierarchy.sql`, which safely repairs missing v2.4.5 tables, policies, grants, and creates an administrator-only save RPC.
+- Detects an unapplied database migration and displays the exact required migration instead of silently showing empty lists.
+- Preserves legacy `subject` / `subjectId` metadata alongside the new `course` / `courseId` values so existing synced documents continue to open normally.
 
 ## v2.4.5 dynamic metadata, print-faithful view, and cross-device sync
 
@@ -146,6 +157,7 @@ Apply the SQL migrations **in numerical order**:
 6. `006_data_api_grants.sql`
 7. `007_auto_rls_function_hardening.sql`
 8. `008_dynamic_content_options.sql`
+9. `009_content_options_repair_course_hierarchy.sql`
 
 Do not combine future schema changes into these files after production use begins. Add `005_...sql`, `006_...sql`, etc.
 
