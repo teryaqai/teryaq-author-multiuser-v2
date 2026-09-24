@@ -1,5 +1,26 @@
 # TERYAQ Master Tool — Editor Acceptance Checklist
 
+## v2.5.0 governance and no-regression checks
+
+- [ ] Dashboard and sidebar display `v2.5.0`; Network loads `app.v2.5.0.js`, `platform.v2.5.0.js`, and `styles.v2.5.0.css`.
+- [ ] Apply migration 010 after migrations 001–009; confirm normal users cannot list all requests, audit events, other users' conflicts, or invoke admin restore/purge/analytics RPCs.
+- [ ] As a normal user, update the display name successfully, then attempt to change the same profile's role through the API and confirm migration 010 rejects self-promotion.
+- [ ] Submit an account request while signed out; confirm the response does not reveal whether that email already has an account.
+- [ ] As admin, approve one request and reject another; confirm only the protected Edge Function sends an invitation and the service-role key never reaches browser source/storage/network payloads.
+- [ ] Open an approved invitation link on a device with an existing cached user; confirm TERYAQ shows the password-creation screen instead of silently opening the cached account.
+- [ ] Complete an invitation password, confirm the URL fragment is removed, the request status becomes Activated, and the new user sees only their own RLS-isolated workspace.
+- [ ] As a normal user, open **History / Versions → Cloud versions & compare**, compare two versions, and confirm the live document, local queue, and cloud version remain unchanged.
+- [ ] Compare versions containing metadata, moved/changed/added/removed text blocks, tables, and figures; confirm each difference is labelled read-only.
+- [ ] Admin Analytics loads 7/30/90/365-day views and reports only synchronized cloud data.
+- [ ] Create a genuine two-device conflict; confirm Admin → Cloud Conflicts shows owner/device/version metadata but no private local document JSON.
+- [ ] Resolve the conflict on the owner's device; confirm the cloud metadata changes to Resolved without weakening the existing explicit conflict choices.
+- [ ] Delete and sync a document owned by another user; as admin restore it, then confirm the owner receives the restored higher cloud version on the next sync.
+- [ ] Confirm permanent deletion is disabled before the 30-day retention date, the protected server function rejects an early request, and an authenticated browser cannot invoke the database purge function directly.
+- [ ] After retention expires in a disposable test project, type `PURGE`, permanently delete the test document, and confirm its versions, attachment rows, and storage objects are removed while the purge audit event remains.
+- [ ] Audit Log lists document, content-option, account-request, restore, purge, compare/download, and role-change activity as applicable.
+- [ ] Export Audit CSV with a value beginning in `=`, `+`, `-`, or `@`; confirm the cell is neutralized against spreadsheet formula execution.
+- [ ] Repeat v2.3.3 uninterrupted typing, v2.3.4 two-device race-safe sync, offline relaunch, ownership repair, Trash conflict restore, Content Options, DOCX table import, HTML/PDF export, Arabic RTL lists, and protected style-contract checks below.
+
 ## v2.4.7 Admin stability and ordering checks
 
 - [ ] Dashboard and sidebar display `v2.4.7`; Network loads `app.v2.4.7.js`, `platform.v2.4.7.js`, and `styles.v2.4.7.css`.

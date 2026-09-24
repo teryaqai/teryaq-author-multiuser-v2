@@ -1,4 +1,15 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.4.7
+# TERYAQ Master Tool — Multi-user Offline-First v2.5.0
+
+## v2.5.0 governance and administration
+
+- Compares any two immutable cloud versions from **History / Versions** without editing or restoring either copy.
+- Adds administrator analytics for users, active/deleted documents, versions, conflicts, account requests, and recent audit activity.
+- Adds an administrator cloud-conflict dashboard containing synchronization metadata only; private local-only edits are never uploaded to it.
+- Introduces a 30-day Trash retention policy. Administrators may restore another user's synchronized deleted document; irreversible purge is admin-only and blocked by the database until retention expires.
+- Adds a cloud Audit Log with formula-injection-safe CSV export.
+- Adds **Request an account** to sign-in. Requests remain pending until an administrator approves them; invitations are sent by a protected Supabase Edge Function.
+- Adds migration `010_governance_admin_tools.sql` plus protected Edge Functions `admin-account-request` and `admin-governance`. The service-role key remains server-side and never appears in the PWA.
+- Preserves the v2.3.4 race-safe synchronization, v2.3.3 uninterrupted autosave, account RLS isolation, offline editing, exact document style contract, DOCX tables, exports, Content Options, and existing version history.
 
 ## v2.4.7 stable Admin editing and clear ordering
 
@@ -166,12 +177,19 @@ Apply the SQL migrations **in numerical order**:
 7. `007_auto_rls_function_hardening.sql`
 8. `008_dynamic_content_options.sql`
 9. `009_content_options_repair_course_hierarchy.sql`
+10. `010_governance_admin_tools.sql`
 
 Do not combine future schema changes into these files after production use begins. Add `005_...sql`, `006_...sql`, etc.
 
 ### Create users
 
-Create allowed users from Supabase Authentication. Public signup is intentionally not exposed by the app.
+Users may submit an access request from the sign-in page, but the request does not create an account. An administrator must approve it before the server-side invitation is sent. Existing administrators can still create users directly in Supabase Authentication.
+
+### Deploy the account-approval function
+
+Deploy `supabase/functions/admin-account-request/index.ts` as `admin-account-request` and `supabase/functions/admin-governance/index.ts` as `admin-governance`. Set `TERYAQ_SITE_URL` to the production HTTPS URL used after an invitation is accepted. `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` remain protected Edge Function environment values; never copy the service-role key into `index.html`, JavaScript, Render, or a user's device. The governance function removes attachments through the Storage API before completing an authorized permanent purge.
+
+In **Supabase → Authentication → URL Configuration**, set the production Render HTTPS address as the Site URL and add it to Redirect URLs. An approved user follows the invitation link back to TERYAQ, chooses a password in the protected invitation screen, and then enters the account's isolated workspace.
 
 ### Make your admin account
 

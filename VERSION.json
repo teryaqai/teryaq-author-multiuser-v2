@@ -1,7 +1,7 @@
 {
-  "appVersion": "2.4.7",
+  "appVersion": "2.5.0",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 3,
-  "cloudMigrationVersion": 9,
-  "release": "stable-admin-editing-and-clear-display-order"
+  "cloudMigrationVersion": 10,
+  "release": "governance-admin-tools"
 }
