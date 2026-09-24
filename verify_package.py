@@ -6,8 +6,9 @@ required=[
     'index.html','styles.css','platform.js','app.js',
     'styles.v2.5.0.css','platform.v2.5.0.js','app.v2.5.0.js',
     'styles.v2.5.1.css','platform.v2.5.1.js','app.v2.5.1.js',
+    'styles.v2.5.3.css','platform.v2.5.3.js','app.v2.5.3.js',
     'sw.js','manifest.webmanifest','README.md','UPDATE_AND_MIGRATION_POLICY.md',
-    'AI_REVIEW_BRIEF.md','UPLOAD_v2.5.0.md','UPLOAD_v2.5.1.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
+    'AI_REVIEW_BRIEF.md','UPLOAD_v2.5.0.md','UPLOAD_v2.5.1.md','UPLOAD_v2.5.3.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
     'supabase/migrations/010_governance_admin_tools.sql',
     'supabase/migrations/011_v2_5_1_profiles_updates.sql',
     'supabase/functions/admin-account-request/index.ts',
@@ -192,12 +193,12 @@ for forbidden in ['.p-Normal{','.p-Heading1{','.p-Heading2{','.p-Heading3{','.p-
         print('V2.4 LAYOUT MUST NOT OVERRIDE DOCUMENT STYLE:',forbidden);sys.exit(1)
 
 version=(root/'VERSION.json').read_text(encoding='utf-8')
-if '"appVersion": "2.5.1"' not in version or '"cloudMigrationVersion": 11' not in version or "teryaq-master-tool-v2.5.1" not in (root/'sw.js').read_text(encoding='utf-8'):
-    print('VERSION/CACHE MISMATCH: expected v2.5.1 / migration 11');sys.exit(1)
-for source,versioned in [('app.js','app.v2.5.1.js'),('platform.js','platform.v2.5.1.js'),('styles.css','styles.v2.5.1.css')]:
+if '"appVersion": "2.5.3"' not in version or '"cloudMigrationVersion": 11' not in version or "teryaq-master-tool-v2.5.3" not in (root/'sw.js').read_text(encoding='utf-8'):
+    print('VERSION/CACHE MISMATCH: expected v2.5.3 / migration 11');sys.exit(1)
+for source,versioned in [('app.js','app.v2.5.3.js'),('platform.js','platform.v2.5.3.js'),('styles.css','styles.v2.5.3.css')]:
     if (root/source).read_bytes()!=(root/versioned).read_bytes():
         print('STALE VERSIONED ASSET:',versioned);sys.exit(1)
-for ref in ['styles.v2.5.1.css','platform.v2.5.1.js','app.v2.5.1.js','vendor/jszip.min.js']:
+for ref in ['styles.v2.5.3.css','platform.v2.5.3.js','app.v2.5.3.js','vendor/jszip.min.js']:
     if ref not in html:
         print('MISSING VERSIONED ASSET REFERENCE:',ref);sys.exit(1)
 for number in range(1,12):

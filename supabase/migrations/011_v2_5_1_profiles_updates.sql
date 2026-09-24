@@ -1,6 +1,11 @@
 -- TERYAQ Master Tool v2.5.1
 -- Profile avatars plus administrator-managed dashboard announcements.
 
+-- Migration 010 replaced this broad legacy trigger with the narrower
+-- protect_profile_role_change_trigger. Remove the legacy trigger so trusted
+-- bootstrap/admin operations are not blocked by two conflicting checks.
+drop trigger if exists protect_profile_role_trigger on public.profiles;
+
 alter table public.profiles
   add column if not exists avatar_path text;
 

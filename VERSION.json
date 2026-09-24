@@ -1,7 +1,7 @@
 {
-  "appVersion": "2.5.1",
+  "appVersion": "2.5.3",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
   "cloudMigrationVersion": 11,
-  "release": "profile-updates-media-ui"
+  "release": "unified-workspace-edges"
 }

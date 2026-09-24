@@ -1,4 +1,12 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.5.1
+# TERYAQ Master Tool — Multi-user Offline-First v2.5.3
+
+## v2.5.3 workspace alignment polish
+
+- Aligns every Dashboard/portal page to the exact left and right edges of the floating top bar.
+- Makes the editor title/action bar and the Home/Insert/Table/View ribbon equal in width, radius, border, and floating-card treatment.
+- Keeps both editor bars stacked and sticky while the document scrolls.
+- Resizes the top bar, ribbon, and page workspace together when the sidebar expands or collapses.
+- Changes presentation only; save, autosave, synchronization, conflicts, document styles, A4 sizing, and cloud migrations remain unchanged.
 
 ## v2.5.1 interface, profiles, announcements, and figure media
 

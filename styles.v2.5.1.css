@@ -245,6 +245,8 @@ html,body,button,input,select,textarea{font-family:"Tajawal",Arial,sans-serif}
 .editor-mode .topbar-global-actions{grid-column:2;grid-row:1;align-self:center;margin-left:0}
 .auth-request-link{width:100%;min-height:46px;margin:10px 0 8px;border:1px solid #9bcab9;border-radius:10px;background:#e8f5f0;color:#286f58;text-decoration:none;font-size:14px;box-shadow:0 4px 12px rgba(64,138,113,.09)}
 .auth-request-link:hover,.auth-request-link:focus-visible{border-color:#408a71;background:#dcefe7;color:#205c49;outline:2px solid rgba(64,138,113,.16);outline-offset:2px}
+.auth-error:empty{display:none}
+.auth-request-link{margin-top:8px}
 .profile-name-field{margin-top:18px}.password-card{align-self:start}.password-change-fields{display:grid;gap:16px;margin-top:20px}.password-change-fields .field{margin:0}.password-change-button{margin-top:18px;min-height:42px}.password-card #changePasswordStatus{margin-top:11px}
 .avatar-crop-editor{display:grid;grid-template-columns:minmax(220px,280px) minmax(220px,1fr);gap:20px;align-items:center;margin:16px 0;padding:16px;border:1px solid #cfe2da;border-radius:15px;background:#f4faf7}
 .avatar-crop-stage{position:relative;width:min(280px,100%);aspect-ratio:1;overflow:hidden;border:2px solid #fff;border-radius:22px;background:#dce8e3;box-shadow:0 0 0 1px #afcfc2,0 10px 24px rgba(17,28,45,.12);cursor:grab;touch-action:none;user-select:none}

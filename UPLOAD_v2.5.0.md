@@ -11,6 +11,8 @@
 
 Run `supabase/migrations/010_governance_admin_tools.sql` once in the Supabase SQL Editor after migrations 001–009.
 
+The migration finishes by notifying PostgREST to reload its schema cache. If the SQL Editor reports success but the application still says that `audit_log`, `account_requests`, `sync_conflicts`, or `admin_analytics` is missing, run `NOTIFY pgrst, 'reload schema';` once in a separate SQL Editor query and reload the application.
+
 The migration adds account requests, audit events, cloud conflict metadata, a 30-day Trash retention setting, administrator restore/purge RPCs, and analytics. It does not alter the document JSON schema, local IndexedDB schema, style contract, or the existing `push_document()` synchronization algorithm.
 
 Do not edit or rerun migrations 001–009 as a replacement for migration 010.

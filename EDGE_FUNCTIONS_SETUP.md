@@ -14,7 +14,18 @@ The static TERYAQ site runs on Render, but **Approve & Invite** and permanent st
 7. Repeat the same process with the exact name `admin-governance` and the file:
    `supabase/functions/admin-governance/index.ts`
 
-Keep JWT verification enabled. Both functions also verify the signed-in user's `profiles.role` before allowing an administrative action.
+> **Important:** the function endpoint itself must end with
+> `/functions/v1/admin-account-request`. Renaming the code file inside a function
+> that was created with another name (for example `bright-action`) does not rename
+> the deployed endpoint. If the URL still ends in another name, create a new
+> function named exactly `admin-account-request`, deploy this code there, verify it,
+> then remove the incorrectly named function.
+
+Open the function's **Settings**, turn **Verify JWT with legacy secret** off,
+and save the change. The function performs current session validation itself and
+also verifies the signed-in user's `profiles.role` before allowing an
+administrative action. Disabling the legacy gateway check prevents newer session
+tokens from being rejected before this authorization code runs.
 
 ## Add the TERYAQ site address
 
@@ -40,5 +51,19 @@ In **Authentication → URL Configuration**:
 3. Approve a test request.
 4. Confirm that the request changes to **Invited** and the recipient receives the Supabase invitation email.
 5. Open the invitation link and confirm that TERYAQ shows **Create your password**.
+
+## If the function says `Admin access required`
+
+The signed-in account exists, but its row in `public.profiles` is not marked as
+an administrator. Run migration `011_v2_5_1_profiles_updates.sql` again, then
+promote only the approved administrator email from the Supabase SQL Editor:
+
+```sql
+update public.profiles
+set role = 'admin', updated_at = now()
+where lower(email) = lower('approved-admin@example.com');
+```
+
+Sign out and back in after the update so the app reloads the current profile.
 
 If the app says the approval service is not reachable, confirm that the function name is exactly `admin-account-request` and that its deployment is active in the same Supabase project used by the app.

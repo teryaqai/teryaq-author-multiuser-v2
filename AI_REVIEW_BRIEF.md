@@ -1,14 +1,14 @@
-# TERYAQ Master Tool v2.5.1 — Independent AI Review Brief
+# TERYAQ Master Tool v2.5.3 — Independent AI Review Brief
 
 ## What to upload
 
-Upload the complete `TERYAQ_Master_Tool_v2.5.1.zip`. It contains the application source, bundled JSZip with its license, Supabase migrations, the protected account-approval and governance Edge Functions, release metadata, test checklists, and this brief. You may also attach a redacted `.teryaq` export that contains no confidential scientific material.
+Upload the complete `TERYAQ_Master_Tool_Render_Deploy_v2.5.3.zip`. It contains the application source, bundled JSZip with its license, Supabase migrations, the protected account-approval and governance Edge Functions, release metadata, test checklists, and this brief. You may also attach a redacted `.teryaq` export that contains no confidential scientific material.
 
 Never upload passwords, Supabase service-role keys, browser storage exports, access/refresh tokens, or real confidential documents. The application package intentionally contains no configured project URL or keys.
 
 ## Copy/paste prompt for the reviewing AI
 
-> Act as a senior offline-first PWA and Supabase/PostgreSQL security reviewer. Review the attached TERYAQ Master Tool v2.5.1 source without rewriting the product or weakening its account isolation, RLS, immutable version history, local-first behavior, or v2.3.3/v2.3.4 save-and-sync protections.
+> Act as a senior offline-first PWA and Supabase/PostgreSQL security reviewer. Review the attached TERYAQ Master Tool v2.5.3 source without rewriting the product or weakening its account isolation, RLS, immutable version history, local-first behavior, or v2.3.3/v2.3.4 save-and-sync protections.
 >
 > The reported production symptoms were: (1) a laptop displayed `Synced` but its newest text did not arrive on the phone; (2) false conflicts appeared while using one device; (3) earlier versions could lose or replace local text; (4) `Document ownership mismatch` appeared on a document believed to be locally created; and (5) v2.3.2 autosave dropped editor focus. The v2.3.3 focus fix must remain unchanged.
 >
@@ -18,11 +18,13 @@ Never upload passwords, Supabase service-role keys, browser storage exports, acc
 >
 > v2.5.1 keeps the v2.5.0 governance model and adds migration 011, profile avatars, announcements/read receipts, lazy Admin sections, checkbox author pickers, and a separate resumable figure-image upload queue. Verify that image upload failures never overwrite document JSON, text autosave remains focus-safe, remote documents contain Storage paths rather than base64 images, private Storage RLS prevents cross-account access, and only admins can publish or delete announcements.
 >
-> Also trace: offline avatar selection/removal; offline announcement read state; upload interruption midway through a figure image; upload retry after PWA restart; second-device image retrieval; export validation for every mandatory Figure field; and service-worker upgrade to v2.5.1.
+> v2.5.3 is a CSS/layout-only release. It makes portal pages share the floating top bar's exact horizontal edges and makes the title/action bar and editor ribbon equal floating cards that resize together with the sidebar. Verify that this introduces no changes to document content dimensions, A4 output, editor controls, autosave, synchronization, conflict handling, or the protected style contract.
+>
+> Also trace: offline avatar selection/removal; offline announcement read state; upload interruption midway through a figure image; upload retry after PWA restart; second-device image retrieval; export validation for every mandatory Figure field; and service-worker upgrade to v2.5.3.
 >
 > Report only evidence-backed findings. For each finding provide Severity (P0–P3), exact file/function, reproducible event sequence, why existing protection fails, minimal safe fix, and regression test. Explicitly distinguish confirmed defects from hypotheses. Check SQL RLS/RPC security separately from client reliability. Do not recommend disabling RLS, sharing accounts, using the service-role key in the client, or overwriting local conflict data automatically.
 >
-> End with: (A) whether v2.5.1 preserves v2.3.4 cross-device sync correctness, (B) whether migrations 008–011 and Storage RLS enforce the intended boundaries, (C) whether media upload is isolated from autosave/conflict logic, (D) whether Admin lazy loading and announcement permissions are safe, (E) whether the exact style contract remains unchanged, and (F) a prioritized pre-production test list.
+> End with: (A) whether v2.5.3 preserves v2.3.4 cross-device sync correctness, (B) whether migrations 008–011 and Storage RLS enforce the intended boundaries, (C) whether media upload is isolated from autosave/conflict logic, (D) whether Admin lazy loading and announcement permissions are safe, (E) whether the exact style contract remains unchanged, and (F) a prioritized pre-production test list.
 
 ## Architecture summary
 
