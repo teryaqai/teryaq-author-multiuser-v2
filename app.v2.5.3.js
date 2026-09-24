@@ -70,12 +70,14 @@ const UI_ICON_PATHS={
   'check-circle':'<circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/>',history:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>','chevron-down':'<path d="m6 9 6 6 6-6"/>',undo:'<path d="M9 7 4 12l5 5"/><path d="M4 12h9a7 7 0 0 1 7 7"/>',redo:'<path d="m15 7 5 5-5 5"/><path d="M20 12h-9a7 7 0 0 0-7 7"/>',
   bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 22a8 8 0 0 1 16 0"/>','log-out':'<path d="M10 17l5-5-5-5M15 12H3"/><path d="M14 3h7v18h-7"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',cloud:'<path d="M7 19h10a4 4 0 0 0 .7-7.94A6 6 0 0 0 6.25 9.7 4.6 4.6 0 0 0 7 19Z"/>',activity:'<path d="M3 12h4l2-7 4 14 2-7h6"/>',megaphone:'<path d="m3 11 16-6v14L3 13zM3 11v2M7 14l1 6h4l-2-7"/>'
 };
-function uiIcon(name){return `<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">${UI_ICON_PATHS[name]||UI_ICON_PATHS.documents}</svg>`}
+const UI_CUSTOM_ICON_FILES={documents:'documents.svg',success:'success.svg',conflict:'conflict.svg',sync:'sync.svg',refresh:'sync.svg',megaphone:'updates.svg',guide:'guide.svg'};
+function uiIcon(name){const file=UI_CUSTOM_ICON_FILES[name];if(file)return `<span class="ui-icon ui-custom-icon" style="--ui-icon:url('icons/ui/${file}')" aria-hidden="true"></span>`;return `<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">${UI_ICON_PATHS[name]||UI_ICON_PATHS.documents}</svg>`}
 window.TeryaqUIIcon=uiIcon;
 function hydrateStaticIcons(root=document){root.querySelectorAll('[data-ui-icon]').forEach(host=>{host.innerHTML=uiIcon(host.dataset.uiIcon)})}
 
 function toast(msg){ const el=byId('toast'); if(!el)return; el.textContent=msg; el.classList.add('show'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),1800); }
-function setSaveStatus(text){ const el=byId('saveStatus'); if(el) el.textContent=text; }
+function statusMarkup(text){return String(text??'').split('✓').map(esc).join(uiIcon('success'))}
+function setSaveStatus(text){ const el=byId('saveStatus'); if(el) el.innerHTML=statusMarkup(text); }
 function updateEditorLocks(){
   const saving=state.saveInFlight>0,busy=state.blockingSaveInFlight>0||state.syncInFlight;
   for(const id of ['saveBtn','syncBtnEditor','backBtn','settingsBtnEditor','editorImportBtn','validateBtn','historyBtn','exportMenuButton','backupBtn','saveTemplateBtn','printBtn','htmlExportBtn']){const button=byId(id);if(button)button.disabled=busy}

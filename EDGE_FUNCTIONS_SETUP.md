@@ -66,4 +66,25 @@ where lower(email) = lower('approved-admin@example.com');
 
 Sign out and back in after the update so the app reloads the current profile.
 
+If SQL already shows `role = 'admin'` but the function still rejects the
+request, confirm that the authenticated user ID and profile ID are the same:
+
+```sql
+select
+  u.id as auth_user_id,
+  p.id as profile_id,
+  u.email,
+  p.role,
+  length(trim(p.role)) as role_length
+from auth.users u
+left join public.profiles p on p.id = u.id
+where lower(u.email) = lower('approved-admin@example.com');
+```
+
+Then redeploy the current `supabase/functions/admin-account-request/index.ts`
+into the **same Supabase project whose URL is saved in TERYAQ Settings & Sync**.
+Role changes are read on every request; if the matching row already says
+`admin`, a continued rejection means the deployed function/project is stale or
+different from the project's URL stored in the app.
+
 If the app says the approval service is not reachable, confirm that the function name is exactly `admin-account-request` and that its deployment is active in the same Supabase project used by the app.

@@ -1,4 +1,4 @@
-const CACHE = 'teryaq-master-tool-v2.5.3-workspace-edges-1';
+const CACHE = 'teryaq-master-tool-v2.5.3-custom-icons-2';
 const SCOPE_URL = new URL(self.registration.scope);
 const ROOT_URL = SCOPE_URL.href;
 const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
@@ -19,6 +19,12 @@ const CORE_ASSETS = [
   new URL('icons/icon-192.png', SCOPE_URL).href,
   new URL('icons/icon-512.png', SCOPE_URL).href,
   new URL('icons/default-avatar.svg', SCOPE_URL).href,
+  new URL('icons/ui/documents.svg', SCOPE_URL).href,
+  new URL('icons/ui/success.svg', SCOPE_URL).href,
+  new URL('icons/ui/conflict.svg', SCOPE_URL).href,
+  new URL('icons/ui/sync.svg', SCOPE_URL).href,
+  new URL('icons/ui/updates.svg', SCOPE_URL).href,
+  new URL('icons/ui/guide.svg', SCOPE_URL).href,
 ];
 
 const OPTIONAL_ASSETS = [];

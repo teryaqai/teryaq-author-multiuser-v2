@@ -276,6 +276,11 @@ html,body,button,input,select,textarea{font-family:"Tajawal",Arial,sans-serif}
   color:#fff;
   box-shadow:none;
 }
+.ui-custom-icon{display:inline-block;background:currentColor;-webkit-mask:var(--ui-icon) center/contain no-repeat;mask:var(--ui-icon) center/contain no-repeat;fill:none;stroke:none}
+.nav-icon .ui-custom-icon,.template-icon .ui-custom-icon{width:20px;height:20px}
+.stat-card .stat-icon .ui-custom-icon{width:21px;height:21px}
+.admin-section-nav .ui-custom-icon{width:19px;height:19px;flex:0 0 19px}
+.save-status .ui-custom-icon,.sync-status .ui-custom-icon{width:13px;height:13px;margin-inline:3px;vertical-align:-2px}
 .app-shell.sidebar-collapsed .sidebar-link.active{
   background:#408a71;
   color:#fff;

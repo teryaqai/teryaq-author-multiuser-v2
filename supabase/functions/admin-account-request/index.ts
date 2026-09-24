@@ -1,5 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+const FUNCTION_VERSION = '2.5.3-admin-invite-2'
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -7,12 +9,15 @@ const corsHeaders = {
 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+  let phase = 'startup'
   try {
+    phase = 'environment'
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     const siteUrl = Deno.env.get('TERYAQ_SITE_URL') ?? ''
     if (!supabaseUrl || !serviceRoleKey) throw new Error('Function environment is incomplete')
 
+    phase = 'authentication'
     const authorization = request.headers.get('Authorization') ?? ''
     const adminClient = createClient(supabaseUrl, serviceRoleKey, {
       auth: { autoRefreshToken: false, persistSession: false },
@@ -21,10 +26,34 @@ Deno.serve(async (request) => {
     const { data: userData, error: userError } = await adminClient.auth.getUser(token)
     if (userError || !userData.user) throw new Error('Not authenticated')
 
-    const { data: profile, error: profileError } = await adminClient
-      .from('profiles').select('id,role').eq('id', userData.user.id).single()
-    if (profileError || profile?.role !== 'admin') throw new Error('Admin access required')
+    phase = 'admin-profile'
+    const { data: idProfile, error: profileError } = await adminClient
+      .from('profiles').select('id,email,role').eq('id', userData.user.id).maybeSingle()
+    if (profileError) throw new Error(`Profile lookup failed: ${profileError.message}`)
 
+    // Older installations can contain a legacy profile row keyed incorrectly.
+    // The authenticated email comes from Supabase Auth itself, so an exact
+    // email fallback remains tied to the verified signed-in identity.
+    let profile = idProfile
+    let normalizedRole = String(profile?.role ?? '').trim().toLowerCase()
+    const signedInEmail = String(userData.user.email ?? '').trim().toLowerCase()
+    if (normalizedRole !== 'admin' && signedInEmail) {
+      const { data: emailProfiles, error: emailProfileError } = await adminClient
+        .from('profiles').select('id,email,role').ilike('email', signedInEmail).limit(2)
+      if (emailProfileError) throw new Error(`Email profile lookup failed: ${emailProfileError.message}`)
+      const adminMatches = (emailProfiles ?? []).filter((candidate) =>
+        String(candidate.role ?? '').trim().toLowerCase() === 'admin'
+        && String(candidate.email ?? '').trim().toLowerCase() === signedInEmail
+      )
+      if (adminMatches.length === 1) profile = adminMatches[0]
+      normalizedRole = String(profile?.role ?? '').trim().toLowerCase()
+    }
+    if (!profile || normalizedRole !== 'admin') {
+      const identity = userData.user.email ?? userData.user.id
+      throw new Error(`Admin access required for the signed-in account (${identity}; role: ${normalizedRole || 'missing'})`)
+    }
+
+    phase = 'request-body'
     const payload = await request.json()
     const requestId = String(payload.request_id ?? '')
     const action = String(payload.action ?? '')
@@ -33,11 +62,13 @@ Deno.serve(async (request) => {
       throw new Error('Invalid account-request action')
     }
 
+    phase = 'load-request'
     const { data: accountRequest, error: requestError } = await adminClient
       .from('account_requests').select('*').eq('id', requestId).single()
     if (requestError || !accountRequest) throw new Error('Account request not found')
 
     if (action === 'reject') {
+      phase = 'reject-request'
       if (!['pending', 'approved'].includes(accountRequest.status)) {
         throw new Error('Only a pending request can be rejected')
       }
@@ -52,7 +83,7 @@ Deno.serve(async (request) => {
         entity_type: 'account_request', entity_id: requestId,
         metadata: { email: accountRequest.email, decision_note: decisionNote },
       })
-      return json({ status: 'rejected' })
+      return json({ status: 'rejected', function_version: FUNCTION_VERSION })
     }
 
     if (!['pending', 'approved', 'invited'].includes(accountRequest.status)) {
@@ -62,11 +93,13 @@ Deno.serve(async (request) => {
       data: { name: accountRequest.requester_name, account_request_id: requestId },
     }
     if (siteUrl) inviteOptions.redirectTo = siteUrl
+    phase = 'send-invite'
     const { data: invite, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(
       accountRequest.email, inviteOptions,
     )
     if (inviteError) throw inviteError
 
+    phase = 'update-request'
     const timestamp = new Date().toISOString()
     const { error: updateError } = await adminClient.from('account_requests').update({
       status: 'invited', decision_note: decisionNote,
@@ -81,9 +114,10 @@ Deno.serve(async (request) => {
       entity_type: 'account_request', entity_id: requestId,
       metadata: { email: accountRequest.email, decision_note: decisionNote },
     })
-    return json({ status: 'invited' })
+    return json({ status: 'invited', function_version: FUNCTION_VERSION })
   } catch (error) {
-    return json({ error: error instanceof Error ? error.message : String(error) }, 400)
+    const message = error instanceof Error ? error.message : String(error)
+    return json({ error: `${FUNCTION_VERSION} · ${phase}: ${message}` }, 400)
   }
 })
 

@@ -6,6 +6,7 @@
 - Makes the editor title/action bar and the Home/Insert/Table/View ribbon equal in width, radius, border, and floating-card treatment.
 - Keeps both editor bars stacked and sticky while the document scrolls.
 - Resizes the top bar, ribbon, and page workspace together when the sidebar expands or collapses.
+- Uses the approved custom vector icons for Documents, successful Save/Sync, Conflicts, Sync, Updates, and Guide.
 - Changes presentation only; save, autosave, synchronization, conflicts, document styles, A4 sizing, and cloud migrations remain unchanged.
 
 ## v2.5.1 interface, profiles, announcements, and figure media

@@ -459,11 +459,12 @@ async function syncNow({silent=false}={}){
   try{return await syncPromise}finally{syncPromise=null}
 }
 
-function setSyncLabel(text){for(const id of ['syncStatus','syncStatusEditor']){const el=byId(id);if(el)el.textContent=text}}
+function renderStatusLabel(el,text){if(!el)return;const icon=window.TeryaqUIIcon?.('success');if(icon&&String(text).includes('✓'))el.innerHTML=String(text).split('✓').map(esc).join(icon);else el.textContent=text}
+function setSyncLabel(text){for(const id of ['syncStatus','syncStatusEditor'])renderStatusLabel(byId(id),text)}
 async function updateSyncUi(){
   const els=['syncStatus','syncStatusEditor'].map(byId).filter(Boolean);if(!els.length)return;const conflictButton=byId('resolveConflictsBtn');if(!currentUser){els.forEach(el=>el.textContent='');if(conflictButton)conflictButton.classList.add('hidden');return}
   const q=(await all('syncQueue')).filter(x=>x.ownerId===currentUser.id),conflicts=(await all('conflicts')).filter(x=>x.ownerId===currentUser.id),media=(await all('mediaQueue')).filter(x=>x.ownerId===currentUser.id&&x.status!=='uploaded'),lastError=await settingGet(LAST_SYNC_ERROR_KEY);await getAutoSyncEnabled();
-  const pendingCount=q.length+media.length,text=syncRunning?'Syncing…':conflicts.length?`${conflicts.length} conflict${conflicts.length===1?'':'s'}`:!isOnline()?(pendingCount?`${pendingCount} offline item${pendingCount===1?'':'s'}`:'Offline · saved locally'):lastError?(pendingCount?`Sync failed · ${pendingCount} queued`:'Sync check failed · retrying'):media.length?`${media.length} image upload${media.length===1?'':'s'} pending`:q.length?`${q.length} uploading soon`:'Synced ✓';els.forEach(el=>{el.textContent=text;el.title=lastError?.message||''});if(conflictButton){conflictButton.classList.toggle('hidden',!conflicts.length);const label=conflictButton.querySelector('span:last-child');if(label)label.textContent=`Conflicts (${conflicts.length})`;else conflictButton.textContent=`Conflicts (${conflicts.length})`}
+  const pendingCount=q.length+media.length,text=syncRunning?'Syncing…':conflicts.length?`${conflicts.length} conflict${conflicts.length===1?'':'s'}`:!isOnline()?(pendingCount?`${pendingCount} offline item${pendingCount===1?'':'s'}`:'Offline · saved locally'):lastError?(pendingCount?`Sync failed · ${pendingCount} queued`:'Sync check failed · retrying'):media.length?`${media.length} image upload${media.length===1?'':'s'} pending`:q.length?`${q.length} uploading soon`:'Synced ✓';els.forEach(el=>{renderStatusLabel(el,text);el.title=lastError?.message||''});if(conflictButton){conflictButton.classList.toggle('hidden',!conflicts.length);const label=conflictButton.querySelector('span:last-child');if(label)label.textContent=`Conflicts (${conflicts.length})`;else conflictButton.textContent=`Conflicts (${conflicts.length})`}
 }
 
 async function conflictCount(){return currentUser?(await all('conflicts')).filter(c=>c.ownerId===currentUser.id).length:0}

@@ -4,17 +4,16 @@ import re, sys
 root=Path(__file__).parent
 required=[
     'index.html','styles.css','platform.js','app.js',
-    'styles.v2.5.0.css','platform.v2.5.0.js','app.v2.5.0.js',
-    'styles.v2.5.1.css','platform.v2.5.1.js','app.v2.5.1.js',
     'styles.v2.5.3.css','platform.v2.5.3.js','app.v2.5.3.js',
     'sw.js','manifest.webmanifest','README.md','UPDATE_AND_MIGRATION_POLICY.md',
-    'AI_REVIEW_BRIEF.md','UPLOAD_v2.5.0.md','UPLOAD_v2.5.1.md','UPLOAD_v2.5.3.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
+    'UPLOAD_v2.5.3.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
     'supabase/migrations/010_governance_admin_tools.sql',
     'supabase/migrations/011_v2_5_1_profiles_updates.sql',
     'supabase/functions/admin-account-request/index.ts',
     'supabase/functions/admin-governance/index.ts',
     'vendor/jszip.min.js','vendor/JSZip-LICENSE.md',
-    'fonts/Tajawal-Regular.ttf','fonts/Tajawal-Medium.ttf','fonts/Tajawal-Bold.ttf','icons/default-avatar.svg'
+    'fonts/Tajawal-Regular.ttf','fonts/Tajawal-Medium.ttf','fonts/Tajawal-Bold.ttf','icons/default-avatar.svg',
+    'icons/ui/documents.svg','icons/ui/success.svg','icons/ui/conflict.svg','icons/ui/sync.svg','icons/ui/updates.svg','icons/ui/guide.svg'
 ]
 missing=[x for x in required if not (root/x).exists()]
 if missing:
@@ -141,6 +140,9 @@ for marker in ['Cloud versions & compare','TeryaqPlatform.showCloudVersions']:
 for marker in ['UI_ICON_PATHS','renderAuthorPicker','ensureFigureExportReady','mediaQueue','figureUploadSummary','teryaq-media-progress','notificationsButton','profileMenuButton']:
     if marker not in app and marker not in html:
         print('MISSING V2.5.1 UI/MEDIA MARKER:',marker);sys.exit(1)
+for marker in ['UI_CUSTOM_ICON_FILES','ui-custom-icon',"success:'success.svg'",'statusMarkup']:
+    if marker not in app and marker not in styles:
+        print('MISSING V2.5.3 CUSTOM ICON MARKER:',marker);sys.exit(1)
 for forbidden in ['outlineDrawerToggle','mobileOutlineToggle']:
     if forbidden in html or forbidden in app:
         print('LEGACY FIXED OUTLINE CONTROL STILL PRESENT:',forbidden);sys.exit(1)
@@ -222,7 +224,7 @@ for marker in ['uploadPendingAvatar','getUpdates','markAllUpdatesRead','createAp
     if marker not in platform:
         print('MISSING V2.5.1 PLATFORM MARKER:',marker);sys.exit(1)
 edge=(root/'supabase'/'functions'/'admin-account-request'/'index.ts').read_text(encoding='utf-8')
-for marker in ['SUPABASE_SERVICE_ROLE_KEY','auth.admin.inviteUserByEmail',"profile?.role !== 'admin'",'account_request.approved']:
+for marker in ['SUPABASE_SERVICE_ROLE_KEY','auth.admin.inviteUserByEmail','normalizedRole',"normalizedRole !== 'admin'",'account_request.approved']:
     if marker not in edge:
         print('INCOMPLETE V2.5.0 ACCOUNT APPROVAL FUNCTION:',marker);sys.exit(1)
 governance=(root/'supabase'/'functions'/'admin-governance'/'index.ts').read_text(encoding='utf-8')

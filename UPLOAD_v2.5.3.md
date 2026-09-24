@@ -4,6 +4,8 @@
 
 v2.5.3 is a presentation-only release. It aligns Dashboard pages with the floating top bar and gives the two editor bars the same width, border, radius, shadow, and responsive sidebar behavior.
 
+It also includes the approved custom vector icons for Documents, successful Save/Sync, Conflicts, Sync, Updates, and Guide. The included `admin-account-request` Edge Function now reports the exact signed-in identity/role when an admin-profile check fails; redeploy that function separately in Supabase because Render cannot deploy Edge Functions.
+
 It does not change IndexedDB, Supabase tables, migrations, authentication, autosave, synchronization, conflicts, document styles, exports, or A4 dimensions. Migration 011 remains the latest cloud migration; do not rerun or replace earlier migrations for this release.
 
 ## Deploy
