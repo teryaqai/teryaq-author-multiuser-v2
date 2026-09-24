@@ -1,4 +1,4 @@
-const CACHE = 'teryaq-master-tool-v2.5.1';
+const CACHE = 'teryaq-master-tool-v2.5.1-ui-polish-1';
 const SCOPE_URL = new URL(self.registration.scope);
 const ROOT_URL = SCOPE_URL.href;
 const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;

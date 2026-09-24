@@ -19,6 +19,8 @@ Do not edit or rerun migrations 001–010 as a replacement for migration 011.
 
 ## 3. Deploy the protected account-approval function
 
+For click-by-click Dashboard instructions, open `EDGE_FUNCTIONS_SETUP.md`.
+
 With the Supabase CLI linked to the correct project:
 
 ```bash

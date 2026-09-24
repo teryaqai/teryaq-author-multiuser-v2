@@ -7,7 +7,7 @@ required=[
     'styles.v2.5.0.css','platform.v2.5.0.js','app.v2.5.0.js',
     'styles.v2.5.1.css','platform.v2.5.1.js','app.v2.5.1.js',
     'sw.js','manifest.webmanifest','README.md','UPDATE_AND_MIGRATION_POLICY.md',
-    'AI_REVIEW_BRIEF.md','UPLOAD_v2.5.0.md','UPLOAD_v2.5.1.md','render.yaml','VERSION.json',
+    'AI_REVIEW_BRIEF.md','UPLOAD_v2.5.0.md','UPLOAD_v2.5.1.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
     'supabase/migrations/010_governance_admin_tools.sql',
     'supabase/migrations/011_v2_5_1_profiles_updates.sql',
     'supabase/functions/admin-account-request/index.ts',
