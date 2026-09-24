@@ -1,8 +1,16 @@
 # TERYAQ Master Tool — Editor Acceptance Checklist
 
-## v2.5.0 governance and no-regression checks
+## v2.5.1 UI, profile, announcements, media, and no-regression checks
 
-- [ ] Dashboard and sidebar display `v2.5.0`; Network loads `app.v2.5.0.js`, `platform.v2.5.0.js`, and `styles.v2.5.0.css`.
+- [ ] Dashboard and sidebar display `v2.5.1`; Network loads `app.v2.5.1.js`, `platform.v2.5.1.js`, and `styles.v2.5.1.css`.
+- [ ] Expanded floating sidebar keeps every label on one line; collapsed mode shows an icon rail with tooltips; mobile opens as a drawer.
+- [ ] Top-right avatar menu opens Profile, Settings, and Sign out. Profile photo is square-cropped, survives offline relaunch, and appears on a second device after sync.
+- [ ] Dashboard updates and the bell show the same announcements. Read state is preserved per user, including an offline mark-read followed by reconnect.
+- [ ] Admin Center changes sections without preloading all document JSON. Search is debounced and tables paginate without losing the active section.
+- [ ] New-document author selection uses checkboxes without Ctrl. Inside Text and Figures, authors remain locked until Edit and change only after Save changes.
+- [ ] A figure image saves locally offline, resumes upload after reconnect, displays percent/bytes/speed/ETA, and appears on a second device.
+- [ ] Figure export is blocked when code, title, source, order, or copyright status is missing; every missing control is highlighted and the first one receives focus.
+- [ ] Long DOCX-imported text wraps inside its table cell and increases row height instead of widening or squeezing the table.
 - [ ] Apply migration 010 after migrations 001–009; confirm normal users cannot list all requests, audit events, other users' conflicts, or invoke admin restore/purge/analytics RPCs.
 - [ ] As a normal user, update the display name successfully, then attempt to change the same profile's role through the API and confirm migration 010 rejects self-promotion.
 - [ ] Submit an account request while signed out; confirm the response does not reveal whether that email already has an account.
@@ -12,7 +20,7 @@
 - [ ] As a normal user, open **History / Versions → Cloud versions & compare**, compare two versions, and confirm the live document, local queue, and cloud version remain unchanged.
 - [ ] Compare versions containing metadata, moved/changed/added/removed text blocks, tables, and figures; confirm each difference is labelled read-only.
 - [ ] Admin Analytics loads 7/30/90/365-day views and reports only synchronized cloud data.
-- [ ] Create a genuine two-device conflict; confirm Admin → Cloud Conflicts shows owner/device/version metadata but no private local document JSON.
+- [ ] Create a genuine two-device conflict; confirm Admin Center → Cloud Operations → Conflicts shows owner/device/version metadata but no private local document JSON.
 - [ ] Resolve the conflict on the owner's device; confirm the cloud metadata changes to Resolved without weakening the existing explicit conflict choices.
 - [ ] Delete and sync a document owned by another user; as admin restore it, then confirm the owner receives the restored higher cloud version on the next sync.
 - [ ] Confirm permanent deletion is disabled before the 30-day retention date, the protected server function rejects an early request, and an authenticated browser cannot invoke the database purge function directly.

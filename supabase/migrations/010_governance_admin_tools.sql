@@ -397,9 +397,13 @@ begin
     'pending_requests',(select count(*) from public.account_requests where status='pending'),
     'events_in_period',(select count(*) from public.audit_log where created_at>=now()-make_interval(days=>p_days)),
     'daily_versions',coalesce((
-      select jsonb_agg(jsonb_build_object('day',day,'count',count) order by day)
+      select jsonb_agg(
+        jsonb_build_object('day',activity_date,'count',version_count)
+        order by activity_date
+      )
       from (
-        select created_at::date day,count(*) count from public.document_versions
+        select created_at::date as activity_date,count(*) as version_count
+        from public.document_versions
         where created_at>=now()-make_interval(days=>p_days)
         group by created_at::date
       ) q
@@ -419,3 +423,7 @@ revoke all on function public.admin_analytics(integer) from public;
 grant execute on function public.admin_analytics(integer) to authenticated;
 
 commit;
+
+-- Make the newly added tables and RPC functions immediately visible to the
+-- Supabase Data API after this migration succeeds.
+notify pgrst, 'reload schema';

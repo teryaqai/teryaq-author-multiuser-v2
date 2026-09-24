@@ -5,13 +5,15 @@ root=Path(__file__).parent
 required=[
     'index.html','styles.css','platform.js','app.js',
     'styles.v2.5.0.css','platform.v2.5.0.js','app.v2.5.0.js',
+    'styles.v2.5.1.css','platform.v2.5.1.js','app.v2.5.1.js',
     'sw.js','manifest.webmanifest','README.md','UPDATE_AND_MIGRATION_POLICY.md',
-    'AI_REVIEW_BRIEF.md','UPLOAD_v2.5.0.md','render.yaml','VERSION.json',
+    'AI_REVIEW_BRIEF.md','UPLOAD_v2.5.0.md','UPLOAD_v2.5.1.md','render.yaml','VERSION.json',
     'supabase/migrations/010_governance_admin_tools.sql',
+    'supabase/migrations/011_v2_5_1_profiles_updates.sql',
     'supabase/functions/admin-account-request/index.ts',
     'supabase/functions/admin-governance/index.ts',
     'vendor/jszip.min.js','vendor/JSZip-LICENSE.md',
-    'fonts/Tajawal-Regular.ttf','fonts/Tajawal-Medium.ttf','fonts/Tajawal-Bold.ttf'
+    'fonts/Tajawal-Regular.ttf','fonts/Tajawal-Medium.ttf','fonts/Tajawal-Bold.ttf','icons/default-avatar.svg'
 ]
 missing=[x for x in required if not (root/x).exists()]
 if missing:
@@ -22,7 +24,7 @@ ids=re.findall(r'\bid="([^"]+)"',html)
 dups=sorted({x for x in ids if ids.count(x)>1})
 if dups:
     print('DUPLICATE IDS:',dups);sys.exit(1)
-for x in ['authGate','authPasswordToggle','authCloudToggle','authCloudPanel','authCloudClose','authCloudScrim','authOfflineIdentity','requestAccountBtn','accountRequestModal','accountRequestForm','inviteSetupModal','inviteSetupForm','invitePassword','invitePasswordConfirm','appShell','appSidebar','sidebarCollapse','syncBtn','settingsBtn','adminBtn','trashBtn','documentsView','documentBulkBar','bulkDeleteDocuments','clearDocumentSelection','accountView','adminView','leftPanel','editorContentColumn','tableRegister','outlineViewBtn','outlineCloseBtn','outlineScrim','modalBody','appVersionBadge','sidebarAppVersion','exportMenu','exportMenuButton','exportMenuPanel','htmlExportBtn','importDocxTableBtn','viewOnlyBtn','deleteTableBtn','printPreviewWorkspace','printPreviewPages']:
+for x in ['authGate','authPasswordToggle','authCloudToggle','authCloudPanel','authCloudClose','authCloudScrim','authOfflineIdentity','requestAccountBtn','accountRequestModal','accountRequestForm','inviteSetupModal','inviteSetupForm','invitePassword','invitePasswordConfirm','appShell','appSidebar','sidebarCollapse','syncBtn','adminBtn','trashBtn','documentsView','documentBulkBar','bulkDeleteDocuments','clearDocumentSelection','profileView','adminView','notificationsButton','profileMenuButton','dashboardUpdates','leftPanel','editorContentColumn','tableRegister','outlineViewBtn','outlineCloseBtn','outlineScrim','modalBody','appVersionBadge','sidebarAppVersion','exportMenu','exportMenuButton','exportMenuPanel','htmlExportBtn','editorImportBtn','importDocxTableBtn','viewOnlyBtn','deleteTableBtn','printPreviewWorkspace','printPreviewPages']:
     if f'id="{x}"' not in html:
         print('MISSING HTML ID:',x);sys.exit(1)
 
@@ -135,6 +137,9 @@ for marker in ['metaCourse','figMetaCourse','Select a course first','metadata.co
 for marker in ['Cloud versions & compare','TeryaqPlatform.showCloudVersions']:
     if marker not in app:
         print('MISSING V2.5.0 VERSION COMPARISON ENTRY:',marker);sys.exit(1)
+for marker in ['UI_ICON_PATHS','renderAuthorPicker','ensureFigureExportReady','mediaQueue','figureUploadSummary','teryaq-media-progress','notificationsButton','profileMenuButton']:
+    if marker not in app and marker not in html:
+        print('MISSING V2.5.1 UI/MEDIA MARKER:',marker);sys.exit(1)
 for forbidden in ['outlineDrawerToggle','mobileOutlineToggle']:
     if forbidden in html or forbidden in app:
         print('LEGACY FIXED OUTLINE CONTROL STILL PRESENT:',forbidden);sys.exit(1)
@@ -175,6 +180,9 @@ for marker in ['v2.4.7 stable Admin forms','chapter-course-heading','chapter-cou
 for marker in ['v2.5.0 governance','account-request-modal','admin-metric-grid','admin-chart-row','version-compare-controls','version-diff-row']:
     if marker not in styles:
         print('MISSING V2.5.0 STYLE:',marker);sys.exit(1)
+for marker in ['v2.5.1 floating navigation','topbar-popover','author-check-list','profile-photo-editor','admin-center-shell','figure-upload-progress']:
+    if marker not in styles:
+        print('MISSING V2.5.1 STYLE:',marker);sys.exit(1)
 for protected in ['.p-Normal{font-size:11pt', '.p-Heading1{display:flex;gap:7px;align-items:flex-start;font-size:14pt', '.p-Heading2{display:flex;gap:7px;align-items:flex-start;font-size:13pt', '.p-Heading3{font-size:12pt', '.p-Heading4{font-size:11pt', '.p-TableCaption{font-size:9pt', '.mark-NotesToDelete{color:#FF0000;font-weight:700;font-size:9pt', '.mark-HighYield{color:#7030A0;font-weight:700', '.mark-ClinicalCorrelation{color:#39E794']:
     if protected not in styles:
         print('STYLE CONTRACT CHANGED OR MISSING:',protected);sys.exit(1)
@@ -184,15 +192,15 @@ for forbidden in ['.p-Normal{','.p-Heading1{','.p-Heading2{','.p-Heading3{','.p-
         print('V2.4 LAYOUT MUST NOT OVERRIDE DOCUMENT STYLE:',forbidden);sys.exit(1)
 
 version=(root/'VERSION.json').read_text(encoding='utf-8')
-if '"appVersion": "2.5.0"' not in version or '"cloudMigrationVersion": 10' not in version or "teryaq-master-tool-v2.5.0" not in (root/'sw.js').read_text(encoding='utf-8'):
-    print('VERSION/CACHE MISMATCH: expected v2.5.0 / migration 10');sys.exit(1)
-for source,versioned in [('app.js','app.v2.5.0.js'),('platform.js','platform.v2.5.0.js'),('styles.css','styles.v2.5.0.css')]:
+if '"appVersion": "2.5.1"' not in version or '"cloudMigrationVersion": 11' not in version or "teryaq-master-tool-v2.5.1" not in (root/'sw.js').read_text(encoding='utf-8'):
+    print('VERSION/CACHE MISMATCH: expected v2.5.1 / migration 11');sys.exit(1)
+for source,versioned in [('app.js','app.v2.5.1.js'),('platform.js','platform.v2.5.1.js'),('styles.css','styles.v2.5.1.css')]:
     if (root/source).read_bytes()!=(root/versioned).read_bytes():
         print('STALE VERSIONED ASSET:',versioned);sys.exit(1)
-for ref in ['styles.v2.5.0.css','platform.v2.5.0.js','app.v2.5.0.js','vendor/jszip.min.js']:
+for ref in ['styles.v2.5.1.css','platform.v2.5.1.js','app.v2.5.1.js','vendor/jszip.min.js']:
     if ref not in html:
         print('MISSING VERSIONED ASSET REFERENCE:',ref);sys.exit(1)
-for number in range(1,11):
+for number in range(1,12):
     if not list((root/'supabase'/'migrations').glob(f'{number:03d}_*.sql')):
         print('MISSING CLOUD MIGRATION:',number);sys.exit(1)
 migration9=(root/'supabase'/'migrations'/'009_content_options_repair_course_hierarchy.sql').read_text(encoding='utf-8')
@@ -200,9 +208,18 @@ for marker in ['references public.content_subjects(id) on delete restrict','uniq
     if marker not in migration9:
         print('INCOMPLETE V2.4.7 CONTENT OPTION MIGRATION:',marker);sys.exit(1)
 migration10=(root/'supabase'/'migrations'/'010_governance_admin_tools.sql').read_text(encoding='utf-8')
-for marker in ['create table if not exists public.account_requests','create table if not exists public.audit_log','create table if not exists public.sync_conflicts','submit_account_request','activate_own_account_request','report_sync_conflict','protect_profile_role_change','admin_restore_document','admin_purge_document','record_admin_event','admin_analytics','trash_retention_days','public.is_admin(auth.uid())','grant execute on function public.admin_purge_document(text,uuid) to service_role']:
+for marker in ['create table if not exists public.account_requests','create table if not exists public.audit_log','create table if not exists public.sync_conflicts','submit_account_request','activate_own_account_request','report_sync_conflict','protect_profile_role_change','admin_restore_document','admin_purge_document','record_admin_event','admin_analytics','activity_date','version_count','trash_retention_days','public.is_admin(auth.uid())','grant execute on function public.admin_purge_document(text,uuid) to service_role']:
     if marker not in migration10:
         print('INCOMPLETE V2.5.0 GOVERNANCE MIGRATION:',marker);sys.exit(1)
+if "notify pgrst, 'reload schema';" not in migration10.lower():
+    print('MISSING POSTGREST SCHEMA CACHE RELOAD');sys.exit(1)
+migration11=(root/'supabase'/'migrations'/'011_v2_5_1_profiles_updates.sql').read_text(encoding='utf-8')
+for marker in ['avatar_path','create table if not exists public.app_updates','create table if not exists public.app_update_reads','app_updates_admin_insert','app_update_reads_own_insert',"notify pgrst, 'reload schema'"]:
+    if marker not in migration11:
+        print('INCOMPLETE V2.5.1 PROFILE/UPDATES MIGRATION:',marker);sys.exit(1)
+for marker in ['uploadPendingAvatar','getUpdates','markAllUpdatesRead','createAppUpdate','deleteAppUpdate','processMediaQueue','createTusUpload','getAttachmentPreview','admin-center-shell']:
+    if marker not in platform:
+        print('MISSING V2.5.1 PLATFORM MARKER:',marker);sys.exit(1)
 edge=(root/'supabase'/'functions'/'admin-account-request'/'index.ts').read_text(encoding='utf-8')
 for marker in ['SUPABASE_SERVICE_ROLE_KEY','auth.admin.inviteUserByEmail',"profile?.role !== 'admin'",'account_request.approved']:
     if marker not in edge:

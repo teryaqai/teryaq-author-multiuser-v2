@@ -1,4 +1,15 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.5.0
+# TERYAQ Master Tool — Multi-user Offline-First v2.5.1
+
+## v2.5.1 interface, profiles, announcements, and figure media
+
+- Replaces the flush dark navigation with a floating, responsive sidebar and a consistent offline-safe SVG icon system.
+- Moves Profile, Settings, and Sign out into the top-right avatar menu; Profile supports a default vector avatar, automatic square crop, local-first photo save, and cloud upload.
+- Rebuilds Admin as eight lazy-loaded sections with per-table debounced search and pagination so opening the admin area no longer downloads every document body.
+- Adds administrator-managed updates shown to every user on the Dashboard and in the notification bell, with per-user read state and offline cache.
+- Replaces Ctrl-based author selection with visible checkboxes in both creation flows and a protected Edit/Save/Cancel picker inside documents.
+- Adds a separate resumable Storage upload queue for figure images with per-image percentage, bytes, speed, ETA, offline pause, retry, and aggregate progress. Text autosave and document conflict semantics are unchanged.
+- Figure export now blocks and highlights missing Figure code, title, source, order, or copyright status. Long imported table content wraps without compressing rows.
+- Adds migration `011_v2_5_1_profiles_updates.sql` for profile avatar paths, announcements, and per-user read receipts.
 
 ## v2.5.0 governance and administration
 
@@ -178,6 +189,7 @@ Apply the SQL migrations **in numerical order**:
 8. `008_dynamic_content_options.sql`
 9. `009_content_options_repair_course_hierarchy.sql`
 10. `010_governance_admin_tools.sql`
+11. `011_v2_5_1_profiles_updates.sql`
 
 Do not combine future schema changes into these files after production use begins. Add `005_...sql`, `006_...sql`, etc.
 

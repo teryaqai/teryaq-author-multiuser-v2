@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="styles.v2.5.0.css">
+  <link rel="stylesheet" href="styles.v2.5.1.css">
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
@@ -38,7 +38,7 @@
       <button class="auth-cloud-toggle" id="authCloudToggle" type="button" aria-controls="authCloudPanel" aria-expanded="false">
         <span class="auth-cloud-toggle-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 .7-7.94A6 6 0 0 0 6.25 8.7 4.6 4.6 0 0 0 7 18Z"/></svg></span>
         <span><b>Cloud setup</b><small id="authCloudState">Configure the Supabase connection</small></span>
-        <span class="auth-cloud-toggle-arrow" aria-hidden="true">→</span>
+        <span class="auth-cloud-toggle-arrow" data-ui-icon="arrow-right" aria-hidden="true"></span>
       </button>
     </main>
 
@@ -85,43 +85,36 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/icon-192.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.5.0</span></small></div>
-      <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
-      <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">×</button>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.5.1</span></small></div>
+      <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><span data-ui-icon="panel-close"></span></button>
+      <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
     <nav class="sidebar-nav" aria-label="Main navigation">
-      <button class="sidebar-link active" data-nav="home" title="Dashboard"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg></span><span class="nav-label">Dashboard</span></button>
-      <button class="sidebar-link" data-nav="documents" title="Documents"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h8l4 4v16H6z"/><path d="M14 2v5h5M9 12h6M9 16h6"/></svg></span><span class="nav-label">Documents</span></button>
-      <button class="sidebar-link" data-nav="templates" title="Templates"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 9v12"/></svg></span><span class="nav-label">Templates</span></button>
-      <button class="sidebar-link" data-nav="trash" id="trashBtn" title="Trash"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/></svg></span><span class="nav-label">Trash</span></button>
-      <button class="sidebar-link" data-nav="guide" title="Guide"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A3.5 3.5 0 0 1 7.5 2H11v18H7.5A3.5 3.5 0 0 0 4 23z"/><path d="M20 5.5A3.5 3.5 0 0 0 16.5 2H13v18h3.5A3.5 3.5 0 0 1 20 23z"/></svg></span><span class="nav-label">Guide</span></button>
-      <button class="sidebar-link" data-nav="settings" id="settingsBtn" title="Settings & Sync"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h7M15 18h5"/><circle cx="16" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="13" cy="18" r="2"/></svg></span><span class="nav-label">Settings & Sync</span></button>
-      <button class="sidebar-link" data-nav="account" title="Account"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 22a8 8 0 0 1 16 0"/></svg></span><span class="nav-label">Account</span></button>
-      <button class="sidebar-link hidden" data-nav="admin" id="adminBtn" title="Admin"><span class="nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 5 3 8 7 10 4-2 7-5 7-10V6z"/><path d="m9 12 2 2 4-5"/></svg></span><span class="nav-label">Admin</span></button>
+      <button class="sidebar-link active" data-nav="home" title="Dashboard"><span class="nav-icon" data-ui-icon="home"></span><span class="nav-label">Dashboard</span></button>
+      <button class="sidebar-link" data-nav="documents" title="Documents"><span class="nav-icon" data-ui-icon="documents"></span><span class="nav-label">Documents</span></button>
+      <button class="sidebar-link" data-nav="templates" title="Templates"><span class="nav-icon" data-ui-icon="templates"></span><span class="nav-label">Templates</span></button>
+      <button class="sidebar-link" data-nav="trash" id="trashBtn" title="Trash"><span class="nav-icon" data-ui-icon="trash"></span><span class="nav-label">Trash</span></button>
+      <button class="sidebar-link" data-nav="guide" title="Guide"><span class="nav-icon" data-ui-icon="guide"></span><span class="nav-label">Guide</span></button>
+      <button class="sidebar-link hidden" data-nav="admin" id="adminBtn" title="Admin"><span class="nav-icon" data-ui-icon="shield"></span><span class="nav-label">Admin</span></button>
     </nav>
-    <div class="sidebar-account">
-      <span class="user-avatar" id="sidebarAvatar">T</span>
-      <div class="sidebar-account-copy"><b id="sidebarUsername">User</b><small id="sidebarEmail"></small></div>
-    </div>
   </aside>
   <div class="sidebar-scrim hidden" id="sidebarScrim"></div>
   <div class="app-frame">
   <header class="topbar">
     <div class="brand">
-      <button class="mobile-menu" id="sidebarToggle" aria-label="Open menu">☰</button>
-      <button class="btn back-button hidden" id="backBtn" title="Back to documents">← Back</button>
+      <button class="mobile-menu" id="sidebarToggle" aria-label="Open menu"><span data-ui-icon="menu"></span></button>
+      <button class="btn back-button hidden" id="backBtn" title="Back to documents"><span data-ui-icon="arrow-left"></span><span>Back</span></button>
       <div class="brand-copy"><h1 id="docTitle">TERYAQ Master Tool</h1><small>Offline Scientific Authoring Workspace</small></div>
     </div>
     <div class="top-actions" id="homeActions">
-      <label class="global-search"><span>⌕</span><input id="globalSearch" placeholder="Search documents…"></label>
+      <label class="global-search"><span data-ui-icon="search"></span><input id="globalSearch" placeholder="Search documents…"></label>
       <div class="status-cluster">
-        <span class="account-label" id="accountLabel"></span>
         <span class="sync-status" id="syncStatus">Offline</span>
       </div>
       <div class="action-cluster">
-        <button class="btn primary" id="syncBtn">Sync Now</button>
-        <button class="btn conflict-summary hidden" id="resolveConflictsBtn">Conflicts</button>
-        <button class="btn" id="importBtn">Import</button>
+        <button class="btn primary" id="syncBtn"><span data-ui-icon="refresh"></span><span>Sync Now</span></button>
+        <button class="btn conflict-summary hidden" id="resolveConflictsBtn"><span data-ui-icon="conflict"></span><span>Conflicts</span></button>
+        <button class="btn" id="importBtn"><span data-ui-icon="upload"></span><span>Import</span></button>
       </div>
       <input id="importFile" type="file" accept=".teryaq,.json,application/json" hidden>
     </div>
@@ -132,24 +125,43 @@
       </div>
       <div class="toolbar-cluster">
         <div class="action-cluster primary-actions">
-          <button class="btn primary" id="saveBtn">Save</button>
-          <button class="btn" id="syncBtnEditor">Sync</button>
-          <button class="btn" id="settingsBtnEditor">Settings & Sync</button>
+          <button class="btn primary" id="saveBtn"><span data-ui-icon="save"></span><span>Save</span></button>
+          <button class="btn" id="syncBtnEditor"><span data-ui-icon="refresh"></span><span>Sync</span></button>
+          <button class="btn" id="settingsBtnEditor"><span data-ui-icon="settings"></span><span>Settings & Sync</span></button>
         </div>
         <div class="action-cluster secondary-actions">
-          <button class="btn" id="validateBtn">Validate</button>
-          <button class="btn" id="historyBtn" title="Recovery snapshots and earlier document states">History / Versions</button>
+          <button class="btn" id="editorImportBtn"><span data-ui-icon="upload"></span><span>Import</span></button>
+          <button class="btn" id="validateBtn"><span data-ui-icon="check-circle"></span><span>Validate</span></button>
+          <button class="btn" id="historyBtn" title="Recovery snapshots and earlier document states"><span data-ui-icon="history"></span><span>History / Versions</span></button>
           <div class="export-menu" id="exportMenu">
-            <button class="btn export-menu-trigger" id="exportMenuButton" type="button" aria-haspopup="menu" aria-expanded="false">Export <span aria-hidden="true">⌄</span></button>
+            <button class="btn export-menu-trigger" id="exportMenuButton" type="button" aria-haspopup="menu" aria-expanded="false"><span data-ui-icon="download"></span><span>Export</span><span data-ui-icon="chevron-down"></span></button>
             <div class="export-menu-panel hidden" id="exportMenuPanel" role="menu" aria-label="Export options">
-              <button id="backupBtn" type="button" role="menuitem"><span class="export-option-icon">D</span><span><b>Export Draft (.teryaq)</b><small>Editable and re-importable document</small></span></button>
-              <button id="printBtn" type="button" role="menuitem"><span class="export-option-icon">P</span><span><b>Export as PDF</b><small>Open the A4 print and PDF dialog</small></span></button>
-              <button id="saveTemplateBtn" type="button" role="menuitem"><span class="export-option-icon">T</span><span><b>Save as Template</b><small>Create a reusable local template</small></span></button>
-              <button id="htmlExportBtn" type="button" role="menuitem"><span class="export-option-icon">H</span><span><b>Export as HTML</b><small>Standalone view with embedded font</small></span></button>
+              <button id="backupBtn" type="button" role="menuitem"><span class="export-option-icon" data-ui-icon="documents"></span><span><b>Export Draft (.teryaq)</b><small>Editable and re-importable document</small></span></button>
+              <button id="printBtn" type="button" role="menuitem"><span class="export-option-icon" data-ui-icon="text"></span><span><b>Export as PDF</b><small>Open the A4 print and PDF dialog</small></span></button>
+              <button id="saveTemplateBtn" type="button" role="menuitem"><span class="export-option-icon" data-ui-icon="templates"></span><span><b>Save as Template</b><small>Create a reusable local template</small></span></button>
+              <button id="htmlExportBtn" type="button" role="menuitem"><span class="export-option-icon" data-ui-icon="download"></span><span><b>Export as HTML</b><small>Standalone view with embedded font</small></span></button>
             </div>
           </div>
-          <button class="btn icon-action" data-action="undo" title="Undo" aria-label="Undo">↶</button>
-          <button class="btn icon-action" data-action="redo" title="Redo" aria-label="Redo">↷</button>
+          <button class="btn icon-action" data-action="undo" title="Undo" aria-label="Undo"><span data-ui-icon="undo"></span></button>
+          <button class="btn icon-action" data-action="redo" title="Redo" aria-label="Redo"><span data-ui-icon="redo"></span></button>
+        </div>
+      </div>
+    </div>
+    <div class="topbar-global-actions">
+      <div class="topbar-popover-wrap">
+        <button class="topbar-icon-button" id="notificationsButton" type="button" aria-label="Notifications" aria-haspopup="true" aria-expanded="false"><span data-ui-icon="bell"></span><span class="notification-badge hidden" id="notificationBadge">0</span></button>
+        <section class="topbar-popover notifications-popover hidden" id="notificationsPanel" aria-label="Updates and notifications">
+          <div class="popover-heading"><div><b>Updates</b><small>Latest TERYAQ announcements</small></div><button class="text-button" id="markUpdatesRead" type="button">Mark all read</button></div>
+          <div class="notification-items" id="notificationItems"></div>
+        </section>
+      </div>
+      <div class="topbar-popover-wrap">
+        <button class="profile-menu-button" id="profileMenuButton" type="button" aria-haspopup="true" aria-expanded="false"><img id="topbarAvatarImage" src="icons/default-avatar.svg" alt=""><span id="topbarUsername">User</span><span data-ui-icon="chevron-down"></span></button>
+        <div class="topbar-popover profile-popover hidden" id="profileMenuPanel" role="menu">
+          <button type="button" data-nav="profile" role="menuitem"><span data-ui-icon="user"></span><span>Profile</span></button>
+          <button type="button" data-nav="settings" role="menuitem"><span data-ui-icon="settings"></span><span>Settings</span></button>
+          <hr>
+          <button type="button" id="topbarSignOut" class="danger-menu-item" role="menuitem"><span data-ui-icon="log-out"></span><span>Sign out</span></button>
         </div>
       </div>
     </div>
@@ -158,8 +170,9 @@
   <main>
     <section class="view active" id="homeView">
       <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.5.0</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.5.1</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
         <div class="stat-grid" id="dashboardStats"></div>
+        <section class="portal-panel dashboard-updates-panel"><div class="section-head"><div><span class="eyebrow">WHAT'S NEW</span><h3>Updates & announcements</h3></div><button class="text-button" id="dashboardMarkUpdatesRead" type="button">Mark all read</button></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
         <div class="portal-grid two-thirds">
           <section class="portal-panel"><div class="section-head"><div><span class="eyebrow">Workspace</span><h3>Recent documents</h3></div><button class="text-button" data-nav="documents">View all →</button></div><div class="cards compact-cards" id="documentCards"></div></section>
           <aside class="portal-panel"><span class="eyebrow">Quick help</span><h3>Need a hand?</h3><p class="muted">The bilingual guide explains offline work, syncing, conflicts, history, versions, and recovery.</p><button class="btn" data-nav="guide">Open guide / افتح الدليل</button></aside>
@@ -185,7 +198,7 @@
         <details class="guide-topic" id="guide-conflicts"><summary><span class="guide-index">06</span><span><b>Conflicts</b><small>كيف أعرف التعارض وأحله؟</small></span></summary><div class="guide-topic-body"><div><h4>Where it appears</h4><p>The affected document shows a red conflict status in Documents. The top conflict button lists all unresolved conflicts.</p><h4>Resolution choices</h4><ul><li><b>Keep local:</b> upload this device's copy as the next cloud version.</li><li><b>Use server:</b> discard the conflicting local copy and accept the cloud copy.</li><li><b>Save both:</b> keep the cloud copy on the original and preserve local work as a new document.</li></ul></div><div dir="rtl"><h4>متى يحدث؟</h4><p>عندما يعدّل جهازان المستند نفسه انطلاقًا من نفس النسخة قبل أن يتزامنا. لا يستبدل التطبيق أي نسخة تلقائيًا.</p><h4>الخيار الأكثر أمانًا عند الشك</h4><p>اختر <b>Save both</b> ثم راجع النسختين يدويًا، خصوصًا للمحتوى العلمي.</p></div></div></details>
         <details class="guide-topic" id="guide-history"><summary><span class="guide-index">07</span><span><b>History and cloud Versions</b><small>ما الفرق وأين أجدها؟</small></span></summary><div class="guide-topic-body"><div><h4>History</h4><p>Local recovery snapshots kept on this device. Open the document and choose <b>History / Versions</b>. You can create a snapshot or restore an earlier state.</p><h4>Cloud Version</h4><p>An immutable cloud snapshot created after every accepted synchronization. Choose <b>Cloud versions & compare</b> to select an earlier and later version, review metadata/content changes side by side, download one version, or download the complete archive. Comparison is read-only and never changes the live document.</p></div><div dir="rtl"><h4>الفرق العملي</h4><p><b>History</b> للاستعادة السريعة على الجهاز نفسه، أما <b>Version</b> فهي نسخة سحابية ثابتة لكل مزامنة ناجحة. من <b>Cloud versions & compare</b> اختر نسختين لرؤية المضاف والمحذوف والمتغير والمنقول دون تعديل الملف الحالي. استعادة History تحفظ الحالة الحالية أولًا ثم تعيد النسخة المختارة.</p></div><div class="guide-note"><b>Remember:</b> Undo/Redo is for the current editing session; History is local recovery; Version is the immutable cloud archive.</div></div></details>
         <details class="guide-topic" id="guide-trash"><summary><span class="guide-index">08</span><span><b>Trash and restore</b><small>الحذف والاستعادة</small></span></summary><div class="guide-topic-body"><div><h4>Move to Trash</h4><p>Documents → ••• → Move to Trash. A complete recoverable copy is kept locally and the soft-delete is queued for cloud sync. A deleted document no longer contributes to the active conflict count.</p><h4>Restore</h4><p>Trash → Restore returns your document. Admin → All Trash can also restore a user's synchronized deleted document; it returns as a higher cloud version and reaches the owner on the next sync.</p><h4>Permanent deletion</h4><p>Only an administrator may permanently delete a synchronized Trash item, only after the configured 30-day retention period, and only after typing PURGE. The action removes version history and Storage attachments and remains recorded in the Audit Log.</p></div><div dir="rtl"><h4>الحذف والتعارض</h4><p>عند نقل ملف متعارض إلى السلة يختفي من عداد التعارضات النشطة، لكن التطبيق يحفظ حالته. إذا استُعيد الملف من سلة المستخدم يعود معه التعارض ليُحل بالطريقة الصحيحة.</p><h4>صلاحيات السلة</h4><p>المستخدم يرى محذوفاته فقط. الأدمن يرى المحذوفات المتزامنة لكل الحسابات من <b>Admin → All Trash</b> ويمكنه استعادتها. الحذف النهائي محصور بالأدمن، ولا يسمح به السيرفر قبل مرور 30 يومًا، ولا يمكن التراجع عنه.</p></div></div></details>
-        <details class="guide-topic" id="guide-account"><summary><span class="guide-index">09</span><span><b>Account, username, and password</b><small>الحساب واسم المستخدم وكلمة المرور</small></span></summary><div class="guide-topic-body"><div><h4>Request access</h4><p>On sign-in choose <b>Request an account</b>, send your name, email, and task type, then wait for admin approval. The request alone does not create access. Open the approved invitation link, save Cloud setup if this is a new device, and choose an 8+ character password.</p><h4>Username</h4><p>Account → Username → Save. It replaces the email in the greeting and sidebar. It does not change the sign-in email.</p><h4>Password</h4><p>Account → enter and confirm a password of at least eight characters. Internet is required, and the change applies to every device. Use the eye icon to show or hide it.</p></div><div dir="rtl"><h4>طلب حساب جديد</h4><p>من صفحة الدخول اضغط <b>Request an account</b> وأرسل الاسم والإيميل ونوع المهمة. الطلب لا ينشئ حسابًا فورًا؛ يجب أن يوافق الأدمن وتصل دعوة. افتح رابط الدعوة، احفظ Cloud setup إذا كان الجهاز جديدًا، ثم أنشئ كلمة مرور من 8 أحرف أو أكثر.</p><h4>إظهار كلمة المرور</h4><p>اضغط أيقونة العين داخل حقل كلمة المرور لإظهارها أو إخفائها.</p><h4>الخروج</h4><p><b>Sign out</b> يزيل الجلسة ويبقي مساحة العمل المحلية. أما <b>Sign out & Remove Local Data</b> فيحذف بيانات هذا الحساب من الجهاز فقط؛ لذلك تأكد من المزامنة أو النسخ الاحتياطي أولًا.</p></div></div></details>
+        <details class="guide-topic" id="guide-account"><summary><span class="guide-index">09</span><span><b>Profile, account, and password</b><small>البروفايل والحساب وكلمة المرور</small></span></summary><div class="guide-topic-body"><div><h4>Request access</h4><p>On sign-in choose <b>Request an account</b>, send your name, email, and task type, then wait for admin approval. The request alone does not create immediate access.</p><h4>Profile</h4><p>Open the avatar menu in the top-right corner → <b>Profile</b>. Change the display name or choose a JPG/PNG/WebP photo. The photo is center-cropped, saved locally first, and uploaded when internet returns. <b>Use default</b> restores the vector avatar.</p><h4>Password and Settings</h4><p>Use Profile to change an 8+ character password. Use the avatar menu → <b>Settings</b> for Sync, Cloud connection, backups, device data, and Sign out & Remove Local Data.</p></div><div dir="rtl"><h4>البروفايل</h4><p>اضغط الصورة أعلى يمين الداشبورد ثم <b>Profile</b>. يمكنك تغيير الاسم أو اختيار صورة؛ تُقص تلقائيًا بشكل مربع، تُحفظ محليًا أولًا، ثم تُرفع عند عودة الإنترنت. زر <b>Use default</b> يعيد الصورة الافتراضية.</p><h4>الإعدادات والخروج</h4><p>من قائمة الصورة اختر <b>Settings</b> للمزامنة والنسخ الاحتياطي وبيانات الجهاز. <b>Sign out</b> يبقي البيانات المحلية، أما <b>Sign out & Remove Local Data</b> فيحذف بيانات الحساب من هذا الجهاز فقط.</p></div></div></details>
         <details class="guide-topic" id="guide-admin"><summary><span class="guide-index">10</span><span><b>Admin workspace</b><small>دليل الأدمن</small></span></summary><div class="guide-topic-body"><div><h4>Admin pages</h4><ul><li><b>Overview:</b> synchronized totals and the limits of admin visibility.</li><li><b>Analytics:</b> 7/30/90/365-day cloud activity, versions, users, documents, conflicts, and requests.</li><li><b>Content Options:</b> authors, courses, and course-specific chapters.</li><li><b>Users / Documents / Versions:</b> synchronized accounts and documents, downloads, archives, and read-only version comparison.</li><li><b>Cloud Conflicts:</b> status, owner, device, and version metadata only; the owner still chooses the content resolution.</li><li><b>Account Requests:</b> approve and invite, reject, or resend an invitation.</li><li><b>Audit Log:</b> security/administration events with CSV export.</li><li><b>All Trash:</b> restore any synchronized deleted document, or permanently purge an eligible item after retention.</li></ul></div><div dir="rtl"><h4>صفحات الأدمن</h4><p><b>Analytics</b> للإحصائيات السحابية، و<b>Cloud Conflicts</b> لبيانات التعارض دون عرض المسودة المحلية، و<b>Account Requests</b> للموافقة وإرسال الدعوة، و<b>Audit Log</b> لمراجعة الأحداث وتصدير CSV، و<b>All Trash</b> للاستعادة أو الحذف النهائي بعد مدة الاحتفاظ.</p><h4>حدود رؤية الأدمن</h4><p>لا يستطيع الأدمن رؤية تعديل ما زال محليًا على جهاز مستخدم؛ يجب أن تتم المزامنة أولًا. حل محتوى التعارض يبقى عند مالك المستند.</p></div></div></details>
         <details class="guide-topic" id="guide-backups"><summary><span class="guide-index">11</span><span><b>Backups and moving devices</b><small>النسخ الاحتياطي وتغيير الجهاز</small></span></summary><div class="guide-topic-body"><div><h4>Before changing a device</h4><ol><li>Press Sync Now and confirm Synced ✓.</li><li>Settings & Sync → Export Workspace Backup.</li><li>Keep important .teryaq exports separately.</li><li>On the new device, configure Supabase, sign in, then Sync Now.</li></ol></div><div dir="rtl"><h4>ما الذي يحتويه Workspace Backup؟</h4><p>المستندات المحلية، القوالب، نقاط History، السلة، والتعارضات الخاصة بالحساب على هذا الجهاز. الاستعادة تُنشئ نسخة أمان محلية قبل الكتابة.</p></div></div></details>
         <details class="guide-topic guide-problems" id="guide-fixes"><summary><span class="guide-index">12</span><span><b>Troubleshooting</b><small>المشكلة والحل خطوة بخطوة</small></span></summary><div class="guide-topic-body"><div class="problem-list"><h4>App does not open offline</h4><ol><li>Reconnect once.</li><li>Open the installed app and refresh.</li><li>Confirm the Dashboard shows the expected version number.</li><li>Close every TERYAQ window, reopen the installed app online once, then test offline.</li></ol><h4>Sync or ownership error</h4><ol><li>Do not clear browser data; the local draft is preserved first.</li><li>Press Sync again. A document-ID ownership mismatch is repaired automatically as a new safe cloud identity.</li><li>If Conflict appears, open the affected document from Documents and review both copies.</li></ol><h4>Document missing on another device</h4><ol><li>On the original device, confirm it is not pending/local-only.</li><li>Press Sync and wait for a cloud version number.</li><li>On the second device, confirm the same app version, sign into the same email, and press Sync Now.</li></ol></div><div class="problem-list" dir="rtl"><h4>اختفى العمل بعد تسجيل الدخول أو الرجوع</h4><ol><li>لا تمسح بيانات الموقع أو التطبيق.</li><li>تحقق من رقم الإصدار الظاهر في Dashboard؛ يجب أن يكون نفسه على كل الأجهزة.</li><li>إذا ظهر Conflict فهذا يعني أن جهازًا آخر أرسل نسخة أحدث؛ تبقى المسودة المحلية محفوظة ولا تُستبدل تلقائيًا.</li><li>إذا كان العمل على جهاز آخر بحالة pending، افتح الجهاز الأصلي واضغط Sync وانتظر رقم النسخة السحابية.</li></ol><h4>Document ownership mismatch</h4><p>لا يعني أن شخصًا آخر عدّل الملف. يعني أن نفس Document ID مرتبط بمعرّف حساب سحابي آخر. من الإصدار 2.3.2 يحفظ التطبيق نسخة أمان، ينشئ Document ID جديدًا للحساب الحالي، ثم يعيد المزامنة دون استبدال السجل السحابي الآخر.</p><h4>النص العربي أو البوليت في الاتجاه الخطأ</h4><p>تأكد أن أول حرف فعلي في البند عربي. الاتجاه يُحسب لكل بند على حدة؛ البنود التي تبدأ بالإنجليزية تبقى من اليسار.</p></div></div></details>
@@ -193,13 +206,13 @@
       <div class="guide-empty hidden" id="guideEmpty">No guide section matches your search. / لا يوجد قسم مطابق لبحثك.</div>
     </div></section>
     <section class="view" id="settingsView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">Preferences</span><h2>Settings & Sync</h2><p>Manage automatic synchronization, cloud connection, backups, and this device.</p></div></div><div id="settingsPageBody"></div></div></section>
-    <section class="view" id="accountView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">Profile</span><h2>Account</h2><p>Update the name shown across TERYAQ and secure your account.</p></div></div><div id="accountPageBody"></div></div></section>
-    <section class="view" id="adminView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">Administration</span><h2>Admin workspace</h2><p>Review synchronized work and manage the author, course, and course-specific chapter options used by every device.</p></div></div><div id="adminPageBody"></div></div></section>
+    <section class="view" id="profileView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">Your account</span><h2>Profile</h2><p>Manage the name and photo shown across TERYAQ.</p></div></div><div id="accountPageBody"></div></div></section>
+    <section class="view" id="adminView"><div class="portal-page admin-center-page"><div class="page-heading"><div><span class="eyebrow">Administration</span><h2>Admin Center</h2><p>Manage access, content, cloud operations, analytics, governance, and user updates.</p></div></div><div id="adminPageBody"></div></div></section>
 
     <section class="view" id="editorView">
       <div id="textEditorArea" class="editor-view hidden">
         <div class="editor-ribbon left-panel" id="leftPanel">
-            <button class="mobile-controls-toggle" id="mobileControlsToggle"><span>Editing Controls</span><span>⌄</span></button>
+            <button class="mobile-controls-toggle" id="mobileControlsToggle"><span>Editing Controls</span><span data-ui-icon="chevron-down"></span></button>
             <div class="editor-ribbon-tabs" role="tablist" aria-label="Document editing tools">
               <button class="editor-ribbon-tab active" type="button" role="tab" data-ribbon-tab="home" aria-selected="true">Home</button>
               <button class="editor-ribbon-tab" type="button" role="tab" data-ribbon-tab="insert" aria-selected="false">Insert</button>
@@ -228,7 +241,7 @@
               </details>
               <details class="control-group ribbon-panel" data-ribbon-panel="table" open hidden>
                 <summary>Selected table</summary>
-                <div class="control-body"><button class="btn" id="rowUpBtn">Row ↑</button><button class="btn" id="rowDownBtn">Row ↓</button><button class="btn" id="colLeftBtn">Col ←</button><button class="btn" id="colRightBtn">Col →</button><button class="btn danger" id="delRowBtn">Delete Row</button><button class="btn danger" id="delColBtn">Delete Col</button><button class="btn danger" id="deleteTableBtn">Delete Table</button><div class="control-row"><input id="colWidthInput" type="number" min="5" max="95" value="33" style="width:72px;border:1px solid var(--line);border-radius:8px;padding:7px"><button class="btn" id="applyColWidthBtn">Apply Width %</button><button class="btn" id="equalColsBtn">Equal Columns</button></div></div>
+                <div class="control-body"><button class="btn" id="rowUpBtn"><span data-ui-icon="arrow-up"></span><span>Row</span></button><button class="btn" id="rowDownBtn"><span data-ui-icon="arrow-down"></span><span>Row</span></button><button class="btn" id="colLeftBtn"><span data-ui-icon="arrow-left"></span><span>Column</span></button><button class="btn" id="colRightBtn"><span data-ui-icon="arrow-right"></span><span>Column</span></button><button class="btn danger" id="delRowBtn">Delete Row</button><button class="btn danger" id="delColBtn">Delete Col</button><button class="btn danger" id="deleteTableBtn">Delete Table</button><div class="control-row"><input id="colWidthInput" type="number" min="5" max="95" value="33" style="width:72px;border:1px solid var(--line);border-radius:8px;padding:7px"><button class="btn" id="applyColWidthBtn">Apply Width %</button><button class="btn" id="equalColsBtn">Equal Columns</button></div></div>
               </details>
               <details class="control-group ribbon-panel view-ribbon-panel" data-ribbon-panel="view" open hidden>
                 <summary>Document view</summary>
@@ -252,7 +265,7 @@
                 <div class="cover-title"><h2>Draft information</h2><span class="chip">Scientific Draft - Text Content</span></div>
                 <div class="cover-body">
                   <div class="meta-grid">
-                    <div class="field"><label>Author</label><select id="metaName" multiple size="3" aria-label="Authors"></select><small class="field-hint">You can select more than one author.</small></div><div class="field"><label>Course</label><select id="metaCourse"></select></div>
+                    <div class="field"><label>Author</label><div id="metaName" class="author-picker-host" aria-label="Authors"></div><small class="field-hint">Select one or more authors.</small></div><div class="field"><label>Course</label><select id="metaCourse"></select></div>
                     <div class="field"><label>Start date</label><input id="metaStart" type="date"></div><div class="field"><label>End date</label><input id="metaEnd" type="date"></div>
                     <div class="field span-2"><label>Chapter</label><select id="metaChapter"></select><small class="field-hint">Only chapters belonging to the selected course are shown.</small></div>
                     <div class="field" style="grid-column:1/-1"><label>General notes</label><textarea id="metaNotes"></textarea></div>
@@ -282,15 +295,16 @@
           </aside>
           <button class="outline-scrim hidden" id="outlineScrim" type="button" aria-label="Close document outline"></button>
         </div>
-        <div class="mobile-history-float"><button class="btn" data-action="undo" aria-label="Undo">↶</button><button class="btn" data-action="redo" aria-label="Redo">↷</button></div>
+        <div class="mobile-history-float"><button class="btn" data-action="undo" aria-label="Undo"><span data-ui-icon="undo"></span></button><button class="btn" data-action="redo" aria-label="Redo"><span data-ui-icon="redo"></span></button></div>
       </div>
 
       <div id="figureEditorArea" class="hidden">
         <div class="figure-editor-main">
           <section class="outcomes-summary"><h2 style="margin:0 0 4px;font-size:16px">Summary of figure outcomes</h2><p style="margin:0 0 12px;color:var(--muted);font-size:12px">Each figure follows one of the five outcomes below.</p><div class="outcome-list"><div class="outcome"><strong>Order 1 — KEEP</strong>Keep the figure as it is when copyright is clear and it already fits Teryaq style.</div><div class="outcome"><strong>Order 2 — CHANGE</strong>Make specific minor changes when copyright is not an issue.</div><div class="outcome"><strong>Order 3 — RECREATE</strong>Recreate with AI using defined scientific-fidelity rules.</div><div class="outcome"><strong>Order 4 — DESIGN</strong>Create a new Teryaq-designed figure, especially charts and simple illustrations.</div><div class="outcome"><strong>Order 5 — SEARCH</strong>Search for a suitable figure when an appropriate one cannot be found by the draft writer.</div></div></section>
+          <section class="figure-upload-summary hidden" id="figureUploadSummary" aria-live="polite"></section>
           <details class="figure-guide"><summary>Instructions & Notes</summary><div class="inside"><p><b>Order 1:</b> only when the writer is certain there are no copyright issues and the style is suitable.</p><p><b>Order 3 defaults:</b> Tajawal/English; change skin color and gender when suitable; minor color change; preserve anatomy/histology exactly; alter only non-scientific visual features; remove logos/signatures/watermarks/unnecessary titles; white background; final image 1:1. Any exception or extra change must be stated in PROMPT → DETAILS.</p><p><b>Order 4:</b> clearly define the desired final output. <b>Order 5:</b> clearly describe what should be searched for.</p><p><b>Very important:</b> figure code contains only the figure number; title is mandatory; caption is optional.</p></div></details>
           <details class="figure-guide"><summary>Steps of Creation</summary><div class="inside"><ol><li>Choose a clear, high-quality figure matching Teryaq usage.</li><li>Add it to the Figure area.</li><li>Write the figure code.</li><li>Write a short title; use Caption for extra clarification.</li><li>Always record the source.</li><li>Choose the correct Order.</li><li>Write details in PROMPT → DETAILS.</li><li>Choose copyright status; use “I don't know” when uncertain.</li><li>Add any extra notes.</li></ol></div></details>
-          <section class="cover-card" style="width:100%"><div class="cover-title"><h2>Draft information</h2><span class="chip">Scientific Draft - Figures</span></div><div class="cover-body"><div class="meta-grid"><div class="field"><label>Author</label><select id="figMetaName" multiple size="3" aria-label="Authors"></select><small class="field-hint">You can select more than one author.</small></div><div class="field"><label>Course</label><select id="figMetaCourse"></select></div><div class="field span-2"><label>Chapter</label><select id="figMetaChapter"></select><small class="field-hint">Only chapters belonging to the selected course are shown.</small></div><div class="field" style="grid-column:1/-1"><label>General notes</label><textarea id="figMetaNotes"></textarea></div></div></div></section>
+          <section class="cover-card" style="width:100%"><div class="cover-title"><h2>Draft information</h2><span class="chip">Scientific Draft - Figures</span></div><div class="cover-body"><div class="meta-grid"><div class="field"><label>Author</label><div id="figMetaName" class="author-picker-host" aria-label="Authors"></div><small class="field-hint">Select one or more authors.</small></div><div class="field"><label>Course</label><select id="figMetaCourse"></select></div><div class="field span-2"><label>Chapter</label><select id="figMetaChapter"></select><small class="field-hint">Only chapters belonging to the selected course are shown.</small></div><div class="field" style="grid-column:1/-1"><label>General notes</label><textarea id="figMetaNotes"></textarea></div></div></div></section>
           <div class="figure-cards" id="figureCards"></div>
           <div style="text-align:center;padding:18px"><button class="btn primary" onclick="(function(){const d=window.__dummy})()" id="addFigureBtn">+ Add Figure</button></div>
         </div>
@@ -305,7 +319,7 @@
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
-<script src="platform.v2.5.0.js"></script>
-<script src="app.v2.5.0.js"></script>
+<script src="platform.v2.5.1.js"></script>
+<script src="app.v2.5.1.js"></script>
 </body>
 </html>
