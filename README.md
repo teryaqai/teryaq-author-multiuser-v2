@@ -1,4 +1,10 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.5.13
+# TERYAQ Master Tool — Multi-user Offline-First v2.5.14
+
+## v2.5.14 Non-spoken Script headings
+
+- Script Cues now has a Heading control. It creates an editable full-width highlighted title box in the script and a corresponding box in print and HTML export.
+- Headings are excluded from spoken Teleprompter lines. Enter after editing a heading creates a spoken line below it.
+- Shooting Script template version increases to 1.2.0. Existing scripts continue to open without migration.
 
 ## v2.5.13 Shooting Script controls and playback
 
