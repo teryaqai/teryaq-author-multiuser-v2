@@ -1,4 +1,17 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.5.9
+# TERYAQ Master Tool — Multi-user Offline-First v2.5.11
+
+## v2.5.11 Shooting Script
+
+- New Shooting Script template built on the structured Draft editor and its offline save, cloud sync, history, and export paths. No Draft information step or stage fields.
+- Text Formatting shares font size, bold, italic, underline, three bullet levels, and numbering; script mode adds RTL/LTR icon buttons.
+- Script Cues: unspoken instructions, emphasis, silence, and ×2. The teleprompter hides instructions, repeats the following spoken line for reading, pauses at silence, and edits the original script directly.
+- Teleprompter supports variable speed, reading region and bars, text size and spacing, dark/light, manual scrolling, and fullscreen.
+
+## v2.5.10 underline for text drafts
+
+- Adds a Tajawal U underline control to Text Formatting in the Scientific Draft text editor. Underlining is saved as a run mark, restored during editing, and retained in View only, HTML, and print/PDF output.
+- Bold, italic, and underline can now be combined on selected text. Applying a named paragraph or selection preset still clears conflicting inline formatting.
+- Shooting script and Teleprompter screens are currently visual concepts, not part of this release.
 
 ## v2.5.9 mint header and View icons
 
