@@ -1,4 +1,10 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.5.5
+# TERYAQ Master Tool — Multi-user Offline-First v2.5.6
+
+## v2.5.6 unified editor ribbon
+
+- Joins the title/actions and the six editing tabs into one compact editor header. Save and Sync stay beside the document title, and the File tab contains Export, Import, History / Versions, Validate, and Settings & Sync.
+- Removes repeated subtitles inside every tab while retaining its controls. Text Formatting displays the supplied Aa size icon as a native size picker with no arrow, plus compact B and I buttons.
+- Gives the three bullet levels and Numbering identical 105 × 35 px controls with consistent type and icon sizes. Tabs remain accessible when horizontal room is limited.
 
 ## v2.5.5 ribbon and loading refinements
 
