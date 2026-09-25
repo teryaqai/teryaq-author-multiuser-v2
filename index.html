@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="styles.v2.5.4.css">
+  <link rel="stylesheet" href="styles.v2.5.5.css">
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
@@ -84,7 +84,7 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/icon-192.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.5.4</span></small></div>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.5.5</span></small></div>
       <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><span data-ui-icon="panel-close"></span></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
@@ -113,7 +113,7 @@
       <div class="action-cluster">
         <button class="btn primary" id="syncBtn"><span data-ui-icon="refresh"></span><span>Sync Now</span></button>
         <button class="btn conflict-summary hidden" id="resolveConflictsBtn"><span data-ui-icon="conflict"></span><span>Conflicts</span></button>
-        <button class="btn" id="importBtn"><span data-ui-icon="upload"></span><span>Import</span></button>
+        <button class="btn" id="importBtn"><span data-ui-icon="import"></span><span>Import</span></button>
       </div>
       <input id="importFile" type="file" accept=".teryaq,.json,application/json" hidden>
     </div>
@@ -129,16 +129,16 @@
           <button class="btn" id="settingsBtnEditor"><span data-ui-icon="settings"></span><span>Settings & Sync</span></button>
         </div>
         <div class="action-cluster secondary-actions">
-          <button class="btn" id="editorImportBtn"><span data-ui-icon="upload"></span><span>Import</span></button>
+          <button class="btn" id="editorImportBtn"><span data-ui-icon="import"></span><span>Import</span></button>
           <button class="btn" id="validateBtn"><span data-ui-icon="check-circle"></span><span>Validate</span></button>
           <button class="btn" id="historyBtn" title="Recovery snapshots and earlier document states"><span data-ui-icon="history"></span><span>History / Versions</span></button>
           <div class="export-menu" id="exportMenu">
-            <button class="btn export-menu-trigger" id="exportMenuButton" type="button" aria-haspopup="menu" aria-expanded="false"><span data-ui-icon="download"></span><span>Export</span><span data-ui-icon="chevron-down"></span></button>
+            <button class="btn export-menu-trigger" id="exportMenuButton" type="button" aria-haspopup="menu" aria-expanded="false"><span data-ui-icon="export"></span><span>Export</span><span data-ui-icon="chevron-down"></span></button>
             <div class="export-menu-panel hidden" id="exportMenuPanel" role="menu" aria-label="Export options">
               <button id="backupBtn" type="button" role="menuitem"><span class="export-option-icon" data-ui-icon="documents"></span><span><b>Export Draft (.teryaq)</b><small>Editable and re-importable document</small></span></button>
               <button id="printBtn" type="button" role="menuitem"><span class="export-option-icon" data-ui-icon="text"></span><span><b>Export as PDF</b><small>Open the A4 print and PDF dialog</small></span></button>
               <button id="saveTemplateBtn" type="button" role="menuitem"><span class="export-option-icon" data-ui-icon="templates"></span><span><b>Save as Template</b><small>Create a reusable local template</small></span></button>
-              <button id="htmlExportBtn" type="button" role="menuitem"><span class="export-option-icon" data-ui-icon="download"></span><span><b>Export as HTML</b><small>Standalone view with embedded font</small></span></button>
+              <button id="htmlExportBtn" type="button" role="menuitem"><span class="export-option-icon" data-ui-icon="export"></span><span><b>Export as HTML</b><small>Standalone view with embedded font</small></span></button>
             </div>
           </div>
           <button class="btn icon-action" data-action="undo" title="Undo" aria-label="Undo"><span data-ui-icon="undo"></span></button>
@@ -169,7 +169,7 @@
   <main>
     <section class="view active" id="homeView">
       <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.5.4</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.5.5</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
         <div class="stat-grid" id="dashboardStats"></div>
         <section class="portal-panel dashboard-updates-panel"><div class="section-head"><div><span class="eyebrow">WHAT'S NEW</span><h3>Updates & announcements</h3></div><button class="text-button" id="dashboardMarkUpdatesRead" type="button">Mark all read</button></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
         <div class="portal-grid two-thirds">
@@ -213,26 +213,27 @@
         <div class="editor-ribbon left-panel" id="leftPanel">
             <button class="mobile-controls-toggle" id="mobileControlsToggle"><span>Editing Controls</span><span data-ui-icon="chevron-down"></span></button>
             <div class="editor-ribbon-tabs" role="tablist" aria-label="Document editing tools">
-              <button class="editor-ribbon-tab active" type="button" role="tab" data-ribbon-tab="home" aria-selected="true">Home</button>
+              <button class="editor-ribbon-tab active" type="button" role="tab" data-ribbon-tab="styles" aria-selected="true">Styles</button>
+              <button class="editor-ribbon-tab" type="button" role="tab" data-ribbon-tab="formatting" aria-selected="false">Text Formatting</button>
               <button class="editor-ribbon-tab" type="button" role="tab" data-ribbon-tab="insert" aria-selected="false">Insert</button>
               <button class="editor-ribbon-tab" type="button" role="tab" data-ribbon-tab="table" aria-selected="false" disabled title="Select a table cell to use table tools">Table</button>
               <button class="editor-ribbon-tab" type="button" role="tab" data-ribbon-tab="view" aria-selected="false">View</button>
             </div>
             <div class="left-panel-inner">
-              <details class="control-group ribbon-panel" data-ribbon-panel="home" open>
+              <details class="control-group ribbon-panel" data-ribbon-panel="styles" open>
                 <summary>Styles</summary>
                 <div class="control-body">
                   <button class="btn" data-style="Normal">Body</button><button class="btn" data-style="Heading1">H1</button><button class="btn" data-style="Heading2">H2</button><button class="btn" data-style="Heading3">H3</button><button class="btn" data-style="Heading4">H4</button><button class="btn" data-style="Subtitle">Side Q/A</button><button class="btn" data-style="TableCaption">Table Caption</button>
                   <button class="btn" data-mark="SideNote">Side Note</button><button class="btn danger" data-mark="NotesToDelete">Note to Delete</button><button class="btn" data-mark="HighYield">High-Yield</button><button class="btn" data-mark="ClinicalCorrelation">Clinical Correlation</button>
                 </div>
               </details>
-              <details class="control-group ribbon-panel" data-ribbon-panel="home" open>
+              <details class="control-group ribbon-panel" data-ribbon-panel="formatting" open hidden>
                 <summary>Text Formatting</summary>
                 <div class="control-body"><select id="fontSizeSelect"><option value="">Font size</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>16</option><option>18</option><option>20</option><option>22</option><option>24</option></select><button class="btn" id="boldBtn"><b>B</b> Bold</button><button class="btn" id="italicBtn"><i>I</i> Italic</button></div>
               </details>
-              <details class="control-group ribbon-panel" data-ribbon-panel="home" open>
+              <details class="control-group ribbon-panel" data-ribbon-panel="formatting" open hidden>
                 <summary>Bullets & Numbering</summary>
-                <div class="control-body"><button class="btn" data-action="bullet" data-level="1"><span data-ui-icon="bullet-1"></span> Level 1</button><button class="btn" data-action="bullet" data-level="2"><span data-ui-icon="bullet-2"></span> Level 2</button><button class="btn" data-action="bullet" data-level="3"><span data-ui-icon="bullet-3"></span> Level 3</button><button class="btn" id="numberBtn">1. Number</button></div>
+                <div class="control-body"><button class="btn" data-action="bullet" data-level="1"><span data-ui-icon="bullet-1"></span> Level 1</button><button class="btn" data-action="bullet" data-level="2"><span data-ui-icon="bullet-2"></span> Level 2</button><button class="btn" data-action="bullet" data-level="3"><span data-ui-icon="bullet-3"></span> Level 3</button><button class="btn" id="numberBtn"><span class="number-glyph" aria-hidden="true">1.</span><span>Number</span></button></div>
               </details>
               <details class="control-group ribbon-panel" data-ribbon-panel="insert" open hidden>
                 <summary>Insert</summary>
@@ -318,7 +319,7 @@
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
-<script src="platform.v2.5.4.js"></script>
-<script src="app.v2.5.4.js"></script>
+<script src="platform.v2.5.5.js"></script>
+<script src="app.v2.5.5.js"></script>
 </body>
 </html>

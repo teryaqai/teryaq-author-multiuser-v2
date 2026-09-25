@@ -1,4 +1,12 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.5.4
+# TERYAQ Master Tool — Multi-user Offline-First v2.5.5
+
+## v2.5.5 ribbon and loading refinements
+
+- Splits Home into Styles and Text Formatting while retaining Insert, Table, and View. Text controls and bullet/numbering buttons now share consistent sizing.
+- Anchors the Export menu immediately below its trigger on desktop and mobile. Import points into the app (down), and Export points out (up).
+- Displays a brand-colored accessible pulse while an Admin Center section is fetching cloud data, including while partial sections render.
+- Adds checkboxes and a selection count to Admin Trash Management. Selected documents can be permanently deleted together only when every selected item has completed the existing 30-day retention period; the server checks the same rule again.
+- Records migration 012 (the service-role profiles read grant already applied during the invite repair), and syncs the deployed account-request Edge Function source into the release. Existing installations that applied the repair do not rerun SQL.
 
 ## v2.5.4 complete styles and approved icons
 
@@ -205,6 +213,7 @@ Apply the SQL migrations **in numerical order**:
 9. `009_content_options_repair_course_hierarchy.sql`
 10. `010_governance_admin_tools.sql`
 11. `011_v2_5_1_profiles_updates.sql`
+12. `012_service_role_profiles_select.sql` (if the service-role invite repair was already applied, no SQL action is needed)
 
 Do not combine future schema changes into these files after production use begins. Add `005_...sql`, `006_...sql`, etc.
 

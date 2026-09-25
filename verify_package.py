@@ -4,11 +4,12 @@ import re, sys
 root=Path(__file__).parent
 required=[
     'index.html','styles.css','platform.js','app.js',
-    'styles.v2.5.4.css','platform.v2.5.4.js','app.v2.5.4.js',
+    'styles.v2.5.5.css','platform.v2.5.5.js','app.v2.5.5.js',
     'sw.js','manifest.webmanifest','README.md','UPDATE_AND_MIGRATION_POLICY.md',
-    'UPLOAD_v2.5.4.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
+    'UPLOAD_v2.5.5.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
     'supabase/migrations/010_governance_admin_tools.sql',
     'supabase/migrations/011_v2_5_1_profiles_updates.sql',
+    'supabase/migrations/012_service_role_profiles_select.sql',
     'supabase/functions/admin-account-request/index.ts',
     'supabase/functions/admin-governance/index.ts',
     'vendor/jszip.min.js','vendor/JSZip-LICENSE.md',
@@ -198,15 +199,15 @@ for forbidden in ['.p-Normal{','.p-Heading1{','.p-Heading2{','.p-Heading3{','.p-
         print('V2.4 LAYOUT MUST NOT OVERRIDE DOCUMENT STYLE:',forbidden);sys.exit(1)
 
 version=(root/'VERSION.json').read_text(encoding='utf-8')
-if '"appVersion": "2.5.4"' not in version or '"cloudMigrationVersion": 11' not in version or "teryaq-master-tool-v2.5.4" not in (root/'sw.js').read_text(encoding='utf-8'):
-    print('VERSION/CACHE MISMATCH: expected v2.5.4 / migration 11');sys.exit(1)
-for source,versioned in [('app.js','app.v2.5.4.js'),('platform.js','platform.v2.5.4.js'),('styles.css','styles.v2.5.4.css')]:
+if '"appVersion": "2.5.5"' not in version or '"cloudMigrationVersion": 12' not in version or "teryaq-master-tool-v2.5.5" not in (root/'sw.js').read_text(encoding='utf-8'):
+    print('VERSION/CACHE MISMATCH: expected v2.5.5 / migration 12');sys.exit(1)
+for source,versioned in [('app.js','app.v2.5.5.js'),('platform.js','platform.v2.5.5.js'),('styles.css','styles.v2.5.5.css')]:
     if (root/source).read_bytes()!=(root/versioned).read_bytes():
         print('STALE VERSIONED ASSET:',versioned);sys.exit(1)
-for ref in ['styles.v2.5.4.css','platform.v2.5.4.js','app.v2.5.4.js','vendor/jszip.min.js']:
+for ref in ['styles.v2.5.5.css','platform.v2.5.5.js','app.v2.5.5.js','vendor/jszip.min.js']:
     if ref not in html:
         print('MISSING VERSIONED ASSET REFERENCE:',ref);sys.exit(1)
-for number in range(1,12):
+for number in range(1,13):
     if not list((root/'supabase'/'migrations').glob(f'{number:03d}_*.sql')):
         print('MISSING CLOUD MIGRATION:',number);sys.exit(1)
 migration9=(root/'supabase'/'migrations'/'009_content_options_repair_course_hierarchy.sql').read_text(encoding='utf-8')
@@ -223,6 +224,17 @@ migration11=(root/'supabase'/'migrations'/'011_v2_5_1_profiles_updates.sql').rea
 for marker in ['avatar_path','create table if not exists public.app_updates','create table if not exists public.app_update_reads','app_updates_admin_insert','app_update_reads_own_insert',"notify pgrst, 'reload schema'"]:
     if marker not in migration11:
         print('INCOMPLETE V2.5.1 PROFILE/UPDATES MIGRATION:',marker);sys.exit(1)
+migration12=(root/'supabase'/'migrations'/'012_service_role_profiles_select.sql').read_text(encoding='utf-8')
+for marker in ['grant usage on schema public to service_role', 'grant select on table public.profiles to service_role']:
+    if marker not in migration12:
+        print('INCOMPLETE SERVICE ROLE INVITE REPAIR:', marker);sys.exit(1)
+for marker in ['data-ribbon-tab="styles"','data-ribbon-tab="formatting"','data-ribbon-panel="formatting"','data-ui-icon="import"','data-ui-icon="export"']:
+    if marker not in html:
+        print('MISSING V2.5.5 RIBBON OR ICON:', marker);sys.exit(1)
+if 'adminLoadingMarkup(label)' not in platform or '#adminSectionLoading' not in styles or '.export-menu-panel{position:absolute' not in styles:
+    print('MISSING V2.5.5 LOADER OR EXPORT ANCHOR');sys.exit(1)
+if 'admin-trash-select' not in platform or 'adminPurgeSelected' not in platform or 'eligibleIds' not in platform or 'Retention period has not expired' not in (root/'supabase/functions/admin-governance/index.ts').read_text(encoding='utf-8'):
+    print('TRASH SELECTION MUST KEEP THE SERVER RETENTION RULE');sys.exit(1)
 for marker in ['uploadPendingAvatar','getUpdates','markAllUpdatesRead','createAppUpdate','deleteAppUpdate','processMediaQueue','createTusUpload','getAttachmentPreview','admin-center-shell']:
     if marker not in platform:
         print('MISSING V2.5.1 PLATFORM MARKER:',marker);sys.exit(1)

@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const FUNCTION_VERSION = '2.5.3-admin-invite-2'
+const FUNCTION_VERSION = '2026-09-25-admin-invite-3'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

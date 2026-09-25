@@ -55,8 +55,8 @@ In **Authentication → URL Configuration**:
 ## If the function says `Admin access required`
 
 The signed-in account exists, but its row in `public.profiles` is not marked as
-an administrator. Run migration `011_v2_5_1_profiles_updates.sql` again, then
-promote only the approved administrator email from the Supabase SQL Editor:
+an administrator. If the role is genuinely missing, promote only the approved
+administrator email from the Supabase SQL Editor:
 
 ```sql
 update public.profiles
@@ -65,6 +65,12 @@ where lower(email) = lower('approved-admin@example.com');
 ```
 
 Sign out and back in after the update so the app reloads the current profile.
+
+If the profile already has `role = 'admin'` and the invitation function still
+reports an authorization failure, verify that the Edge Function's service role
+can read `public.profiles`. Migration `012_service_role_profiles_select.sql`
+records the narrowly scoped grant used for this repair. Once it has already
+been applied, it does not need to be run again.
 
 If SQL already shows `role = 'admin'` but the function still rejects the
 request, confirm that the authenticated user ID and profile ID are the same:
