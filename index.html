@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="styles.v2.5.7.css">
+  <link rel="stylesheet" href="styles.v2.5.8.css">
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
@@ -84,7 +84,7 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/icon-192.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.5.7</span></small></div>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.5.8</span></small></div>
       <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><span data-ui-icon="panel-close"></span></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
@@ -121,7 +121,7 @@
       <div class="toolbar-cluster">
         <div class="action-cluster primary-actions">
           <button class="btn primary" id="saveBtn"><span data-ui-icon="save"></span><span>Save</span></button>
-          <button class="btn" id="syncBtnEditor"><span data-ui-icon="refresh"></span><span>Sync</span></button>
+          <button class="btn primary" id="syncBtnEditor"><span data-ui-icon="refresh"></span><span>Sync</span></button>
         </div>
         <div class="status-cluster">
           <span class="save-status" id="saveStatus">Saved <span data-ui-icon="success"></span></span>
@@ -158,7 +158,7 @@
               <button class="editor-ribbon-tab active" type="button" role="tab" data-ribbon-tab="styles" aria-selected="true">Styles</button>
               <button class="editor-ribbon-tab" type="button" role="tab" data-ribbon-tab="formatting" aria-selected="false">Text Formatting</button>
               <button class="editor-ribbon-tab" type="button" role="tab" data-ribbon-tab="insert" aria-selected="false">Insert</button>
-              <button class="editor-ribbon-tab" type="button" role="tab" data-ribbon-tab="table" aria-selected="false" disabled title="Select a table cell to use table tools">Table</button>
+              <button class="editor-ribbon-tab" type="button" role="tab" data-ribbon-tab="table" aria-selected="false" title="Table tools and Table outline">Table</button>
               <button class="editor-ribbon-tab" type="button" role="tab" data-ribbon-tab="view" aria-selected="false">View</button>
             </div>
             <div class="left-panel-inner">
@@ -187,7 +187,7 @@
               </div>
               <div class="control-group ribbon-panel" data-ribbon-panel="formatting" hidden>
                 <div class="control-body">
-                  <label class="font-size-picker" title="Font size"><img src="icons/ui/font-size.png" alt=""><select id="fontSizeSelect" aria-label="Font size"><option value="">Font size</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>16</option><option>18</option><option>20</option><option>22</option><option>24</option></select></label>
+                  <label class="font-size-picker" title="Font size"><span class="format-size-glyph" aria-hidden="true">Aa</span><select id="fontSizeSelect" aria-label="Font size"><option value="">Font size</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>16</option><option>18</option><option>20</option><option>22</option><option>24</option></select></label>
                   <button class="btn format-glyph" id="boldBtn" type="button" aria-label="Bold" title="Bold"><b>B</b></button>
                   <button class="btn format-glyph" id="italicBtn" type="button" aria-label="Italic" title="Italic"><i>I</i></button>
                   <span class="format-divider" aria-hidden="true"></span>
@@ -201,7 +201,13 @@
                 <div class="control-body"><button class="btn" id="mainFigBtn">+ Figure Placeholder</button><button class="btn" id="marginFigBtn">+ Margin Figure</button><button class="btn" id="newTableBtn">+ New Table</button><button class="btn" id="importDocxTableBtn">Import DOCX Table</button></div>
               </div>
               <div class="control-group ribbon-panel" data-ribbon-panel="table" hidden>
-                <div class="control-body"><button class="btn" id="rowUpBtn"><span data-ui-icon="arrow-up"></span><span>Row</span></button><button class="btn" id="rowDownBtn"><span data-ui-icon="arrow-down"></span><span>Row</span></button><button class="btn" id="colLeftBtn"><span data-ui-icon="arrow-left"></span><span>Column</span></button><button class="btn" id="colRightBtn"><span data-ui-icon="arrow-right"></span><span>Column</span></button><button class="btn danger" id="delRowBtn">Delete Row</button><button class="btn danger" id="delColBtn">Delete Col</button><button class="btn danger" id="deleteTableBtn">Delete Table</button><div class="control-row"><input id="colWidthInput" type="number" min="5" max="95" value="33" style="width:72px;border:1px solid var(--line);border-radius:8px;padding:7px"><button class="btn" id="applyColWidthBtn">Apply Width %</button><button class="btn" id="equalColsBtn">Equal Columns</button></div></div>
+                <div class="control-body"><button class="btn" id="tableOutlineBtn" type="button" aria-expanded="false" aria-controls="tableOutlinePanel">Table Outline</button><button class="btn" id="rowUpBtn"><span class="table-direction-arrow arrow-up" aria-hidden="true"></span><span>Row</span></button><button class="btn" id="rowDownBtn"><span class="table-direction-arrow arrow-down" aria-hidden="true"></span><span>Row</span></button><button class="btn" id="colLeftBtn"><span class="table-direction-arrow arrow-left" aria-hidden="true"></span><span>Column</span></button><button class="btn" id="colRightBtn"><span class="table-direction-arrow arrow-right" aria-hidden="true"></span><span>Column</span></button><button class="btn danger" id="delRowBtn">Delete Row</button><button class="btn danger" id="delColBtn">Delete Col</button><button class="btn danger" id="deleteTableBtn">Delete Table</button><div class="control-row"><input id="colWidthInput" type="number" min="5" max="95" value="33" style="width:72px;border:1px solid var(--line);border-radius:8px;padding:7px"><button class="btn" id="applyColWidthBtn">Apply Width %</button><button class="btn" id="equalColsBtn">Equal Columns</button></div></div>
+                <div class="table-outline-panel hidden" id="tableOutlinePanel" role="region" aria-label="Table outline">
+                  <section class="cover-card table-information-card">
+                    <div class="cover-title"><div><h2>Table Outline</h2><small>Automatically linked to every inserted table</small></div><button class="btn small" id="closeTableOutlineBtn" type="button" aria-label="Close table outline">Close</button></div>
+                    <div class="cover-body"><div class="table-register" id="tableRegister"></div></div>
+                  </section>
+                </div>
               </div>
               <div class="control-group ribbon-panel view-ribbon-panel" data-ribbon-panel="view" hidden>
                 <div class="control-body">
@@ -209,8 +215,8 @@
                   <button class="btn" id="zoomOutBtn" type="button" aria-label="Zoom out">−</button>
                   <button class="btn view-zoom-label" id="zoomResetBtn" type="button" title="Reset zoom">100%</button>
                   <button class="btn" id="zoomInBtn" type="button" aria-label="Zoom in">＋</button>
-                  <button class="btn primary" id="onePageBtn" type="button" aria-pressed="true">▯ One page</button>
-                  <button class="btn" id="twoPagesBtn" type="button" aria-pressed="false">▯▯ Two pages</button>
+                  <button class="btn primary" id="onePageBtn" type="button" aria-pressed="true"><img class="view-page-icon" src="icons/ui/blank-page.png" alt="">One page</button>
+                  <button class="btn" id="twoPagesBtn" type="button" aria-pressed="false"><img class="view-page-icon" src="icons/ui/two-document.png" alt="">Two pages</button>
                   <button class="btn" id="outlineViewBtn" type="button" aria-expanded="false" aria-controls="rightPanel">☷ Outline</button>
                 </div>
               </div>
@@ -221,7 +227,7 @@
   <main>
     <section class="view active" id="homeView">
       <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.5.7</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.5.8</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
         <div class="stat-grid" id="dashboardStats"></div>
         <section class="portal-panel dashboard-updates-panel"><div class="section-head"><div><span class="eyebrow">WHAT'S NEW</span><h3>Updates & announcements</h3></div></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
         <div class="portal-grid two-thirds">
@@ -274,12 +280,7 @@
                     <div class="field span-2"><label>Chapter</label><select id="metaChapter"></select><small class="field-hint">Only chapters belonging to the selected course are shown.</small></div>
                     <div class="field" style="grid-column:1/-1"><label>General notes</label><textarea id="metaNotes"></textarea></div>
                   </div>
-                  <div class="heading-register" id="headingRegister"></div>
                 </div>
-              </section>
-              <section class="cover-card table-information-card">
-                <div class="cover-title"><div><h2>Table information</h2><small>Automatically linked to every inserted table</small></div><span class="chip">Table register</span></div>
-                <div class="cover-body"><div class="table-register" id="tableRegister"></div></div>
               </section>
               <div class="page-scale-host">
                 <div class="page-wrap" id="pageWrap"><section class="page" id="writingPage"><span class="page-label">Scientific draft writing page</span><div class="block-list" id="blockList"></div></section></div>
@@ -323,7 +324,7 @@
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
-<script src="platform.v2.5.7.js"></script>
-<script src="app.v2.5.7.js"></script>
+<script src="platform.v2.5.8.js"></script>
+<script src="app.v2.5.8.js"></script>
 </body>
 </html>

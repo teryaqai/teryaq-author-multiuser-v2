@@ -1,7 +1,7 @@
 {
-  "appVersion": "2.5.7",
+  "appVersion": "2.5.8",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
   "cloudMigrationVersion": 12,
-  "release": "ribbon-read-status-sync-icon"
+  "release": "editor-table-outline-icons"
 }

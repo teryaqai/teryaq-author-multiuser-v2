@@ -1,4 +1,11 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.5.7
+# TERYAQ Master Tool — Multi-user Offline-First v2.5.8
+
+## v2.5.8 editing and table outline
+
+- Uses the supplied single-page and two-page icons in View. Text Formatting shows Aa, B, and italic I in Tajawal at the same 13px size as the list level labels.
+- Makes the title row and tab row the same medium green while keeping the tool row white. Back, Save, and Sync are dark green with white labels and icons; Save and Sync have the same 38px height.
+- Removes the Headings 1 table from Draft information; the live heading structure remains in Outline. The Table tab now provides an always-available Table Outline popover with editable metadata for every table.
+- Uses the supplied Back arrow artwork for all four table direction controls, rotated up, down, left, and right. Row and column editing controls stay disabled until a table cell is selected.
 
 ## v2.5.7 editor bar and updates polish
 
