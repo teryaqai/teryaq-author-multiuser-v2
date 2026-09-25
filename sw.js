@@ -1,4 +1,4 @@
-const CACHE = 'teryaq-master-tool-v2.5.3-custom-icons-2';
+const CACHE = 'teryaq-master-tool-v2.5.4-custom-icons-2';
 const SCOPE_URL = new URL(self.registration.scope);
 const ROOT_URL = SCOPE_URL.href;
 const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
@@ -6,9 +6,9 @@ const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
 const CORE_ASSETS = [
   ROOT_URL,
   APP_SHELL_URL,
-  new URL('styles.v2.5.3.css', SCOPE_URL).href,
-  new URL('platform.v2.5.3.js', SCOPE_URL).href,
-  new URL('app.v2.5.3.js', SCOPE_URL).href,
+  new URL('styles.v2.5.4.css', SCOPE_URL).href,
+  new URL('platform.v2.5.4.js', SCOPE_URL).href,
+  new URL('app.v2.5.4.js', SCOPE_URL).href,
   new URL('vendor/jszip.min.js', SCOPE_URL).href,
   new URL('vendor/JSZip-LICENSE.md', SCOPE_URL).href,
   new URL('manifest.webmanifest', SCOPE_URL).href,
@@ -25,6 +25,31 @@ const CORE_ASSETS = [
   new URL('icons/ui/sync.svg', SCOPE_URL).href,
   new URL('icons/ui/updates.svg', SCOPE_URL).href,
   new URL('icons/ui/guide.svg', SCOPE_URL).href,
+  new URL('icons/ui/draft-figure.png', SCOPE_URL).href,
+  new URL('icons/ui/import.png', SCOPE_URL).href,
+  new URL('icons/ui/export.png', SCOPE_URL).href,
+  new URL('icons/ui/sync-cloud.png', SCOPE_URL).href,
+  new URL('icons/ui/notifications.png', SCOPE_URL).href,
+  new URL('icons/ui/settings.png', SCOPE_URL).href,
+  new URL('icons/ui/back.png', SCOPE_URL).href,
+  new URL('icons/ui/dashboard.png', SCOPE_URL).href,
+  new URL('icons/ui/templates.png', SCOPE_URL).href,
+  new URL('icons/ui/trash.png', SCOPE_URL).href,
+  new URL('icons/ui/admin.png', SCOPE_URL).href,
+  new URL('icons/ui/document.png', SCOPE_URL).href,
+  new URL('icons/ui/date.png', SCOPE_URL).href,
+  new URL('icons/ui/bullet-circle.png', SCOPE_URL).href,
+  new URL('icons/ui/bullet-square.png', SCOPE_URL).href,
+  new URL('icons/ui/bullet-rhomboid.png', SCOPE_URL).href,
+  new URL('icons/ui/save.png', SCOPE_URL).href,
+  new URL('icons/ui/conflict.png', SCOPE_URL).href,
+  new URL('icons/ui/analytics.png', SCOPE_URL).href,
+  new URL('icons/ui/users-access.png', SCOPE_URL).href,
+  new URL('icons/ui/audit-log.png', SCOPE_URL).href,
+  new URL('icons/ui/content-setup.png', SCOPE_URL).href,
+  new URL('icons/ui/overview.png', SCOPE_URL).href,
+  new URL('icons/ui/cloud-operations.png', SCOPE_URL).href,
+  new URL('icons/ui/draft-text.png', SCOPE_URL).href,
 ];
 
 const OPTIONAL_ASSETS = [];

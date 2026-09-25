@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="styles.v2.5.3.css">
+  <link rel="stylesheet" href="styles.v2.5.4.css">
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
@@ -84,7 +84,7 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/icon-192.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.5.3</span></small></div>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.5.4</span></small></div>
       <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><span data-ui-icon="panel-close"></span></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
@@ -169,7 +169,7 @@
   <main>
     <section class="view active" id="homeView">
       <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.5.3</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.5.4</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
         <div class="stat-grid" id="dashboardStats"></div>
         <section class="portal-panel dashboard-updates-panel"><div class="section-head"><div><span class="eyebrow">WHAT'S NEW</span><h3>Updates & announcements</h3></div><button class="text-button" id="dashboardMarkUpdatesRead" type="button">Mark all read</button></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
         <div class="portal-grid two-thirds">
@@ -232,7 +232,7 @@
               </details>
               <details class="control-group ribbon-panel" data-ribbon-panel="home" open>
                 <summary>Bullets & Numbering</summary>
-                <div class="control-body"><button class="btn" data-action="bullet" data-level="1">● Level 1</button><button class="btn" data-action="bullet" data-level="2">■ Level 2</button><button class="btn" data-action="bullet" data-level="3">◆ Level 3</button><button class="btn" id="numberBtn">1. Number</button></div>
+                <div class="control-body"><button class="btn" data-action="bullet" data-level="1"><span data-ui-icon="bullet-1"></span> Level 1</button><button class="btn" data-action="bullet" data-level="2"><span data-ui-icon="bullet-2"></span> Level 2</button><button class="btn" data-action="bullet" data-level="3"><span data-ui-icon="bullet-3"></span> Level 3</button><button class="btn" id="numberBtn">1. Number</button></div>
               </details>
               <details class="control-group ribbon-panel" data-ribbon-panel="insert" open hidden>
                 <summary>Insert</summary>
@@ -265,7 +265,7 @@
                 <div class="cover-body">
                   <div class="meta-grid">
                     <div class="field"><label>Author</label><div id="metaName" class="author-picker-host" aria-label="Authors"></div><small class="field-hint">Select one or more authors.</small></div><div class="field"><label>Course</label><select id="metaCourse"></select></div>
-                    <div class="field"><label>Start date</label><input id="metaStart" type="date"></div><div class="field"><label>End date</label><input id="metaEnd" type="date"></div>
+                    <div class="field"><label><span data-ui-icon="date"></span> Start date</label><input id="metaStart" type="date"></div><div class="field"><label><span data-ui-icon="date"></span> End date</label><input id="metaEnd" type="date"></div>
                     <div class="field span-2"><label>Chapter</label><select id="metaChapter"></select><small class="field-hint">Only chapters belonging to the selected course are shown.</small></div>
                     <div class="field" style="grid-column:1/-1"><label>General notes</label><textarea id="metaNotes"></textarea></div>
                   </div>
@@ -318,7 +318,7 @@
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
-<script src="platform.v2.5.3.js"></script>
-<script src="app.v2.5.3.js"></script>
+<script src="platform.v2.5.4.js"></script>
+<script src="app.v2.5.4.js"></script>
 </body>
 </html>

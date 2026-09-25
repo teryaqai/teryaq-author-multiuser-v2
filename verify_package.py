@@ -4,16 +4,16 @@ import re, sys
 root=Path(__file__).parent
 required=[
     'index.html','styles.css','platform.js','app.js',
-    'styles.v2.5.3.css','platform.v2.5.3.js','app.v2.5.3.js',
+    'styles.v2.5.4.css','platform.v2.5.4.js','app.v2.5.4.js',
     'sw.js','manifest.webmanifest','README.md','UPDATE_AND_MIGRATION_POLICY.md',
-    'UPLOAD_v2.5.3.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
+    'UPLOAD_v2.5.4.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
     'supabase/migrations/010_governance_admin_tools.sql',
     'supabase/migrations/011_v2_5_1_profiles_updates.sql',
     'supabase/functions/admin-account-request/index.ts',
     'supabase/functions/admin-governance/index.ts',
     'vendor/jszip.min.js','vendor/JSZip-LICENSE.md',
     'fonts/Tajawal-Regular.ttf','fonts/Tajawal-Medium.ttf','fonts/Tajawal-Bold.ttf','icons/default-avatar.svg',
-    'icons/ui/documents.svg','icons/ui/success.svg','icons/ui/conflict.svg','icons/ui/sync.svg','icons/ui/updates.svg','icons/ui/guide.svg'
+    'icons/ui/documents.svg','icons/ui/success.svg','icons/ui/conflict.svg','icons/ui/sync.svg','icons/ui/updates.svg','icons/ui/guide.svg','icons/ui/draft-figure.png','icons/ui/import.png','icons/ui/export.png','icons/ui/sync-cloud.png','icons/ui/notifications.png','icons/ui/settings.png','icons/ui/back.png','icons/ui/dashboard.png','icons/ui/templates.png','icons/ui/trash.png','icons/ui/admin.png','icons/ui/document.png','icons/ui/date.png','icons/ui/bullet-circle.png','icons/ui/bullet-square.png','icons/ui/bullet-rhomboid.png','icons/ui/save.png','icons/ui/conflict.png','icons/ui/analytics.png','icons/ui/users-access.png','icons/ui/audit-log.png','icons/ui/content-setup.png','icons/ui/overview.png','icons/ui/cloud-operations.png','icons/ui/draft-text.png'
 ]
 missing=[x for x in required if not (root/x).exists()]
 if missing:
@@ -142,7 +142,7 @@ for marker in ['UI_ICON_PATHS','renderAuthorPicker','ensureFigureExportReady','m
         print('MISSING V2.5.1 UI/MEDIA MARKER:',marker);sys.exit(1)
 for marker in ['UI_CUSTOM_ICON_FILES','ui-custom-icon',"success:'success.svg'",'statusMarkup']:
     if marker not in app and marker not in styles:
-        print('MISSING V2.5.3 CUSTOM ICON MARKER:',marker);sys.exit(1)
+        print('MISSING V2.5.4 CUSTOM ICON MARKER:',marker);sys.exit(1)
 for forbidden in ['outlineDrawerToggle','mobileOutlineToggle']:
     if forbidden in html or forbidden in app:
         print('LEGACY FIXED OUTLINE CONTROL STILL PRESENT:',forbidden);sys.exit(1)
@@ -186,21 +186,24 @@ for marker in ['v2.5.0 governance','account-request-modal','admin-metric-grid','
 for marker in ['v2.5.1 floating navigation','topbar-popover','author-check-list','profile-photo-editor','admin-center-shell','figure-upload-progress']:
     if marker not in styles:
         print('MISSING V2.5.1 STYLE:',marker);sys.exit(1)
-for protected in ['.p-Normal{font-size:11pt', '.p-Heading1{display:flex;gap:7px;align-items:flex-start;font-size:14pt', '.p-Heading2{display:flex;gap:7px;align-items:flex-start;font-size:13pt', '.p-Heading3{font-size:12pt', '.p-Heading4{font-size:11pt', '.p-TableCaption{font-size:9pt', '.mark-NotesToDelete{color:#FF0000;font-weight:700;font-size:9pt', '.mark-HighYield{color:#7030A0;font-weight:700', '.mark-ClinicalCorrelation{color:#39E794']:
+for protected in ['.p-Normal{font-size:11pt;font-weight:400;font-style:normal', '.p-Heading1{display:flex;gap:7px;align-items:flex-start;font-size:14pt;font-weight:700;font-style:normal', '.p-Heading2{display:flex;gap:7px;align-items:flex-start;font-size:13pt;font-weight:700;font-style:normal', '.p-Heading3{font-size:12pt;font-weight:700;font-style:normal', '.p-Heading4{font-size:11pt;font-weight:400;font-style:italic', '.p-TableCaption{font-size:9pt;font-weight:400;font-style:italic', '.mark-NotesToDelete{color:#FF0000;font-weight:700;font-style:normal;font-size:9pt', '.mark-HighYield{font-size:11pt;font-style:normal;color:#7030A0;font-weight:700', '.mark-ClinicalCorrelation{font-size:11pt;font-weight:400;font-style:normal;color:#39E794']:
     if protected not in styles:
         print('STYLE CONTRACT CHANGED OR MISSING:',protected);sys.exit(1)
+for marker in ['applyNamedStyleToRuns','VISUAL_STYLE_MARKS','bullet-rhomboid.png','ui-back-icon']:
+    if marker not in app and marker not in styles:
+        print('MISSING V2.5.4 STYLE OR ICON:',marker);sys.exit(1)
 workspace_styles=styles.split('/* ===== Compact document workspace v2.4 ===== */',1)[-1]
 for forbidden in ['.p-Normal{','.p-Heading1{','.p-Heading2{','.p-Heading3{','.p-Heading4{','.p-TableCaption{','.mark-SideNote{','.mark-NotesToDelete{','.mark-HighYield{','.mark-ClinicalCorrelation{']:
     if forbidden in workspace_styles:
         print('V2.4 LAYOUT MUST NOT OVERRIDE DOCUMENT STYLE:',forbidden);sys.exit(1)
 
 version=(root/'VERSION.json').read_text(encoding='utf-8')
-if '"appVersion": "2.5.3"' not in version or '"cloudMigrationVersion": 11' not in version or "teryaq-master-tool-v2.5.3" not in (root/'sw.js').read_text(encoding='utf-8'):
-    print('VERSION/CACHE MISMATCH: expected v2.5.3 / migration 11');sys.exit(1)
-for source,versioned in [('app.js','app.v2.5.3.js'),('platform.js','platform.v2.5.3.js'),('styles.css','styles.v2.5.3.css')]:
+if '"appVersion": "2.5.4"' not in version or '"cloudMigrationVersion": 11' not in version or "teryaq-master-tool-v2.5.4" not in (root/'sw.js').read_text(encoding='utf-8'):
+    print('VERSION/CACHE MISMATCH: expected v2.5.4 / migration 11');sys.exit(1)
+for source,versioned in [('app.js','app.v2.5.4.js'),('platform.js','platform.v2.5.4.js'),('styles.css','styles.v2.5.4.css')]:
     if (root/source).read_bytes()!=(root/versioned).read_bytes():
         print('STALE VERSIONED ASSET:',versioned);sys.exit(1)
-for ref in ['styles.v2.5.3.css','platform.v2.5.3.js','app.v2.5.3.js','vendor/jszip.min.js']:
+for ref in ['styles.v2.5.4.css','platform.v2.5.4.js','app.v2.5.4.js','vendor/jszip.min.js']:
     if ref not in html:
         print('MISSING VERSIONED ASSET REFERENCE:',ref);sys.exit(1)
 for number in range(1,12):

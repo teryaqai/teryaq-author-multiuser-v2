@@ -1,4 +1,10 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.5.3
+# TERYAQ Master Tool — Multi-user Offline-First v2.5.4
+
+## v2.5.4 complete styles and approved icons
+
+- Paragraph and selected-text presets now set color, size, weight and italic consistently, clearing conflicting inline formatting when a preset is applied.
+- Maps the 25 supplied PNG icons to sidebar, editor, admin navigation, dates, dashboard, bullets, figure draft, import, export, sync, and notifications. The separately supplied rhomboid is Level 3, and Back points left.
+- Keeps local document schema v2.0.0, IndexedDB version 4 and Supabase migration 011.
 
 ## v2.5.3 workspace alignment polish
 
