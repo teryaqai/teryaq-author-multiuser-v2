@@ -1,4 +1,4 @@
-const CACHE = 'teryaq-master-tool-v2.5.8-editor-table-outline-icons-1';
+const CACHE = 'teryaq-master-tool-v2.5.9-mint-header-view-icons-1';
 const SCOPE_URL = new URL(self.registration.scope);
 const ROOT_URL = SCOPE_URL.href;
 const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
@@ -6,9 +6,9 @@ const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
 const CORE_ASSETS = [
   ROOT_URL,
   APP_SHELL_URL,
-  new URL('styles.v2.5.8.css', SCOPE_URL).href,
-  new URL('platform.v2.5.8.js', SCOPE_URL).href,
-  new URL('app.v2.5.8.js', SCOPE_URL).href,
+  new URL('styles.v2.5.9.css', SCOPE_URL).href,
+  new URL('platform.v2.5.9.js', SCOPE_URL).href,
+  new URL('app.v2.5.9.js', SCOPE_URL).href,
   new URL('vendor/jszip.min.js', SCOPE_URL).href,
   new URL('vendor/JSZip-LICENSE.md', SCOPE_URL).href,
   new URL('manifest.webmanifest', SCOPE_URL).href,
@@ -31,6 +31,8 @@ const CORE_ASSETS = [
   new URL('icons/ui/sync.png', SCOPE_URL).href,
   new URL('icons/ui/blank-page.png', SCOPE_URL).href,
   new URL('icons/ui/two-document.png', SCOPE_URL).href,
+  new URL('icons/ui/view.png', SCOPE_URL).href,
+  new URL('icons/ui/list.png', SCOPE_URL).href,
   new URL('icons/ui/sync-cloud.png', SCOPE_URL).href,
   new URL('icons/ui/notifications.png', SCOPE_URL).href,
   new URL('icons/ui/settings.png', SCOPE_URL).href,

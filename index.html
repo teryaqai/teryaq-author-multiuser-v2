@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="styles.v2.5.8.css">
+  <link rel="stylesheet" href="styles.v2.5.9.css">
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
@@ -84,7 +84,7 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/icon-192.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.5.8</span></small></div>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.5.9</span></small></div>
       <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><span data-ui-icon="panel-close"></span></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
@@ -211,13 +211,13 @@
               </div>
               <div class="control-group ribbon-panel view-ribbon-panel" data-ribbon-panel="view" hidden>
                 <div class="control-body">
-                  <button class="btn" id="viewOnlyBtn" type="button" aria-pressed="false">◉ View only</button>
+                  <button class="btn" id="viewOnlyBtn" type="button" aria-pressed="false"><span class="view-ribbon-icon view-only-icon" aria-hidden="true"></span><span>View only</span></button>
                   <button class="btn" id="zoomOutBtn" type="button" aria-label="Zoom out">−</button>
                   <button class="btn view-zoom-label" id="zoomResetBtn" type="button" title="Reset zoom">100%</button>
                   <button class="btn" id="zoomInBtn" type="button" aria-label="Zoom in">＋</button>
                   <button class="btn primary" id="onePageBtn" type="button" aria-pressed="true"><img class="view-page-icon" src="icons/ui/blank-page.png" alt="">One page</button>
                   <button class="btn" id="twoPagesBtn" type="button" aria-pressed="false"><img class="view-page-icon" src="icons/ui/two-document.png" alt="">Two pages</button>
-                  <button class="btn" id="outlineViewBtn" type="button" aria-expanded="false" aria-controls="rightPanel">☷ Outline</button>
+                  <button class="btn" id="outlineViewBtn" type="button" aria-expanded="false" aria-controls="rightPanel"><span class="view-ribbon-icon outline-icon" aria-hidden="true"></span><span>Outline</span></button>
                 </div>
               </div>
             </div>
@@ -227,7 +227,7 @@
   <main>
     <section class="view active" id="homeView">
       <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.5.8</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.5.9</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
         <div class="stat-grid" id="dashboardStats"></div>
         <section class="portal-panel dashboard-updates-panel"><div class="section-head"><div><span class="eyebrow">WHAT'S NEW</span><h3>Updates & announcements</h3></div></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
         <div class="portal-grid two-thirds">
@@ -324,7 +324,7 @@
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
-<script src="platform.v2.5.8.js"></script>
-<script src="app.v2.5.8.js"></script>
+<script src="platform.v2.5.9.js"></script>
+<script src="app.v2.5.9.js"></script>
 </body>
 </html>

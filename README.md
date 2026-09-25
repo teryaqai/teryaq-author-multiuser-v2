@@ -1,4 +1,9 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.5.8
+# TERYAQ Master Tool — Multi-user Offline-First v2.5.9
+
+## v2.5.9 mint header and View icons
+
+- Gives the chapter and tab rows the same light mint background, with dark readable titles; the tools row stays white. Back, Save, and Sync retain their dark green controls.
+- Replaces the View only and Outline text glyphs with the two supplied PNG icons. Their visible icons persist when View only is toggled and respond to the button color.
 
 ## v2.5.8 editing and table outline
 
