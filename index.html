@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="styles.v2.5.6.css">
+  <link rel="stylesheet" href="styles.v2.5.7.css">
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
@@ -84,7 +84,7 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/icon-192.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.5.6</span></small></div>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.5.7</span></small></div>
       <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><span data-ui-icon="panel-close"></span></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
@@ -137,7 +137,7 @@
       <div class="topbar-popover-wrap">
         <button class="topbar-icon-button" id="notificationsButton" type="button" aria-label="Notifications" aria-haspopup="true" aria-expanded="false"><span data-ui-icon="bell"></span><span class="notification-badge hidden" id="notificationBadge">0</span></button>
         <section class="topbar-popover notifications-popover hidden" id="notificationsPanel" aria-label="Updates and notifications">
-          <div class="popover-heading"><div><b>Updates</b><small>Latest TERYAQ announcements</small></div><button class="text-button" id="markUpdatesRead" type="button">Mark all read</button></div>
+          <div class="popover-heading"><div><b>Updates</b><small>Latest TERYAQ announcements</small></div></div>
           <div class="notification-items" id="notificationItems"></div>
         </section>
       </div>
@@ -152,7 +152,7 @@
       </div>
     </div>
         <div class="editor-ribbon left-panel" id="leftPanel">
-            <button class="mobile-controls-toggle" id="mobileControlsToggle"><span>Editing Controls</span><span data-ui-icon="chevron-down"></span></button>
+            
             <div class="editor-ribbon-tabs" role="tablist" aria-label="Document editing tools">
               <button class="editor-ribbon-tab" type="button" role="tab" data-ribbon-tab="file" aria-selected="false">File</button>
               <button class="editor-ribbon-tab active" type="button" role="tab" data-ribbon-tab="styles" aria-selected="true">Styles</button>
@@ -179,13 +179,13 @@
                   <button class="btn" id="settingsBtnEditor"><span data-ui-icon="settings"></span><span>Settings & Sync</span></button>
                 </div>
               </div>
-              <details class="control-group ribbon-panel" data-ribbon-panel="styles" open>
+              <div class="control-group ribbon-panel" data-ribbon-panel="styles">
                 <div class="control-body">
                   <button class="btn" data-style="Normal">Body</button><button class="btn" data-style="Heading1">H1</button><button class="btn" data-style="Heading2">H2</button><button class="btn" data-style="Heading3">H3</button><button class="btn" data-style="Heading4">H4</button><button class="btn" data-style="Subtitle">Side Q/A</button><button class="btn" data-style="TableCaption">Table Caption</button>
                   <button class="btn" data-mark="SideNote">Side Note</button><button class="btn danger" data-mark="NotesToDelete">Note to Delete</button><button class="btn" data-mark="HighYield">High-Yield</button><button class="btn" data-mark="ClinicalCorrelation">Clinical Correlation</button>
                 </div>
-              </details>
-              <details class="control-group ribbon-panel" data-ribbon-panel="formatting" open hidden>
+              </div>
+              <div class="control-group ribbon-panel" data-ribbon-panel="formatting" hidden>
                 <div class="control-body">
                   <label class="font-size-picker" title="Font size"><img src="icons/ui/font-size.png" alt=""><select id="fontSizeSelect" aria-label="Font size"><option value="">Font size</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>16</option><option>18</option><option>20</option><option>22</option><option>24</option></select></label>
                   <button class="btn format-glyph" id="boldBtn" type="button" aria-label="Bold" title="Bold"><b>B</b></button>
@@ -196,14 +196,14 @@
                   <button class="btn list-format-button" data-action="bullet" data-level="3"><span data-ui-icon="bullet-3"></span><span>Level 3</span></button>
                   <button class="btn list-format-button" id="numberBtn"><span class="number-glyph" aria-hidden="true">1.</span><span>Numbering</span></button>
                 </div>
-              </details>
-              <details class="control-group ribbon-panel" data-ribbon-panel="insert" open hidden>
+              </div>
+              <div class="control-group ribbon-panel" data-ribbon-panel="insert" hidden>
                 <div class="control-body"><button class="btn" id="mainFigBtn">+ Figure Placeholder</button><button class="btn" id="marginFigBtn">+ Margin Figure</button><button class="btn" id="newTableBtn">+ New Table</button><button class="btn" id="importDocxTableBtn">Import DOCX Table</button></div>
-              </details>
-              <details class="control-group ribbon-panel" data-ribbon-panel="table" open hidden>
+              </div>
+              <div class="control-group ribbon-panel" data-ribbon-panel="table" hidden>
                 <div class="control-body"><button class="btn" id="rowUpBtn"><span data-ui-icon="arrow-up"></span><span>Row</span></button><button class="btn" id="rowDownBtn"><span data-ui-icon="arrow-down"></span><span>Row</span></button><button class="btn" id="colLeftBtn"><span data-ui-icon="arrow-left"></span><span>Column</span></button><button class="btn" id="colRightBtn"><span data-ui-icon="arrow-right"></span><span>Column</span></button><button class="btn danger" id="delRowBtn">Delete Row</button><button class="btn danger" id="delColBtn">Delete Col</button><button class="btn danger" id="deleteTableBtn">Delete Table</button><div class="control-row"><input id="colWidthInput" type="number" min="5" max="95" value="33" style="width:72px;border:1px solid var(--line);border-radius:8px;padding:7px"><button class="btn" id="applyColWidthBtn">Apply Width %</button><button class="btn" id="equalColsBtn">Equal Columns</button></div></div>
-              </details>
-              <details class="control-group ribbon-panel view-ribbon-panel" data-ribbon-panel="view" open hidden>
+              </div>
+              <div class="control-group ribbon-panel view-ribbon-panel" data-ribbon-panel="view" hidden>
                 <div class="control-body">
                   <button class="btn" id="viewOnlyBtn" type="button" aria-pressed="false">◉ View only</button>
                   <button class="btn" id="zoomOutBtn" type="button" aria-label="Zoom out">−</button>
@@ -213,7 +213,7 @@
                   <button class="btn" id="twoPagesBtn" type="button" aria-pressed="false">▯▯ Two pages</button>
                   <button class="btn" id="outlineViewBtn" type="button" aria-expanded="false" aria-controls="rightPanel">☷ Outline</button>
                 </div>
-              </details>
+              </div>
             </div>
         </div>
   </header>
@@ -221,9 +221,9 @@
   <main>
     <section class="view active" id="homeView">
       <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.5.6</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.5.7</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
         <div class="stat-grid" id="dashboardStats"></div>
-        <section class="portal-panel dashboard-updates-panel"><div class="section-head"><div><span class="eyebrow">WHAT'S NEW</span><h3>Updates & announcements</h3></div><button class="text-button" id="dashboardMarkUpdatesRead" type="button">Mark all read</button></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
+        <section class="portal-panel dashboard-updates-panel"><div class="section-head"><div><span class="eyebrow">WHAT'S NEW</span><h3>Updates & announcements</h3></div></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
         <div class="portal-grid two-thirds">
           <section class="portal-panel"><div class="section-head"><div><span class="eyebrow">Workspace</span><h3>Recent documents</h3></div><button class="text-button" data-nav="documents">View all →</button></div><div class="cards compact-cards" id="documentCards"></div></section>
           <aside class="portal-panel"><span class="eyebrow">Quick help</span><h3>Need a hand?</h3><p class="muted">The bilingual guide explains offline work, syncing, conflicts, history, versions, and recovery.</p><button class="btn" data-nav="guide">Open guide / افتح الدليل</button></aside>
@@ -323,7 +323,7 @@
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
-<script src="platform.v2.5.6.js"></script>
-<script src="app.v2.5.6.js"></script>
+<script src="platform.v2.5.7.js"></script>
+<script src="app.v2.5.7.js"></script>
 </body>
 </html>

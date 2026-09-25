@@ -4,9 +4,9 @@ import re, sys
 root=Path(__file__).parent
 required=[
     'index.html','styles.css','platform.js','app.js',
-    'styles.v2.5.6.css','platform.v2.5.6.js','app.v2.5.6.js',
+    'styles.v2.5.7.css','platform.v2.5.7.js','app.v2.5.7.js',
     'sw.js','manifest.webmanifest','README.md','UPDATE_AND_MIGRATION_POLICY.md',
-    'UPLOAD_v2.5.6.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
+    'UPLOAD_v2.5.7.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
     'supabase/migrations/010_governance_admin_tools.sql',
     'supabase/migrations/011_v2_5_1_profiles_updates.sql',
     'supabase/migrations/012_service_role_profiles_select.sql',
@@ -14,7 +14,7 @@ required=[
     'supabase/functions/admin-governance/index.ts',
     'vendor/jszip.min.js','vendor/JSZip-LICENSE.md',
     'fonts/Tajawal-Regular.ttf','fonts/Tajawal-Medium.ttf','fonts/Tajawal-Bold.ttf','icons/default-avatar.svg',
-    'icons/ui/documents.svg','icons/ui/success.svg','icons/ui/conflict.svg','icons/ui/sync.svg','icons/ui/updates.svg','icons/ui/guide.svg','icons/ui/draft-figure.png','icons/ui/font-size.png','icons/ui/import.png','icons/ui/export.png','icons/ui/sync-cloud.png','icons/ui/notifications.png','icons/ui/settings.png','icons/ui/back.png','icons/ui/dashboard.png','icons/ui/templates.png','icons/ui/trash.png','icons/ui/admin.png','icons/ui/document.png','icons/ui/date.png','icons/ui/bullet-circle.png','icons/ui/bullet-square.png','icons/ui/bullet-rhomboid.png','icons/ui/save.png','icons/ui/conflict.png','icons/ui/analytics.png','icons/ui/users-access.png','icons/ui/audit-log.png','icons/ui/content-setup.png','icons/ui/overview.png','icons/ui/cloud-operations.png','icons/ui/draft-text.png'
+    'icons/ui/documents.svg','icons/ui/success.svg','icons/ui/conflict.svg','icons/ui/sync.svg','icons/ui/updates.svg','icons/ui/guide.svg','icons/ui/draft-figure.png','icons/ui/sync.png','icons/ui/font-size.png','icons/ui/import.png','icons/ui/export.png','icons/ui/sync-cloud.png','icons/ui/notifications.png','icons/ui/settings.png','icons/ui/back.png','icons/ui/dashboard.png','icons/ui/templates.png','icons/ui/trash.png','icons/ui/admin.png','icons/ui/document.png','icons/ui/date.png','icons/ui/bullet-circle.png','icons/ui/bullet-square.png','icons/ui/bullet-rhomboid.png','icons/ui/save.png','icons/ui/conflict.png','icons/ui/analytics.png','icons/ui/users-access.png','icons/ui/audit-log.png','icons/ui/content-setup.png','icons/ui/overview.png','icons/ui/cloud-operations.png','icons/ui/draft-text.png'
 ]
 missing=[x for x in required if not (root/x).exists()]
 if missing:
@@ -199,12 +199,12 @@ for forbidden in ['.p-Normal{','.p-Heading1{','.p-Heading2{','.p-Heading3{','.p-
         print('V2.4 LAYOUT MUST NOT OVERRIDE DOCUMENT STYLE:',forbidden);sys.exit(1)
 
 version=(root/'VERSION.json').read_text(encoding='utf-8')
-if '"appVersion": "2.5.6"' not in version or '"cloudMigrationVersion": 12' not in version or "teryaq-master-tool-v2.5.6" not in (root/'sw.js').read_text(encoding='utf-8'):
-    print('VERSION/CACHE MISMATCH: expected v2.5.6 / migration 12');sys.exit(1)
-for source,versioned in [('app.js','app.v2.5.6.js'),('platform.js','platform.v2.5.6.js'),('styles.css','styles.v2.5.6.css')]:
+if '"appVersion": "2.5.7"' not in version or '"cloudMigrationVersion": 12' not in version or "teryaq-master-tool-v2.5.7" not in (root/'sw.js').read_text(encoding='utf-8'):
+    print('VERSION/CACHE MISMATCH: expected v2.5.7 / migration 12');sys.exit(1)
+for source,versioned in [('app.js','app.v2.5.7.js'),('platform.js','platform.v2.5.7.js'),('styles.css','styles.v2.5.7.css')]:
     if (root/source).read_bytes()!=(root/versioned).read_bytes():
         print('STALE VERSIONED ASSET:',versioned);sys.exit(1)
-for ref in ['styles.v2.5.6.css','platform.v2.5.6.js','app.v2.5.6.js','vendor/jszip.min.js']:
+for ref in ['styles.v2.5.7.css','platform.v2.5.7.js','app.v2.5.7.js','vendor/jszip.min.js']:
     if ref not in html:
         print('MISSING VERSIONED ASSET REFERENCE:',ref);sys.exit(1)
 for number in range(1,13):

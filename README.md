@@ -1,4 +1,12 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.5.6
+# TERYAQ Master Tool — Multi-user Offline-First v2.5.7
+
+## v2.5.7 editor bar and updates polish
+
+- Restores the Back arrow by hiding only the label, without hiding the icon nested in its container.
+- Colors the chapter/title and tab rows with two distinct TERYAQ-tinted backgrounds, leaving the tool row white.
+- Replaces collapsible editor sections with permanent panels; switching tabs immediately shows their controls without a Details disclosure.
+- Marks each notification as read when clicked from either the top menu or Dashboard. Each read is stored locally first and queued for cloud sync if offline; bulk Mark all as read buttons are removed.
+- Replaces the sync/refresh icon with the supplied sync.png asset.
 
 ## v2.5.6 unified editor ribbon
 
