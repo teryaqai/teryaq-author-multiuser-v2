@@ -1,4 +1,11 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.5.12
+# TERYAQ Master Tool — Multi-user Offline-First v2.5.13
+
+## v2.5.13 Shooting Script controls and playback
+
+- Right to left, left to right, and three alignment buttons now apply to the selected spoken line, show their active state, and preserve the setting in the script and teleprompter.
+- Removes the extra Script title input from Script information; the document title still follows the information fields.
+- After inserting inline ×2, the caret lands outside the marker and a following space leaves subsequent text in the normal Body style.
+- Teleprompter playback retains fractional scroll movement so speeds from 0.2× through 3× move reliably and scale with the control.
 
 ## v2.5.12 Script information and Teleprompter fixes
 
