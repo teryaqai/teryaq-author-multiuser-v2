@@ -1,4 +1,11 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.5.11
+# TERYAQ Master Tool — Multi-user Offline-First v2.5.12
+
+## v2.5.12 Script information and Teleprompter fixes
+
+- Shooting Script creation now includes Script information: script writer, dates, course, chapter and script notes. The same information card remains editable in the script editor. Older scripts open with the empty fields available.
+- Left, center and right alignment for spoken lines. Text selection is checked against the selected block before emphasis or other inline formatting.
+- ×2 is inserted inline after the selected word or cursor. Earlier standalone ×2 cues migrate into inline markers when an existing script opens.
+- The reading band is fixed over the scroll viewport; the text alone scrolls. Fullscreen Space toggles Play/Pause, and dark mode has stronger contrast outside the reading region.
 
 ## v2.5.11 Shooting Script
 

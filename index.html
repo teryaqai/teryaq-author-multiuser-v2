@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="styles.v2.5.11.css">
+  <link rel="stylesheet" href="styles.v2.5.12.css">
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
@@ -84,7 +84,7 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/icon-192.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.5.11</span></small></div>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.5.12</span></small></div>
       <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><span data-ui-icon="panel-close"></span></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
@@ -191,6 +191,10 @@
                 <div class="control-body">
                   <button class="btn script-only direction-button" id="scriptRtlBtn" type="button" aria-label="Right to left" title="Right to left"><span class="script-dir-glyph script-dir-rtl" aria-hidden="true"></span></button>
                   <button class="btn script-only direction-button" id="scriptLtrBtn" type="button" aria-label="Left to right" title="Left to right"><span class="script-dir-glyph script-dir-ltr" aria-hidden="true"></span></button>
+                  <span class="format-divider script-only" aria-hidden="true"></span>
+                  <button class="btn script-only script-align-button" id="scriptAlignLeft" type="button" title="Align left" aria-label="Align left"><span class="align-glyph align-left" aria-hidden="true"></span></button>
+                  <button class="btn script-only script-align-button" id="scriptAlignCenter" type="button" title="Align center" aria-label="Align center"><span class="align-glyph align-center" aria-hidden="true"></span></button>
+                  <button class="btn script-only script-align-button" id="scriptAlignRight" type="button" title="Align right" aria-label="Align right"><span class="align-glyph align-right" aria-hidden="true"></span></button>
                   <label class="font-size-picker" title="Font size"><span class="format-size-glyph" aria-hidden="true">Aa</span><select id="fontSizeSelect" aria-label="Font size"><option value="">Font size</option><option>9</option><option>10</option><option>11</option><option>12</option><option>13</option><option>14</option><option>16</option><option>18</option><option>20</option><option>22</option><option>24</option></select></label>
                   <button class="btn format-glyph" id="boldBtn" type="button" aria-label="Bold" title="Bold"><b>B</b></button>
                   <button class="btn format-glyph" id="italicBtn" type="button" aria-label="Italic" title="Italic"><i>I</i></button>
@@ -251,7 +255,7 @@
   <main>
     <section class="view active" id="homeView">
       <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.5.11</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.5.12</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
         <div class="stat-grid" id="dashboardStats"></div>
         <section class="portal-panel dashboard-updates-panel"><div class="section-head"><div><span class="eyebrow">WHAT'S NEW</span><h3>Updates & announcements</h3></div></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
         <div class="portal-grid two-thirds">
@@ -295,7 +299,7 @@
         <div id="scriptTeleprompter" class="script-teleprompter hidden" aria-label="Teleprompter">
           <div class="script-prompt-float"><button class="btn" id="scriptPromptFloatPlay" type="button">▶ Play</button><label>Speed <input id="scriptPromptFloatSpeed" type="range" min="0.2" max="3" step="0.1" value="1"></label><button class="btn" id="scriptPromptFloatTheme" type="button">◐ Theme</button><button class="btn" id="scriptPromptFloatExit" type="button">Exit fullscreen</button></div>
           <div class="script-prompt-help">Edit the text here. Changes are saved in the script automatically. Scroll by hand, or press Play.</div>
-          <div id="scriptPromptStage" class="script-prompt-stage" tabindex="0"><div id="scriptPromptTrack" class="script-prompt-track"></div><div class="script-reading-band" aria-hidden="true"></div></div>
+          <div class="script-prompt-viewport"><div id="scriptPromptStage" class="script-prompt-stage" tabindex="0"><div id="scriptPromptTrack" class="script-prompt-track"></div></div><div class="script-reading-band" aria-hidden="true"></div></div>
         </div>
         <div class="editor-layout">
           <section class="editor-main">
@@ -354,7 +358,7 @@
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
-<script src="platform.v2.5.11.js"></script>
-<script src="app.v2.5.11.js"></script>
+<script src="platform.v2.5.12.js"></script>
+<script src="app.v2.5.12.js"></script>
 </body>
 </html>

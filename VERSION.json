@@ -1,7 +1,7 @@
 {
-  "appVersion": "2.5.11",
+  "appVersion": "2.5.12",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
   "cloudMigrationVersion": 12,
-  "release": "shooting-script"
+  "release": "shooting-script-reader-and-information"
 }

@@ -4,9 +4,9 @@ import re, sys
 root=Path(__file__).parent
 required=[
     'index.html','styles.css','platform.js','app.js',
-    'styles.v2.5.11.css','platform.v2.5.11.js','app.v2.5.11.js',
+    'styles.v2.5.12.css','platform.v2.5.12.js','app.v2.5.12.js',
     'sw.js','manifest.webmanifest','README.md','UPDATE_AND_MIGRATION_POLICY.md',
-    'UPLOAD_v2.5.11.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
+    'UPLOAD_v2.5.12.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
     'supabase/migrations/010_governance_admin_tools.sql',
     'supabase/migrations/011_v2_5_1_profiles_updates.sql',
     'supabase/migrations/012_service_role_profiles_select.sql',
@@ -25,7 +25,7 @@ ids=re.findall(r'\bid="([^"]+)"',html)
 dups=sorted({x for x in ids if ids.count(x)>1})
 if dups:
     print('DUPLICATE IDS:',dups);sys.exit(1)
-for x in ['authGate','authPasswordToggle','authCloudToggle','authCloudPanel','authCloudClose','authCloudScrim','authOfflineIdentity','requestAccountBtn','accountRequestModal','accountRequestForm','inviteSetupModal','inviteSetupForm','invitePassword','invitePasswordConfirm','appShell','appSidebar','sidebarCollapse','syncBtn','adminBtn','trashBtn','documentsView','documentBulkBar','bulkDeleteDocuments','clearDocumentSelection','profileView','adminView','notificationsButton','profileMenuButton','dashboardUpdates','leftPanel','editorContentColumn','tableRegister','outlineViewBtn','outlineCloseBtn','outlineScrim','modalBody','appVersionBadge','sidebarAppVersion','exportMenu','exportMenuButton','exportMenuPanel','htmlExportBtn','editorImportBtn','importDocxTableBtn','viewOnlyBtn','underlineBtn','scriptTeleprompter','scriptPromptStage','scriptInstructionBtn','scriptRtlBtn','scriptLtrBtn','deleteTableBtn','printPreviewWorkspace','printPreviewPages']:
+for x in ['authGate','authPasswordToggle','authCloudToggle','authCloudPanel','authCloudClose','authCloudScrim','authOfflineIdentity','requestAccountBtn','accountRequestModal','accountRequestForm','inviteSetupModal','inviteSetupForm','invitePassword','invitePasswordConfirm','appShell','appSidebar','sidebarCollapse','syncBtn','adminBtn','trashBtn','documentsView','documentBulkBar','bulkDeleteDocuments','clearDocumentSelection','profileView','adminView','notificationsButton','profileMenuButton','dashboardUpdates','leftPanel','editorContentColumn','tableRegister','outlineViewBtn','outlineCloseBtn','outlineScrim','modalBody','appVersionBadge','sidebarAppVersion','exportMenu','exportMenuButton','exportMenuPanel','htmlExportBtn','editorImportBtn','importDocxTableBtn','viewOnlyBtn','underlineBtn','scriptTeleprompter','scriptPromptStage','scriptInstructionBtn','scriptRtlBtn','scriptLtrBtn','scriptAlignLeft','scriptAlignCenter','scriptAlignRight','scriptRepeatBtn','scriptRegion','deleteTableBtn','printPreviewWorkspace','printPreviewPages']:
     if f'id="{x}"' not in html:
         print('MISSING HTML ID:',x);sys.exit(1)
 
@@ -199,12 +199,12 @@ for forbidden in ['.p-Normal{','.p-Heading1{','.p-Heading2{','.p-Heading3{','.p-
         print('V2.4 LAYOUT MUST NOT OVERRIDE DOCUMENT STYLE:',forbidden);sys.exit(1)
 
 version=(root/'VERSION.json').read_text(encoding='utf-8')
-if '"appVersion": "2.5.11"' not in version or '"cloudMigrationVersion": 12' not in version or "teryaq-master-tool-v2.5.11" not in (root/'sw.js').read_text(encoding='utf-8'):
-    print('VERSION/CACHE MISMATCH: expected v2.5.11 / migration 12');sys.exit(1)
-for source,versioned in [('app.js','app.v2.5.11.js'),('platform.js','platform.v2.5.11.js'),('styles.css','styles.v2.5.11.css')]:
+if '"appVersion": "2.5.12"' not in version or '"cloudMigrationVersion": 12' not in version or "teryaq-master-tool-v2.5.12" not in (root/'sw.js').read_text(encoding='utf-8'):
+    print('VERSION/CACHE MISMATCH: expected v2.5.12 / migration 12');sys.exit(1)
+for source,versioned in [('app.js','app.v2.5.12.js'),('platform.js','platform.v2.5.12.js'),('styles.css','styles.v2.5.12.css')]:
     if (root/source).read_bytes()!=(root/versioned).read_bytes():
         print('STALE VERSIONED ASSET:',versioned);sys.exit(1)
-for ref in ['styles.v2.5.11.css','platform.v2.5.11.js','app.v2.5.11.js','vendor/jszip.min.js']:
+for ref in ['styles.v2.5.12.css','platform.v2.5.12.js','app.v2.5.12.js','vendor/jszip.min.js']:
     if ref not in html:
         print('MISSING VERSIONED ASSET REFERENCE:',ref);sys.exit(1)
 for number in range(1,13):
