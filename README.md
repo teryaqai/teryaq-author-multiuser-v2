@@ -1,4 +1,16 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.6.2
+# TERYAQ Master Tool — Multi-user Offline-First v2.6.4
+
+## v2.6.4 Figures File ribbon
+
+- The figures draft displays its File ribbon with Export, Import, History / Versions, Submission Forms, Validate, and Settings & Sync. Its Export menu includes the standard `.ترياق`, PDF, HTML, and Save as Template actions, plus Figures only (PDF). The new option uses the existing images-and-Figure-code exporter.
+- Text and script ribbons keep their own editing tabs and options. Apply migration 015 from v2.6.3 for administrator cloud version storage tools; no new database change is needed for this figures menu fix.
+
+## v2.6.3 Cloud versions and form previews
+
+- Admin → Cloud Operations → Versions shows the real database/table size, an estimated snapshot payload per document, and the count eligible for cleanup. After downloading a complete per-document archive, the administrator can choose to clean versions older than 90 days while keeping the newest 10 and the current snapshot. The server checks the count and current version again before deleting and records an audit event. No cleanup runs automatically.
+- Online synchronization, conflict checks, current documents, and the existing 30-day Trash policy are unchanged. Apply migration 015 before opening the new cloud version controls; older deployments still offer their existing version viewer.
+- Admin → Submission Forms → Preview form opens the current builder draft, including unsaved changes, in a navigable preview. Required questions do not block navigation, file inputs do not upload, and preview cannot submit.
+- Shooting Script exports (including montage PDF) now confirm the editorial version, as the text and figure drafts already do. Script HTML and PDF display and embed the selected version. The figures template continues to show its own Version field and version confirmation. Script blocks use the supplied smaller drag icon at the top, aligned along the left edge.
 
 ## v2.6.2 Submissions, archive, script references, and outline
 

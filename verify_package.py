@@ -4,19 +4,20 @@ import re, sys
 root=Path(__file__).parent
 required=[
     'index.html','styles.css','platform.js','app.js',
-    'styles.v2.6.2.css','platform.v2.6.2.js','app.v2.6.2.js','submissions.js','submissions.v2.6.2.js',
+    'styles.v2.6.4.css','platform.v2.6.4.js','app.v2.6.4.js','submissions.js','submissions.v2.6.4.js',
     'sw.js','manifest.webmanifest','README.md','UPDATE_AND_MIGRATION_POLICY.md',
-    'UPLOAD_v2.6.2.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
+    'UPLOAD_v2.6.4.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
     'supabase/migrations/010_governance_admin_tools.sql',
     'supabase/migrations/011_v2_5_1_profiles_updates.sql',
     'supabase/migrations/012_service_role_profiles_select.sql',
     'supabase/migrations/013_submission_forms_library.sql',
     'supabase/migrations/014_submission_uploads_history.sql',
+    'supabase/migrations/015_cloud_version_retention.sql',
     'supabase/functions/admin-account-request/index.ts',
     'supabase/functions/admin-governance/index.ts',
     'vendor/jszip.min.js','vendor/JSZip-LICENSE.md','vendor/pdf.min.mjs','vendor/pdf.worker.min.mjs','vendor/PDF.js-LICENSE.txt',
     'fonts/Tajawal-Regular.ttf','fonts/Tajawal-Medium.ttf','fonts/Tajawal-Bold.ttf','icons/default-avatar.svg',
-    'icons/ui/documents.svg','icons/ui/success.svg','icons/ui/conflict.svg','icons/ui/sync.svg','icons/ui/updates.svg','icons/ui/guide.svg','icons/ui/draft-figure.png','icons/ui/sync.png','icons/ui/blank-page.png','icons/ui/two-document.png','icons/ui/view.png','icons/ui/list.png','icons/ui/import.png','icons/ui/export.png','icons/ui/sync-cloud.png','icons/ui/notifications.png','icons/ui/settings.png','icons/ui/back.png','icons/ui/dashboard.png','icons/ui/templates.png','icons/ui/trash.png','icons/ui/admin.png','icons/ui/document.png','icons/ui/date.png','icons/ui/bullet-circle.png','icons/ui/bullet-square.png','icons/ui/bullet-rhomboid.png','icons/ui/save.png','icons/ui/conflict.png','icons/ui/analytics.png','icons/ui/users-access.png','icons/ui/audit-log.png','icons/ui/content-setup.png','icons/ui/overview.png','icons/ui/cloud-operations.png','icons/ui/draft-text.png','icons/ui/submission-forms.png','icons/ui/archive.png','icons/ui/text-rtl.svg','icons/ui/text-ltr.svg'
+    'icons/ui/documents.svg','icons/ui/success.svg','icons/ui/conflict.svg','icons/ui/sync.svg','icons/ui/updates.svg','icons/ui/guide.svg','icons/ui/draft-figure.png','icons/ui/sync.png','icons/ui/blank-page.png','icons/ui/two-document.png','icons/ui/view.png','icons/ui/list.png','icons/ui/import.png','icons/ui/export.png','icons/ui/sync-cloud.png','icons/ui/notifications.png','icons/ui/settings.png','icons/ui/back.png','icons/ui/dashboard.png','icons/ui/templates.png','icons/ui/trash.png','icons/ui/admin.png','icons/ui/document.png','icons/ui/date.png','icons/ui/bullet-circle.png','icons/ui/bullet-square.png','icons/ui/bullet-rhomboid.png','icons/ui/save.png','icons/ui/conflict.png','icons/ui/analytics.png','icons/ui/users-access.png','icons/ui/audit-log.png','icons/ui/content-setup.png','icons/ui/overview.png','icons/ui/cloud-operations.png','icons/ui/draft-text.png','icons/ui/submission-forms.png','icons/ui/archive.png','icons/ui/text-rtl.svg','icons/ui/text-ltr.svg','icons/ui/drag.png'
 ]
 missing=[x for x in required if not (root/x).exists()]
 if missing:
@@ -201,15 +202,15 @@ for forbidden in ['.p-Normal{','.p-Heading1{','.p-Heading2{','.p-Heading3{','.p-
         print('V2.4 LAYOUT MUST NOT OVERRIDE DOCUMENT STYLE:',forbidden);sys.exit(1)
 
 version=(root/'VERSION.json').read_text(encoding='utf-8')
-if '"appVersion": "2.6.2"' not in version or '"cloudMigrationVersion": 14' not in version or "teryaq-master-tool-v2.6.2" not in (root/'sw.js').read_text(encoding='utf-8'):
-    print('VERSION/CACHE MISMATCH: expected v2.6.2 / migration 14');sys.exit(1)
-for source,versioned in [('app.js','app.v2.6.2.js'),('platform.js','platform.v2.6.2.js'),('styles.css','styles.v2.6.2.css'),('submissions.js','submissions.v2.6.2.js')]:
+if '"appVersion": "2.6.4"' not in version or '"cloudMigrationVersion": 15' not in version or "teryaq-master-tool-v2.6.4" not in (root/'sw.js').read_text(encoding='utf-8'):
+    print('VERSION/CACHE MISMATCH: expected v2.6.4 / migration 15');sys.exit(1)
+for source,versioned in [('app.js','app.v2.6.4.js'),('platform.js','platform.v2.6.4.js'),('styles.css','styles.v2.6.4.css'),('submissions.js','submissions.v2.6.4.js')]:
     if (root/source).read_bytes()!=(root/versioned).read_bytes():
         print('STALE VERSIONED ASSET:',versioned);sys.exit(1)
-for ref in ['styles.v2.6.2.css','platform.v2.6.2.js','app.v2.6.2.js','submissions.v2.6.2.js','vendor/jszip.min.js']:
+for ref in ['styles.v2.6.4.css','platform.v2.6.4.js','app.v2.6.4.js','submissions.v2.6.4.js','vendor/jszip.min.js']:
     if ref not in html:
         print('MISSING VERSIONED ASSET REFERENCE:',ref);sys.exit(1)
-for number in range(1,15):
+for number in range(1,16):
     if not list((root/'supabase'/'migrations').glob(f'{number:03d}_*.sql')):
         print('MISSING CLOUD MIGRATION:',number);sys.exit(1)
 submissions=(root/'submissions.js').read_text(encoding='utf-8')
@@ -279,6 +280,25 @@ for marker in ['confirmScientificExportVersion','Are you sure about this version
 for marker in ['verifySubmissionFileVersion','assertSubmissionVersions','extractPdfVersion','teryaq-editorial-version','تعارض النسخ']:
     if marker not in submissions:
         print('INCOMPLETE DELIVERY VERSION VERIFICATION:',marker);sys.exit(1)
+
+# v2.6.4 safety: cleanup must be explicit, admin-only, version-guarded, and
+# independent of push_document. Preview must never enter the upload/submit path.
+migration15=(root/'supabase'/'migrations'/'015_cloud_version_retention.sql').read_text(encoding='utf-8')
+for marker in ['public.is_admin(auth.uid())','admin_version_storage','admin_prune_document_versions',
+               'for update',"newest_rank > 10","interval '90 days'",'version <> doc.current_version',
+               'p_expected_current_version','p_expected_eligible','version.history_pruned',
+               'grant execute on function public.admin_prune_document_versions(text,bigint,integer) to authenticated']:
+    if marker not in migration15:
+        print('UNSAFE OR INCOMPLETE CLOUD VERSION RETENTION:',marker);sys.exit(1)
+preview=submissions.split('async function previewAdminForm(d)',1)[-1].split('async function refreshAdminContent',1)[0]
+if 'disabled aria-label=' not in submissions or 'data-preview-step' not in preview or any(call in preview for call in ['submitForm(', 'ensurePendingSubmission(', 'startFileUpload(', 'validateSection(']):
+    print('FORM PREVIEW MUST NOT UPLOAD, SUBMIT, OR REQUIRE FIELDS');sys.exit(1)
+if "'shooting-script'].includes(doc?.templateId)" not in app or "if(!isScript()||!await confirmScientificExportVersion(state.current))" not in app or 'icons/ui/drag.png' not in app:
+    print('INCOMPLETE SCRIPT VERSION CONFIRMATION OR DRAG ICON');sys.exit(1)
+if 'id="figureOnlyExportMenuBtn"' not in html or "byId('figureOnlyExportMenuBtn').onclick" not in app or "setRibbonTab('file')" not in app:
+    print('FIGURES FILE RIBBON IS MISSING EXPORT OPTIONS');sys.exit(1)
+if '.editor-mode:is(.editor-text-mode,.editor-figure-mode) .app-frame>.topbar>.editor-ribbon' not in styles or '.editor-mode:not(.editor-figure-mode) .figure-only' not in styles:
+    print('FIGURES FILE RIBBON IS HIDDEN OR FIGURES OPTION LEAKS INTO OTHER TEMPLATES');sys.exit(1)
 for asset in ['vendor/pdf.min.mjs','vendor/pdf.worker.min.mjs']:
     if asset not in (root/'sw.js').read_text(encoding='utf-8'):
         print('PDF VERSION READER MUST BE AVAILABLE OFFLINE:',asset);sys.exit(1)
