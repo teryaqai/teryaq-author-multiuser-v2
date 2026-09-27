@@ -1,4 +1,12 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.6.1
+# TERYAQ Master Tool — Multi-user Offline-First v2.6.2
+
+## v2.6.2 Submissions, archive, script references, and outline
+
+- Submission files upload immediately on selection with size, progress, and speed. Section 3 now presents a compact visual quality checklist. Submission Forms shows a collapsible personal delivery history.
+- The administrator Archive lists files in form order, one per row, with a manual Google Drive backup checkbox. Submission Trash joins Document Trash and retains the 30-day deletion rule. Content Setup uses full-width tabs for Categories, Courses, Chapters, Versions, and Authors.
+- Script blocks use a left-side drag handle for ordering. A figure/table reference asks for type and code, is inserted inline, and stays out of the Teleprompter; text after special markers returns to normal formatting.
+- Copy Outline lives beside Document Outline and numbers Heading 1 as 1, 2 and Heading 2 as 1.1, 1.2, 2.1. Apply migration 014 and redeploy the admin-governance function before uploading the v2.6.2 app.
+- Exporting a scientific text or figures draft asks the author to confirm or change its editorial version. TERYAQ records that version in HTML and JSON exports and in PDF titles and cover details. Scientific draft submission checks all five versioned deliverables against the selected form version and blocks missing or conflicting versions.
 
 ## v2.6.1 Submission Forms and Shooting Script
 

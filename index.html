@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="styles.v2.6.1.css">
+  <link rel="stylesheet" href="styles.v2.6.2.css">
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
@@ -84,7 +84,7 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/icon-192.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.6.1</span></small></div>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.6.2</span></small></div>
       <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><span data-ui-icon="panel-close"></span></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
@@ -179,7 +179,6 @@
                   </div>
                   <button class="btn" id="editorImportBtn"><span data-ui-icon="import"></span><span>Import</span></button>
                   <button class="btn" id="historyBtn" title="Recovery snapshots and earlier document states"><span data-ui-icon="history"></span><span>History / Versions</span></button>
-                  <button class="btn" id="copyOutlineBtn" type="button">Copy Outline</button>
                   <button class="btn" id="openSubmissionBtn" type="button">Submission Forms</button>
                   <button class="btn" id="validateBtn"><span data-ui-icon="check-circle"></span><span>Validate</span></button>
                   <button class="btn" id="settingsBtnEditor"><span data-ui-icon="settings"></span><span>Settings & Sync</span></button>
@@ -263,7 +262,7 @@
   <main>
     <section class="view active" id="homeView">
       <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.6.1</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.6.2</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
         <div class="stat-grid" id="dashboardStats"></div>
         <section class="portal-panel dashboard-updates-panel"><div class="section-head"><div><span class="eyebrow">WHAT'S NEW</span><h3>Updates & announcements</h3></div></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
         <div class="portal-grid two-thirds">
@@ -335,7 +334,7 @@
           </section>
 
           <aside class="side-panel right-panel" id="rightPanel">
-            <div class="outline-drawer-head"><div class="panel-title">Document Outline</div><button class="outline-close" id="outlineCloseBtn" type="button" aria-label="Close document outline">×</button></div>
+            <div class="outline-drawer-head"><div class="panel-title">Document Outline</div><button class="btn small copy-outline-button" id="copyOutlineBtn" type="button">Copy Outline</button><button class="outline-close" id="outlineCloseBtn" type="button" aria-label="Close document outline">×</button></div>
             <div class="right-panel-inner">
               <div class="outline-list" id="outlineList"></div>
             </div>
@@ -367,8 +366,8 @@
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
-<script src="platform.v2.6.1.js"></script>
-<script src="app.v2.6.1.js"></script>
-<script src="submissions.v2.6.1.js"></script>
+<script src="platform.v2.6.2.js"></script>
+<script src="app.v2.6.2.js"></script>
+<script src="submissions.v2.6.2.js"></script>
 </body>
 </html>

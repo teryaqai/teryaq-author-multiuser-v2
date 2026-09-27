@@ -1,4 +1,4 @@
-const CACHE = 'teryaq-master-tool-v2.6.1-submission-forms-1';
+const CACHE = 'teryaq-master-tool-v2.6.2-submission-history-2';
 const SCOPE_URL = new URL(self.registration.scope);
 const ROOT_URL = SCOPE_URL.href;
 const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
@@ -6,12 +6,15 @@ const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
 const CORE_ASSETS = [
   ROOT_URL,
   APP_SHELL_URL,
-  new URL('styles.v2.6.1.css', SCOPE_URL).href,
-  new URL('platform.v2.6.1.js', SCOPE_URL).href,
-  new URL('app.v2.6.1.js', SCOPE_URL).href,
-  new URL('submissions.v2.6.1.js', SCOPE_URL).href,
+  new URL('styles.v2.6.2.css', SCOPE_URL).href,
+  new URL('platform.v2.6.2.js', SCOPE_URL).href,
+  new URL('app.v2.6.2.js', SCOPE_URL).href,
+  new URL('submissions.v2.6.2.js', SCOPE_URL).href,
   new URL('vendor/jszip.min.js', SCOPE_URL).href,
   new URL('vendor/JSZip-LICENSE.md', SCOPE_URL).href,
+  new URL('vendor/pdf.min.mjs', SCOPE_URL).href,
+  new URL('vendor/pdf.worker.min.mjs', SCOPE_URL).href,
+  new URL('vendor/PDF.js-LICENSE.txt', SCOPE_URL).href,
   new URL('manifest.webmanifest', SCOPE_URL).href,
   new URL('VERSION.json', SCOPE_URL).href,
   new URL('fonts/Tajawal-Regular.ttf', SCOPE_URL).href,

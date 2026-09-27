@@ -26,6 +26,32 @@ Deno.serve(async (request) => {
 
     const payload = await request.json()
     const action = String(payload.action ?? '')
+    if (action === 'purge_submission') {
+      const submissionId = String(payload.submission_id ?? '')
+      if (!/^[0-9a-f-]{36}$/i.test(submissionId)) throw new Error('Invalid submission ID')
+      const [{ data: submission, error: submissionError }, { data: config, error: configError }] = await Promise.all([
+        adminClient.from('content_submissions').select('id,owner_id,deleted_at,files').eq('id', submissionId).single(),
+        adminClient.from('system_config').select('value').eq('key', 'trash_retention_days').single(),
+      ])
+      if (submissionError || !submission) throw new Error('Submission not found')
+      if (!submission.deleted_at) throw new Error('Only trashed submissions can be purged')
+      if (configError) throw configError
+      const retentionDays = Math.max(1, Number(config?.value ?? 30))
+      const cutoff = new Date(Date.now() - retentionDays * 86400000).toISOString()
+      if (Date.parse(submission.deleted_at) > Date.parse(cutoff)) throw new Error('Retention period has not expired')
+      const prefix = `${submission.owner_id}/${submission.id}/`
+      const paths = (Array.isArray(submission.files) ? submission.files : []).map((item) => String(item?.path ?? ''))
+      if (paths.some((path) => !path.startsWith(prefix) || path.includes('..'))) throw new Error('Submission contains an invalid storage path')
+      for (let start = 0; start < paths.length; start += 1000) {
+        const { error } = await adminClient.storage.from('teryaq-submissions').remove(paths.slice(start, start + 1000))
+        if (error) throw error
+      }
+      const { data: deleted, error: deleteError } = await adminClient.from('content_submissions')
+        .delete().eq('id', submissionId).lt('deleted_at', cutoff).select('id').maybeSingle()
+      if (deleteError) throw deleteError
+      if (!deleted) throw new Error('The submission changed during deletion; refresh the trash')
+      return json({ deleted: true, submission_id: submissionId })
+    }
     const documentId = String(payload.document_id ?? '')
     if (action !== 'purge_document' || !documentId) throw new Error('Invalid governance action')
 
