@@ -1,4 +1,10 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.6.6
+# TERYAQ Master Tool — Multi-user Offline-First v2.6.7
+
+## v2.6.7 Drag handles and block selection
+
+- Shooting Script and Scientific Draft – Text both display matching compact 20 × 20 px drag and selection controls, vertically stacked on the left of every content block. The checkbox is a single white bordered box that turns green with a white check when selected.
+- Selecting any number of blocks reveals Delete selected above the writing page. Confirmation protects the action, Undo restores the previous content, and the heading outline/table register refresh after deleting or moving blocks. No selection state is stored in the document.
+- A4 print/export excludes the editor controls and their spacing. No database migration is required.
 
 ## v2.6.6 Script drag handles
 

@@ -4,9 +4,9 @@ import re, sys
 root=Path(__file__).parent
 required=[
     'index.html','styles.css','platform.js','app.js',
-    'styles.v2.6.6.css','platform.v2.6.6.js','app.v2.6.6.js','submissions.js','submissions.v2.6.6.js',
+    'styles.v2.6.7.css','platform.v2.6.7.js','app.v2.6.7.js','submissions.js','submissions.v2.6.7.js',
     'sw.js','manifest.webmanifest','README.md','UPDATE_AND_MIGRATION_POLICY.md',
-    'UPLOAD_v2.6.6.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
+    'UPLOAD_v2.6.7.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
     'supabase/migrations/010_governance_admin_tools.sql',
     'supabase/migrations/011_v2_5_1_profiles_updates.sql',
     'supabase/migrations/012_service_role_profiles_select.sql',
@@ -202,12 +202,12 @@ for forbidden in ['.p-Normal{','.p-Heading1{','.p-Heading2{','.p-Heading3{','.p-
         print('V2.4 LAYOUT MUST NOT OVERRIDE DOCUMENT STYLE:',forbidden);sys.exit(1)
 
 version=(root/'VERSION.json').read_text(encoding='utf-8')
-if '"appVersion": "2.6.6"' not in version or '"cloudMigrationVersion": 15' not in version or "teryaq-master-tool-v2.6.6" not in (root/'sw.js').read_text(encoding='utf-8'):
-    print('VERSION/CACHE MISMATCH: expected v2.6.6 / migration 15');sys.exit(1)
-for source,versioned in [('app.js','app.v2.6.6.js'),('platform.js','platform.v2.6.6.js'),('styles.css','styles.v2.6.6.css'),('submissions.js','submissions.v2.6.6.js')]:
+if '"appVersion": "2.6.7"' not in version or '"cloudMigrationVersion": 15' not in version or "teryaq-master-tool-v2.6.7" not in (root/'sw.js').read_text(encoding='utf-8'):
+    print('VERSION/CACHE MISMATCH: expected v2.6.7 / migration 15');sys.exit(1)
+for source,versioned in [('app.js','app.v2.6.7.js'),('platform.js','platform.v2.6.7.js'),('styles.css','styles.v2.6.7.css'),('submissions.js','submissions.v2.6.7.js')]:
     if (root/source).read_bytes()!=(root/versioned).read_bytes():
         print('STALE VERSIONED ASSET:',versioned);sys.exit(1)
-for ref in ['styles.v2.6.6.css','platform.v2.6.6.js','app.v2.6.6.js','submissions.v2.6.6.js','vendor/jszip.min.js']:
+for ref in ['styles.v2.6.7.css','platform.v2.6.7.js','app.v2.6.7.js','submissions.v2.6.7.js','vendor/jszip.min.js']:
     if ref not in html:
         print('MISSING VERSIONED ASSET REFERENCE:',ref);sys.exit(1)
 for number in range(1,16):
@@ -281,7 +281,7 @@ for marker in ['verifySubmissionFileVersion','assertSubmissionVersions','extract
     if marker not in submissions:
         print('INCOMPLETE DELIVERY VERSION VERIFICATION:',marker);sys.exit(1)
 
-# v2.6.6 safety: cleanup must be explicit, admin-only, version-guarded, and
+# v2.6.7 safety: cleanup must be explicit, admin-only, version-guarded, and
 # independent of push_document. Preview must never enter the upload/submit path.
 migration15=(root/'supabase'/'migrations'/'015_cloud_version_retention.sql').read_text(encoding='utf-8')
 for marker in ['public.is_admin(auth.uid())','admin_version_storage','admin_prune_document_versions',
@@ -295,9 +295,17 @@ if 'disabled aria-label=' not in submissions or 'data-preview-step' not in previ
     print('FORM PREVIEW MUST NOT UPLOAD, SUBMIT, OR REQUIRE FIELDS');sys.exit(1)
 if "'shooting-script'].includes(doc?.templateId)" not in app or "if(!isScript()||!await confirmScientificExportVersion(state.current))" not in app or 'icons/ui/drag.png' not in app:
     print('INCOMPLETE SCRIPT VERSION CONFIRMATION OR DRAG ICON');sys.exit(1)
-for marker in ['--script-left-border:3px','--script-left-border:4px','--script-left-border:0px','- var(--script-left-border,0px)','padding:0;border:1px solid #dae1dc','.script-drag-icon{display:block;width:16px;height:16px']:
+for marker in ['--script-left-border:3px','--script-left-border:4px','--script-left-border:0px','- var(--script-left-border,0px)','padding:0;border:1px solid #dae1dc','.script-drag-icon{display:block;width:14px;height:14px']:
     if marker not in styles:
         print('SCRIPT DRAG HANDLE ALIGNMENT OR ICON CENTERING IS MISSING:',marker);sys.exit(1)
+if any(f'id="{name}"' not in html for name in ['blockSelectionToolbar','selectedBlockCount','deleteSelectedBlocksBtn']):
+    print('EDITOR SELECTION BAR IS MISSING');sys.exit(1)
+for marker in ['selectedBlockIds:new Set()','function hasBlockControls()','scientific-draft-text',"checkbox.setAttribute('role','checkbox')",'function deleteSelectedBlocks()','function moveDocumentBlockTo(','pushHistory(\'Before deleting selected sections\')']:
+    if marker not in app:
+        print('BLOCK SELECTION, UNDO OR REORDER IS MISSING:',marker);sys.exit(1)
+for marker in ['.editor-text-mode .block-controls{','.editor-text-mode .block-select-box{background:#fff','.editor-text-mode .block-select-box[aria-checked="true"]{background:#408a71','width:20px;height:20px','@media print{.editor-text-mode .doc-block{min-height:0!important}']:
+    if marker not in styles:
+        print('BLOCK CONTROLS MUST BE COMPACT, SINGLE-BOX, AND HIDDEN IN PRINT:',marker);sys.exit(1)
 if 'id="figureOnlyPdfBtn"' in html or "byId('figureOnlyPdfBtn')" in app or '.figure-export-actions{' in styles:
     print('DUPLICATE FIGURES EXPORT BUTTON IS STILL PRESENT');sys.exit(1)
 if 'id="figureOnlyExportMenuBtn"' not in html or "byId('figureOnlyExportMenuBtn').onclick" not in app or "setRibbonTab('file')" not in app:
