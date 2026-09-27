@@ -4,9 +4,9 @@ import re, sys
 root=Path(__file__).parent
 required=[
     'index.html','styles.css','platform.js','app.js',
-    'styles.v2.6.0.css','platform.v2.6.0.js','app.v2.6.0.js','submissions.js','submissions.v2.6.0.js',
+    'styles.v2.6.1.css','platform.v2.6.1.js','app.v2.6.1.js','submissions.js','submissions.v2.6.1.js',
     'sw.js','manifest.webmanifest','README.md','UPDATE_AND_MIGRATION_POLICY.md',
-    'UPLOAD_v2.6.0.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
+    'UPLOAD_v2.6.1.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
     'supabase/migrations/010_governance_admin_tools.sql',
     'supabase/migrations/011_v2_5_1_profiles_updates.sql',
     'supabase/migrations/012_service_role_profiles_select.sql',
@@ -15,7 +15,7 @@ required=[
     'supabase/functions/admin-governance/index.ts',
     'vendor/jszip.min.js','vendor/JSZip-LICENSE.md',
     'fonts/Tajawal-Regular.ttf','fonts/Tajawal-Medium.ttf','fonts/Tajawal-Bold.ttf','icons/default-avatar.svg',
-    'icons/ui/documents.svg','icons/ui/success.svg','icons/ui/conflict.svg','icons/ui/sync.svg','icons/ui/updates.svg','icons/ui/guide.svg','icons/ui/draft-figure.png','icons/ui/sync.png','icons/ui/blank-page.png','icons/ui/two-document.png','icons/ui/view.png','icons/ui/list.png','icons/ui/import.png','icons/ui/export.png','icons/ui/sync-cloud.png','icons/ui/notifications.png','icons/ui/settings.png','icons/ui/back.png','icons/ui/dashboard.png','icons/ui/templates.png','icons/ui/trash.png','icons/ui/admin.png','icons/ui/document.png','icons/ui/date.png','icons/ui/bullet-circle.png','icons/ui/bullet-square.png','icons/ui/bullet-rhomboid.png','icons/ui/save.png','icons/ui/conflict.png','icons/ui/analytics.png','icons/ui/users-access.png','icons/ui/audit-log.png','icons/ui/content-setup.png','icons/ui/overview.png','icons/ui/cloud-operations.png','icons/ui/draft-text.png','icons/ui/text-rtl.svg','icons/ui/text-ltr.svg'
+    'icons/ui/documents.svg','icons/ui/success.svg','icons/ui/conflict.svg','icons/ui/sync.svg','icons/ui/updates.svg','icons/ui/guide.svg','icons/ui/draft-figure.png','icons/ui/sync.png','icons/ui/blank-page.png','icons/ui/two-document.png','icons/ui/view.png','icons/ui/list.png','icons/ui/import.png','icons/ui/export.png','icons/ui/sync-cloud.png','icons/ui/notifications.png','icons/ui/settings.png','icons/ui/back.png','icons/ui/dashboard.png','icons/ui/templates.png','icons/ui/trash.png','icons/ui/admin.png','icons/ui/document.png','icons/ui/date.png','icons/ui/bullet-circle.png','icons/ui/bullet-square.png','icons/ui/bullet-rhomboid.png','icons/ui/save.png','icons/ui/conflict.png','icons/ui/analytics.png','icons/ui/users-access.png','icons/ui/audit-log.png','icons/ui/content-setup.png','icons/ui/overview.png','icons/ui/cloud-operations.png','icons/ui/draft-text.png','icons/ui/submission-forms.png','icons/ui/archive.png','icons/ui/text-rtl.svg','icons/ui/text-ltr.svg'
 ]
 missing=[x for x in required if not (root/x).exists()]
 if missing:
@@ -26,7 +26,7 @@ ids=re.findall(r'\bid="([^"]+)"',html)
 dups=sorted({x for x in ids if ids.count(x)>1})
 if dups:
     print('DUPLICATE IDS:',dups);sys.exit(1)
-for x in ['authGate','authPasswordToggle','authCloudToggle','authCloudPanel','authCloudClose','authCloudScrim','authOfflineIdentity','requestAccountBtn','accountRequestModal','accountRequestForm','inviteSetupModal','inviteSetupForm','invitePassword','invitePasswordConfirm','appShell','appSidebar','sidebarCollapse','syncBtn','adminBtn','trashBtn','documentsView','documentBulkBar','bulkDeleteDocuments','clearDocumentSelection','profileView','adminView','notificationsButton','profileMenuButton','dashboardUpdates','leftPanel','editorContentColumn','tableRegister','outlineViewBtn','outlineCloseBtn','outlineScrim','modalBody','appVersionBadge','sidebarAppVersion','exportMenu','exportMenuButton','exportMenuPanel','htmlExportBtn','editorImportBtn','importDocxTableBtn','viewOnlyBtn','underlineBtn','scriptTeleprompter','scriptPromptStage','scriptInstructionBtn','scriptHeadingBtn','scriptRtlBtn','scriptLtrBtn','scriptAlignLeft','scriptAlignCenter','scriptAlignRight','scriptRepeatBtn','scriptRegion','deleteTableBtn','printPreviewWorkspace','printPreviewPages']:
+for x in ['authGate','authPasswordToggle','authCloudToggle','authCloudPanel','authCloudClose','authCloudScrim','authOfflineIdentity','requestAccountBtn','accountRequestModal','accountRequestForm','inviteSetupModal','inviteSetupForm','invitePassword','invitePasswordConfirm','appShell','appSidebar','sidebarCollapse','syncBtn','adminBtn','trashBtn','documentsView','documentBulkBar','bulkDeleteDocuments','clearDocumentSelection','profileView','adminView','notificationsButton','profileMenuButton','dashboardUpdates','leftPanel','editorContentColumn','tableRegister','outlineViewBtn','outlineCloseBtn','outlineScrim','modalBody','appVersionBadge','sidebarAppVersion','exportMenu','exportMenuButton','exportMenuPanel','htmlExportBtn','editorImportBtn','importDocxTableBtn','viewOnlyBtn','underlineBtn','scriptTeleprompter','scriptPromptStage','montageExportBtn','scriptIntroBtn','scriptLightBreakBtn','scriptVisualRefBtn','scriptPresenterBtn','scriptReviewBtn','scriptHeadingBtn','scriptRtlBtn','scriptLtrBtn','scriptAlignLeft','scriptAlignCenter','scriptAlignRight','scriptRepeatBtn','scriptRegion','deleteTableBtn','printPreviewWorkspace','printPreviewPages']:
     if f'id="{x}"' not in html:
         print('MISSING HTML ID:',x);sys.exit(1)
 
@@ -200,12 +200,12 @@ for forbidden in ['.p-Normal{','.p-Heading1{','.p-Heading2{','.p-Heading3{','.p-
         print('V2.4 LAYOUT MUST NOT OVERRIDE DOCUMENT STYLE:',forbidden);sys.exit(1)
 
 version=(root/'VERSION.json').read_text(encoding='utf-8')
-if '"appVersion": "2.6.0"' not in version or '"cloudMigrationVersion": 13' not in version or "teryaq-master-tool-v2.6.0" not in (root/'sw.js').read_text(encoding='utf-8'):
-    print('VERSION/CACHE MISMATCH: expected v2.6.0 / migration 13');sys.exit(1)
-for source,versioned in [('app.js','app.v2.6.0.js'),('platform.js','platform.v2.6.0.js'),('styles.css','styles.v2.6.0.css'),('submissions.js','submissions.v2.6.0.js')]:
+if '"appVersion": "2.6.1"' not in version or '"cloudMigrationVersion": 13' not in version or "teryaq-master-tool-v2.6.1" not in (root/'sw.js').read_text(encoding='utf-8'):
+    print('VERSION/CACHE MISMATCH: expected v2.6.1 / migration 13');sys.exit(1)
+for source,versioned in [('app.js','app.v2.6.1.js'),('platform.js','platform.v2.6.1.js'),('styles.css','styles.v2.6.1.css'),('submissions.js','submissions.v2.6.1.js')]:
     if (root/source).read_bytes()!=(root/versioned).read_bytes():
         print('STALE VERSIONED ASSET:',versioned);sys.exit(1)
-for ref in ['styles.v2.6.0.css','platform.v2.6.0.js','app.v2.6.0.js','submissions.v2.6.0.js','vendor/jszip.min.js']:
+for ref in ['styles.v2.6.1.css','platform.v2.6.1.js','app.v2.6.1.js','submissions.v2.6.1.js','vendor/jszip.min.js']:
     if ref not in html:
         print('MISSING VERSIONED ASSET REFERENCE:',ref);sys.exit(1)
 for number in range(1,14):

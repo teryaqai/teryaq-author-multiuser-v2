@@ -1,4 +1,10 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.6.0
+# TERYAQ Master Tool — Multi-user Offline-First v2.6.1
+
+## v2.6.1 Submission Forms and Shooting Script
+
+- Admin Content Setup groups editorial versions by template. Form builder has its own Admin tab with sections and compact field settings. The admin submission library is now **Archive**; supplied icons identify it and Submission Forms.
+- Shooting Script adds intro and light break cues, visual references and review notes hidden from the teleprompter, and presenter guidance visible while reading. File → Export has a separate montage PDF that omits presenter guidance and review notes. Every script block can move up or down.
+- Existing v2.6.0 migration 013 remains the required database migration. No new cloud migration is necessary.
 
 ## v2.6.0 Submission Forms and library
 
