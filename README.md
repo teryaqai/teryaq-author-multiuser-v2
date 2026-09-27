@@ -1,4 +1,10 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.5.14
+# TERYAQ Master Tool — Multi-user Offline-First v2.6.0
+
+## v2.6.0 Submission Forms and library
+
+- Adds **Submission Forms** for everyone and a five-section scientific draft form. Admin Content Setup manages the cover, sections, questions, required flags, conditional fields, categories, courses, chapters, and editorial versions.
+- Selecting scientific draft version 2 reveals the required completed **Simplified Audit** HTML upload in deliverables. Submitted files and answers are organized by category, course, chapter, content type, and editorial version in the private administrator library.
+- Adds category and editorial version metadata to the built-in document templates, Copy Outline for scientific text, a figures-only PDF print export, and editable JSON `.ترياق` document export. Apply migration 013 before deploying; see `UPLOAD_v2.6.0.md`.
 
 ## v2.5.14 Non-spoken Script headings
 

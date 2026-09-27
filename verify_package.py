@@ -4,12 +4,13 @@ import re, sys
 root=Path(__file__).parent
 required=[
     'index.html','styles.css','platform.js','app.js',
-    'styles.v2.5.14.css','platform.v2.5.14.js','app.v2.5.14.js',
+    'styles.v2.6.0.css','platform.v2.6.0.js','app.v2.6.0.js','submissions.js','submissions.v2.6.0.js',
     'sw.js','manifest.webmanifest','README.md','UPDATE_AND_MIGRATION_POLICY.md',
-    'UPLOAD_v2.5.14.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
+    'UPLOAD_v2.6.0.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
     'supabase/migrations/010_governance_admin_tools.sql',
     'supabase/migrations/011_v2_5_1_profiles_updates.sql',
     'supabase/migrations/012_service_role_profiles_select.sql',
+    'supabase/migrations/013_submission_forms_library.sql',
     'supabase/functions/admin-account-request/index.ts',
     'supabase/functions/admin-governance/index.ts',
     'vendor/jszip.min.js','vendor/JSZip-LICENSE.md',
@@ -199,17 +200,25 @@ for forbidden in ['.p-Normal{','.p-Heading1{','.p-Heading2{','.p-Heading3{','.p-
         print('V2.4 LAYOUT MUST NOT OVERRIDE DOCUMENT STYLE:',forbidden);sys.exit(1)
 
 version=(root/'VERSION.json').read_text(encoding='utf-8')
-if '"appVersion": "2.5.14"' not in version or '"cloudMigrationVersion": 12' not in version or "teryaq-master-tool-v2.5.14" not in (root/'sw.js').read_text(encoding='utf-8'):
-    print('VERSION/CACHE MISMATCH: expected v2.5.14 / migration 12');sys.exit(1)
-for source,versioned in [('app.js','app.v2.5.14.js'),('platform.js','platform.v2.5.14.js'),('styles.css','styles.v2.5.14.css')]:
+if '"appVersion": "2.6.0"' not in version or '"cloudMigrationVersion": 13' not in version or "teryaq-master-tool-v2.6.0" not in (root/'sw.js').read_text(encoding='utf-8'):
+    print('VERSION/CACHE MISMATCH: expected v2.6.0 / migration 13');sys.exit(1)
+for source,versioned in [('app.js','app.v2.6.0.js'),('platform.js','platform.v2.6.0.js'),('styles.css','styles.v2.6.0.css'),('submissions.js','submissions.v2.6.0.js')]:
     if (root/source).read_bytes()!=(root/versioned).read_bytes():
         print('STALE VERSIONED ASSET:',versioned);sys.exit(1)
-for ref in ['styles.v2.5.14.css','platform.v2.5.14.js','app.v2.5.14.js','vendor/jszip.min.js']:
+for ref in ['styles.v2.6.0.css','platform.v2.6.0.js','app.v2.6.0.js','submissions.v2.6.0.js','vendor/jszip.min.js']:
     if ref not in html:
         print('MISSING VERSIONED ASSET REFERENCE:',ref);sys.exit(1)
-for number in range(1,13):
+for number in range(1,14):
     if not list((root/'supabase'/'migrations').glob(f'{number:03d}_*.sql')):
         print('MISSING CLOUD MIGRATION:',number);sys.exit(1)
+submissions=(root/'submissions.js').read_text(encoding='utf-8')
+migration13=(root/'supabase'/'migrations'/'013_submission_forms_library.sql').read_text(encoding='utf-8')
+for marker in ["id:'simplifiedAudit'", "accept:'.html,.htm',required:true,showWhen:{field:'version',equals:'2'}",'uploadSubmissionFile(path,file)','finishSubmission(id,manifest)']:
+    if marker not in submissions:
+        print('INCOMPLETE VERSION 2 AUDIT SUBMISSION:',marker);sys.exit(1)
+for marker in ["'teryaq-submissions'",'submissions_admin_read','submissions_storage_admin_read','validate_content_submission_trigger']:
+    if marker not in migration13:
+        print('INCOMPLETE PRIVATE SUBMISSION LIBRARY:',marker);sys.exit(1)
 migration9=(root/'supabase'/'migrations'/'009_content_options_repair_course_hierarchy.sql').read_text(encoding='utf-8')
 for marker in ['references public.content_subjects(id) on delete restrict','unique (subject_id, chapter_number)','security definer','not public.is_admin(auth.uid())','revoke all on function public.admin_save_content_option','grant execute on function public.admin_save_content_option']:
     if marker not in migration9:

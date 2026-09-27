@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="styles.v2.5.14.css">
+  <link rel="stylesheet" href="styles.v2.6.0.css">
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
@@ -84,7 +84,7 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/icon-192.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.5.14</span></small></div>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.6.0</span></small></div>
       <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><span data-ui-icon="panel-close"></span></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
@@ -92,6 +92,7 @@
       <button class="sidebar-link active" data-nav="home" title="Dashboard"><span class="nav-icon" data-ui-icon="home"></span><span class="nav-label">Dashboard</span></button>
       <button class="sidebar-link" data-nav="documents" title="Documents"><span class="nav-icon" data-ui-icon="documents"></span><span class="nav-label">Documents</span></button>
       <button class="sidebar-link" data-nav="templates" title="Templates"><span class="nav-icon" data-ui-icon="templates"></span><span class="nav-label">Templates</span></button>
+      <button class="sidebar-link" data-nav="submissionForms" title="Submission Forms"><span class="nav-icon" data-ui-icon="documents"></span><span class="nav-label">Submission Forms</span></button>
       <button class="sidebar-link" data-nav="trash" id="trashBtn" title="Trash"><span class="nav-icon" data-ui-icon="trash"></span><span class="nav-label">Trash</span></button>
       <button class="sidebar-link" data-nav="guide" title="Guide"><span class="nav-icon" data-ui-icon="guide"></span><span class="nav-label">Guide</span></button>
       <button class="sidebar-link hidden" data-nav="admin" id="adminBtn" title="Admin"><span class="nav-icon" data-ui-icon="shield"></span><span class="nav-label">Admin</span></button>
@@ -115,7 +116,7 @@
         <button class="btn conflict-summary hidden" id="resolveConflictsBtn"><span data-ui-icon="conflict"></span><span>Conflicts</span></button>
         <button class="btn" id="importBtn"><span data-ui-icon="import"></span><span>Import</span></button>
       </div>
-      <input id="importFile" type="file" accept=".teryaq,.json,application/json" hidden>
+      <input id="importFile" type="file" accept=".ترياق,.teryaq,.json,application/json" hidden>
     </div>
     <div class="top-actions hidden" id="editorActions">
       <div class="toolbar-cluster">
@@ -169,7 +170,7 @@
                   <div class="export-menu" id="exportMenu">
                     <button class="btn export-menu-trigger" id="exportMenuButton" type="button" aria-haspopup="menu" aria-expanded="false"><span data-ui-icon="export"></span><span>Export</span><span data-ui-icon="chevron-down"></span></button>
                     <div class="export-menu-panel hidden" id="exportMenuPanel" role="menu" aria-label="Export options">
-                      <button id="backupBtn" type="button" role="menuitem"><span class="export-option-icon" data-ui-icon="documents"></span><span><b>Export Draft (.teryaq)</b><small>Editable and re-importable document</small></span></button>
+                      <button id="backupBtn" type="button" role="menuitem"><span class="export-option-icon" data-ui-icon="documents"></span><span><b>Export Draft (.ترياق)</b><small>Editable JSON document for re-import</small></span></button>
                       <button id="printBtn" type="button" role="menuitem"><span class="export-option-icon" data-ui-icon="text"></span><span><b>Export as PDF</b><small>Open the A4 print and PDF dialog</small></span></button>
                       <button id="saveTemplateBtn" type="button" role="menuitem"><span class="export-option-icon" data-ui-icon="templates"></span><span><b>Save as Template</b><small>Create a reusable local template</small></span></button>
                       <button id="htmlExportBtn" type="button" role="menuitem"><span class="export-option-icon" data-ui-icon="export"></span><span><b>Export as HTML</b><small>Standalone view with embedded font</small></span></button>
@@ -177,6 +178,8 @@
                   </div>
                   <button class="btn" id="editorImportBtn"><span data-ui-icon="import"></span><span>Import</span></button>
                   <button class="btn" id="historyBtn" title="Recovery snapshots and earlier document states"><span data-ui-icon="history"></span><span>History / Versions</span></button>
+                  <button class="btn" id="copyOutlineBtn" type="button">Copy Outline</button>
+                  <button class="btn" id="openSubmissionBtn" type="button">Submission Forms</button>
                   <button class="btn" id="validateBtn"><span data-ui-icon="check-circle"></span><span>Validate</span></button>
                   <button class="btn" id="settingsBtnEditor"><span data-ui-icon="settings"></span><span>Settings & Sync</span></button>
                 </div>
@@ -256,7 +259,7 @@
   <main>
     <section class="view active" id="homeView">
       <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.5.14</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.6.0</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
         <div class="stat-grid" id="dashboardStats"></div>
         <section class="portal-panel dashboard-updates-panel"><div class="section-head"><div><span class="eyebrow">WHAT'S NEW</span><h3>Updates & announcements</h3></div></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
         <div class="portal-grid two-thirds">
@@ -293,6 +296,7 @@
     </div></section>
     <section class="view" id="settingsView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">Preferences</span><h2>Settings & Sync</h2><p>Manage automatic synchronization, cloud connection, backups, and this device.</p></div></div><div id="settingsPageBody"></div></div></section>
     <section class="view" id="profileView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">Your account</span><h2>Profile</h2><p>Manage the name and photo shown across TERYAQ.</p></div></div><div id="accountPageBody"></div></div></section>
+    <section class="view" id="submissionFormsView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">TERYAQ</span><h2>Submission Forms</h2><p>Choose a submission form to send your completed work.</p></div></div><div id="submissionFormsBody"></div></div></section>
     <section class="view" id="adminView"><div class="portal-page admin-center-page"><div class="page-heading"><div><span class="eyebrow">Administration</span><h2>Admin Center</h2><p>Manage access, content, cloud operations, analytics, governance, and user updates.</p></div></div><div id="adminPageBody"></div></div></section>
 
     <section class="view" id="editorView">
@@ -309,7 +313,7 @@
                 <div class="cover-title"><h2>Draft information</h2><span class="chip">Scientific Draft - Text Content</span></div>
                 <div class="cover-body">
                   <div class="meta-grid">
-                    <div class="field"><label>Author</label><div id="metaName" class="author-picker-host" aria-label="Authors"></div><small class="field-hint">Select one or more authors.</small></div><div class="field"><label>Course</label><select id="metaCourse"></select></div>
+                    <div class="field"><label>Author</label><div id="metaName" class="author-picker-host" aria-label="Authors"></div><small class="field-hint">Select one or more authors.</small></div><div class="field"><label>Category</label><select id="metaCategory"></select></div><div class="field"><label>Course</label><select id="metaCourse"></select></div><div class="field"><label>Version</label><select id="metaVersion"></select></div>
                     <div class="field"><label><span data-ui-icon="date"></span> Start date</label><input id="metaStart" type="date"></div><div class="field"><label><span data-ui-icon="date"></span> End date</label><input id="metaEnd" type="date"></div>
                     <div class="field span-2"><label>Chapter</label><select id="metaChapter"></select><small class="field-hint">Only chapters belonging to the selected course are shown.</small></div>
                     <div class="field" style="grid-column:1/-1"><label>General notes</label><textarea id="metaNotes"></textarea></div>
@@ -343,7 +347,8 @@
           <section class="figure-upload-summary hidden" id="figureUploadSummary" aria-live="polite"></section>
           <details class="figure-guide"><summary>Instructions & Notes</summary><div class="inside"><p><b>Order 1:</b> only when the writer is certain there are no copyright issues and the style is suitable.</p><p><b>Order 3 defaults:</b> Tajawal/English; change skin color and gender when suitable; minor color change; preserve anatomy/histology exactly; alter only non-scientific visual features; remove logos/signatures/watermarks/unnecessary titles; white background; final image 1:1. Any exception or extra change must be stated in PROMPT → DETAILS.</p><p><b>Order 4:</b> clearly define the desired final output. <b>Order 5:</b> clearly describe what should be searched for.</p><p><b>Very important:</b> figure code contains only the figure number; title is mandatory; caption is optional.</p></div></details>
           <details class="figure-guide"><summary>Steps of Creation</summary><div class="inside"><ol><li>Choose a clear, high-quality figure matching Teryaq usage.</li><li>Add it to the Figure area.</li><li>Write the figure code.</li><li>Write a short title; use Caption for extra clarification.</li><li>Always record the source.</li><li>Choose the correct Order.</li><li>Write details in PROMPT → DETAILS.</li><li>Choose copyright status; use “I don't know” when uncertain.</li><li>Add any extra notes.</li></ol></div></details>
-          <section class="cover-card" style="width:100%"><div class="cover-title"><h2>Draft information</h2><span class="chip">Scientific Draft - Figures</span></div><div class="cover-body"><div class="meta-grid"><div class="field"><label>Author</label><div id="figMetaName" class="author-picker-host" aria-label="Authors"></div><small class="field-hint">Select one or more authors.</small></div><div class="field"><label>Course</label><select id="figMetaCourse"></select></div><div class="field span-2"><label>Chapter</label><select id="figMetaChapter"></select><small class="field-hint">Only chapters belonging to the selected course are shown.</small></div><div class="field" style="grid-column:1/-1"><label>General notes</label><textarea id="figMetaNotes"></textarea></div></div></div></section>
+          <section class="cover-card" style="width:100%"><div class="cover-title"><h2>Draft information</h2><span class="chip">Scientific Draft - Figures</span></div><div class="cover-body"><div class="meta-grid"><div class="field"><label>Author</label><div id="figMetaName" class="author-picker-host" aria-label="Authors"></div><small class="field-hint">Select one or more authors.</small></div><div class="field"><label>Category</label><select id="figMetaCategory"></select></div><div class="field"><label>Course</label><select id="figMetaCourse"></select></div><div class="field"><label>Version</label><select id="figMetaVersion"></select></div><div class="field span-2"><label>Chapter</label><select id="figMetaChapter"></select><small class="field-hint">Only chapters belonging to the selected course are shown.</small></div><div class="field" style="grid-column:1/-1"><label>General notes</label><textarea id="figMetaNotes"></textarea></div></div></div></section>
+          <div class="figure-export-actions"><button class="btn primary" id="figureOnlyPdfBtn" type="button">Export figures only (PDF)</button></div>
           <div class="figure-cards" id="figureCards"></div>
           <div style="text-align:center;padding:18px"><button class="btn primary" onclick="(function(){const d=window.__dummy})()" id="addFigureBtn">+ Add Figure</button></div>
         </div>
@@ -358,7 +363,8 @@
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
-<script src="platform.v2.5.14.js"></script>
-<script src="app.v2.5.14.js"></script>
+<script src="platform.v2.6.0.js"></script>
+<script src="app.v2.6.0.js"></script>
+<script src="submissions.v2.6.0.js"></script>
 </body>
 </html>

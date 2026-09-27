@@ -1,7 +1,7 @@
 {
-  "appVersion": "2.5.14",
+  "appVersion": "2.6.0",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
-  "cloudMigrationVersion": 12,
-  "release": "shooting-script-headings"
+  "cloudMigrationVersion": 13,
+  "release": "submission-forms-library"
 }
