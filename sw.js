@@ -1,4 +1,4 @@
-const CACHE = 'teryaq-master-tool-v2.6.4-figures-file-ribbon';
+const CACHE = 'teryaq-master-tool-v2.6.6-script-drag-alignment';
 const SCOPE_URL = new URL(self.registration.scope);
 const ROOT_URL = SCOPE_URL.href;
 const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
@@ -6,10 +6,10 @@ const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
 const CORE_ASSETS = [
   ROOT_URL,
   APP_SHELL_URL,
-  new URL('styles.v2.6.4.css', SCOPE_URL).href,
-  new URL('platform.v2.6.4.js', SCOPE_URL).href,
-  new URL('app.v2.6.4.js', SCOPE_URL).href,
-  new URL('submissions.v2.6.4.js', SCOPE_URL).href,
+  new URL('styles.v2.6.6.css', SCOPE_URL).href,
+  new URL('platform.v2.6.6.js', SCOPE_URL).href,
+  new URL('app.v2.6.6.js', SCOPE_URL).href,
+  new URL('submissions.v2.6.6.js', SCOPE_URL).href,
   new URL('vendor/jszip.min.js', SCOPE_URL).href,
   new URL('vendor/JSZip-LICENSE.md', SCOPE_URL).href,
   new URL('vendor/pdf.min.mjs', SCOPE_URL).href,

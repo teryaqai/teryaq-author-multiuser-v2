@@ -1,4 +1,14 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.6.4
+# TERYAQ Master Tool — Multi-user Offline-First v2.6.6
+
+## v2.6.6 Script drag handles
+
+- Script drag handles now align in a single left column across headings, cues, spoken lines, and all bullet/number levels, compensating for cue borders and list indentation.
+- The supplied drag icon is smaller and centered within every handle with native button padding removed. No database migration is required.
+
+## v2.6.5 Figures export cleanup
+
+- The Figures only PDF action appears only inside File → Export; the duplicate button below the figure draft information is removed.
+- The figure PDF generator, version confirmation, and other export options are unchanged. No database migration is required for this update.
 
 ## v2.6.4 Figures File ribbon
 
