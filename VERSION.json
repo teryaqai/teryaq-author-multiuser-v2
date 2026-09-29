@@ -1,7 +1,7 @@
 {
-  "appVersion": "2.6.7",
+  "appVersion": "2.6.8",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
-  "cloudMigrationVersion": 15,
-  "release": "block-selection"
+  "cloudMigrationVersion": 17,
+  "release": "course-progress"
 }
