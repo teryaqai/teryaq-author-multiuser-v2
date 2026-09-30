@@ -1,4 +1,11 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.7.0
+# TERYAQ Master Tool — Multi-user Offline-First v2.7.1
+
+## v2.7.1 neutral palette, Profile icon, and Guide navigation
+
+- Replaces the saturated purple and leftover green application chrome with consistent shades of gray across the dashboard, editor header and ribbon, Guide, Submission Forms, Archive, Course Progress, and admin controls. The writing styles, script cues, and semantic status colors keep their meanings. The original logo files remain in the package and appear in grayscale within the interface.
+- Uses the supplied Profile silhouette in the account menu and as the default avatar. A user's uploaded photo still takes priority.
+- Selecting a Guide section immediately shows its first topic. Quick tasks also switch to the matching section.
+- No new Supabase migration. Migrations 001–017 remain required. See `UPLOAD_v2.7.1.md`.
 
 ## v2.7.0 purple identity, Guide, account name, and downloads
 

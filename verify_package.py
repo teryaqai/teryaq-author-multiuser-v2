@@ -4,9 +4,9 @@ import re, sys, json
 root=Path(__file__).parent
 required=[
     'index.html','styles.css','platform.js','app.js',
-    'styles.v2.7.0.css','platform.v2.7.0.js','guide.js','guide.v2.7.0.js','workflow.js','workflow.v2.7.0.js','guide.v2.7.0.js','app.v2.7.0.js','submissions.js','submissions.v2.7.0.js',
+    'styles.v2.7.1.css','platform.v2.7.1.js','guide.js','guide.v2.7.1.js','workflow.js','workflow.v2.7.1.js','guide.v2.7.1.js','app.v2.7.1.js','submissions.js','submissions.v2.7.1.js',
     'sw.js','manifest.webmanifest','README.md','UPDATE_AND_MIGRATION_POLICY.md',
-    'UPLOAD_v2.7.0.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
+    'UPLOAD_v2.7.1.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
     'supabase/migrations/010_governance_admin_tools.sql',
     'supabase/migrations/011_v2_5_1_profiles_updates.sql',
     'supabase/migrations/012_service_role_profiles_select.sql',
@@ -18,7 +18,7 @@ required=[
     'supabase/functions/admin-account-request/index.ts',
     'supabase/functions/admin-governance/index.ts',
     'vendor/jszip.min.js','vendor/JSZip-LICENSE.md','vendor/pdf.min.mjs','vendor/pdf.worker.min.mjs','vendor/PDF.js-LICENSE.txt',
-    'fonts/Tajawal-Regular.ttf','fonts/Tajawal-Medium.ttf','fonts/Tajawal-Bold.ttf','icons/default-avatar.svg','icons/teryaq-mark.png','icons/icon-192.png','icons/icon-512.png','icons/ui/course-progress.png',
+    'fonts/Tajawal-Regular.ttf','fonts/Tajawal-Medium.ttf','fonts/Tajawal-Bold.ttf','icons/default-avatar.svg','icons/teryaq-mark.png','icons/icon-192.png','icons/icon-512.png','icons/ui/course-progress.png','icons/ui/profile.png',
     'icons/ui/documents.svg','icons/ui/success.svg','icons/ui/conflict.svg','icons/ui/sync.svg','icons/ui/updates.svg','icons/ui/guide.svg','icons/ui/draft-figure.png','icons/ui/sync.png','icons/ui/blank-page.png','icons/ui/two-document.png','icons/ui/view.png','icons/ui/list.png','icons/ui/import.png','icons/ui/export.png','icons/ui/sync-cloud.png','icons/ui/notifications.png','icons/ui/settings.png','icons/ui/back.png','icons/ui/dashboard.png','icons/ui/templates.png','icons/ui/trash.png','icons/ui/admin.png','icons/ui/document.png','icons/ui/date.png','icons/ui/bullet-circle.png','icons/ui/bullet-square.png','icons/ui/bullet-rhomboid.png','icons/ui/save.png','icons/ui/conflict.png','icons/ui/analytics.png','icons/ui/users-access.png','icons/ui/audit-log.png','icons/ui/content-setup.png','icons/ui/overview.png','icons/ui/cloud-operations.png','icons/ui/draft-text.png','icons/ui/submission-forms.png','icons/ui/archive.png','icons/ui/text-rtl.svg','icons/ui/text-ltr.svg','icons/ui/drag.png'
 ]
 missing=[x for x in required if not (root/x).exists()]
@@ -204,12 +204,12 @@ for forbidden in ['.p-Normal{','.p-Heading1{','.p-Heading2{','.p-Heading3{','.p-
         print('V2.4 LAYOUT MUST NOT OVERRIDE DOCUMENT STYLE:',forbidden);sys.exit(1)
 
 version=(root/'VERSION.json').read_text(encoding='utf-8')
-if '"appVersion": "2.7.0"' not in version or '"cloudMigrationVersion": 17' not in version or "teryaq-master-tool-v2.7.0" not in (root/'sw.js').read_text(encoding='utf-8'):
-    print('VERSION/CACHE MISMATCH: expected v2.7.0 / migration 17');sys.exit(1)
-for source,versioned in [('app.js','app.v2.7.0.js'),('platform.js','platform.v2.7.0.js'),('styles.css','styles.v2.7.0.css'),('submissions.js','submissions.v2.7.0.js'),('workflow.js','workflow.v2.7.0.js'),('guide.js','guide.v2.7.0.js')]:
+if '"appVersion": "2.7.1"' not in version or '"cloudMigrationVersion": 17' not in version or "teryaq-master-tool-v2.7.1" not in (root/'sw.js').read_text(encoding='utf-8'):
+    print('VERSION/CACHE MISMATCH: expected v2.7.1 / migration 17');sys.exit(1)
+for source,versioned in [('app.js','app.v2.7.1.js'),('platform.js','platform.v2.7.1.js'),('styles.css','styles.v2.7.1.css'),('submissions.js','submissions.v2.7.1.js'),('workflow.js','workflow.v2.7.1.js'),('guide.js','guide.v2.7.1.js')]:
     if (root/source).read_bytes()!=(root/versioned).read_bytes():
         print('STALE VERSIONED ASSET:',versioned);sys.exit(1)
-for ref in ['styles.v2.7.0.css','platform.v2.7.0.js','workflow.v2.7.0.js','guide.v2.7.0.js','app.v2.7.0.js','submissions.v2.7.0.js','vendor/jszip.min.js']:
+for ref in ['styles.v2.7.1.css','platform.v2.7.1.js','workflow.v2.7.1.js','guide.v2.7.1.js','app.v2.7.1.js','submissions.v2.7.1.js','vendor/jszip.min.js']:
     if ref not in html:
         print('MISSING VERSIONED ASSET REFERENCE:',ref);sys.exit(1)
 for number in range(1,18):
@@ -306,7 +306,7 @@ for marker in ['verifySubmissionFileVersion','assertSubmissionVersions','extract
     if marker not in submissions:
         print('INCOMPLETE DELIVERY VERSION VERIFICATION:',marker);sys.exit(1)
 
-# v2.7.0 safety: cleanup must be explicit, admin-only, version-guarded, and
+# v2.7.1 safety: cleanup must be explicit, admin-only, version-guarded, and
 # independent of push_document. Preview must never enter the upload/submit path.
 migration15=(root/'supabase'/'migrations'/'015_cloud_version_retention.sql').read_text(encoding='utf-8')
 for marker in ['public.is_admin(auth.uid())','admin_version_storage','admin_prune_document_versions',
@@ -328,7 +328,7 @@ if any(f'id="{name}"' not in html for name in ['blockSelectionToolbar','selected
 for marker in ['selectedBlockIds:new Set()','function hasBlockControls()','scientific-draft-text',"checkbox.setAttribute('role','checkbox')",'function deleteSelectedBlocks()','function moveDocumentBlockTo(','pushHistory(\'Before deleting selected sections\')']:
     if marker not in app:
         print('BLOCK SELECTION, UNDO OR REORDER IS MISSING:',marker);sys.exit(1)
-for marker in ['.editor-text-mode .block-controls{','.editor-text-mode .block-select-box{background:#fff','.editor-text-mode .block-select-box[aria-checked="true"]{background:#412e88','width:20px;height:20px','@media print{.editor-text-mode .doc-block{min-height:0!important}']:
+for marker in ['.editor-text-mode .block-controls{','.editor-text-mode .block-select-box{background:#fff','.editor-text-mode .block-select-box[aria-checked="true"]{background:#454a50','width:20px;height:20px','@media print{.editor-text-mode .doc-block{min-height:0!important}']:
     if marker not in styles:
         print('BLOCK CONTROLS MUST BE COMPACT, SINGLE-BOX, AND HIDDEN IN PRINT:',marker);sys.exit(1)
 for marker in ['function downloadSubmissionZip(row,button)','orderedSubmissionFiles(row)','new JSZip()','downloadSubmissionFile(file.path)','data-download-zip=','Backup Locations','data-drive-uploaded=']:
@@ -366,7 +366,7 @@ for asset in ['vendor/pdf.min.mjs','vendor/pdf.worker.min.mjs']:
         print('PDF VERSION READER MUST BE AVAILABLE OFFLINE:',asset);sys.exit(1)
 if 'SUPABASE_SERVICE_ROLE_KEY' in platform or 'service_role' in platform.lower():
     print('SERVICE ROLE KEY MUST NEVER APPEAR IN CLIENT PLATFORM CODE');sys.exit(1)
-# v2.7.0 brand, Guide, account-name, and download-location checks.
+# v2.7.1 brand, Guide, account-name, and download-location checks.
 guide=(root/'guide.js').read_text(encoding='utf-8')
 manifest=(root/'manifest.webmanifest').read_text(encoding='utf-8')
 sw=(root/'sw.js').read_text(encoding='utf-8')
@@ -378,8 +378,12 @@ for marker in ['accountNameReady','showRequiredAccountName','requireAccountName'
     if marker not in app:print('ACCOUNT-NAME GATE MISSING:',marker);sys.exit(1)
 for marker in ['downloadFolderInfo','chooseDownloadFolder','downloadBlobToDevice','Set your account name in Profile before importing documents.']:
     if marker not in platform:print('DOWNLOAD FOLDER OR BACKUP NAME GATE MISSING:',marker);sys.exit(1)
-if '#412e88' not in styles or '#8366ad' not in styles or '#412e88' not in manifest or 'icons/teryaq-mark.png' not in html:
-    print('APPROVED PURPLE BRAND OR LOGO MISSING');sys.exit(1)
-if 'guide.v2.7.0.js' not in sw or 'icons/ui/course-progress.png' not in sw:
+if '--brand:#454a50' not in styles or '#454a50' not in manifest or 'icons/teryaq-mark.png' not in html:
+    print('NEUTRAL WORKSPACE PALETTE OR LOGO MISSING');sys.exit(1)
+if "user:'profile.png'" not in app or 'icons/ui/profile.png' not in sw or 'icons/ui/profile.png' not in platform or 'icons/ui/profile.png' not in html:
+    print('PROFILE ICON IS NOT CONSISTENTLY INSTALLED');sys.exit(1)
+if "state.selected=available().find(topic=>topic.section===state.category)?.id||state.selected" not in guide:
+    print('GUIDE SECTION MUST OPEN ITS FIRST TOPIC');sys.exit(1)
+if 'guide.v2.7.1.js' not in sw or 'icons/ui/course-progress.png' not in sw:
     print('NEW GUIDE/ICON MUST BE AVAILABLE OFFLINE');sys.exit(1)
 print('Static package checks passed.')
