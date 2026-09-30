@@ -1,4 +1,26 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.6.7
+# TERYAQ Master Tool — Multi-user Offline-First v2.7.0
+
+## v2.7.0 purple identity, Guide, account name, and downloads
+
+- Uses the approved purple logo and palette throughout the Master Tool interface. The supplied square mark appears in sign-in, navigation, and installed-app icons; status and document-content colors retain their own meanings.
+- Rebuilds Guide as a task-first Help Center with English/Arabic switching, search, topic navigation, current workflow guidance, and admin-only topics.
+- Requires an account name before creating, duplicating, or importing a document. New accounts without a saved name open Profile first. The name is stored in the existing Supabase profile field.
+- Adds a download-folder choice in Settings on compatible browsers and browser-default downloads elsewhere; improves the iPad header layout.
+- Includes the post-v2.6.9 Archive backup placement, Course Progress icon, and shorter generated document titles.
+- No new Supabase migration. Migrations through 017 are required for the existing Submission Forms and Course Progress features. See `UPLOAD_v2.7.0.md` for deployment checks.
+
+## v2.6.9 migration guidance
+
+A missing `workflow_accounts()` function now identifies migration 017 in the app error. Migration 017 must be applied to Supabase before using account-based author selection or Course Progress.
+
+## Course Progress
+
+Migration `017_course_workflows.sql` follows 016. The course-wide Summary shows approved required checkpoints across all chapters and stages. Course Leads assign owners, reviewers and author accounts without admin access; these names come from user profiles rather than manually entered Content Setup Authors. Existing author catalog rows remain stored for legacy documents. Task submissions are checked on the server, review evidence is limited to participants, and decisions and admin overrides are recorded. The migration and workflow require a live Supabase integration check before production use; local validation covers package structure and JavaScript syntax only.
+
+## v2.6.8 Archive ZIP and backup locations
+
+- Each admin Archive submission can download all of its uploaded files as one ZIP in form order. The action fetches existing files with the admin session and generates the ZIP locally; names are sanitized and the action reports progress or failure without claiming a backup was completed.
+- Backup Locations now groups independent manual confirmations for Google Drive, Hard-disk, and Telegram. The first checkbox keeps its existing saved value. Each location has a separately saved detail: an HTTPS Google Drive link, hard-disk location, or Telegram channel/message reference. Migration 016 adds admin-only details, flags, and audit timestamps for the new confirmations. Downloading ZIP does not mark a destination as backed up.
 
 ## v2.6.7 Drag handles and block selection
 
@@ -321,8 +343,13 @@ Apply the SQL migrations **in numerical order**:
 10. `010_governance_admin_tools.sql`
 11. `011_v2_5_1_profiles_updates.sql`
 12. `012_service_role_profiles_select.sql` (if the service-role invite repair was already applied, no SQL action is needed)
+13. `013_submission_forms_library.sql`
+14. `014_submission_uploads_history.sql`
+15. `015_cloud_version_retention.sql`
+16. `016_submission_backup_locations.sql` (backup confirmations and location details)
+17. `017_course_workflows.sql` (Course Progress, account-based assignments, review permissions and notifications)
 
-Do not combine future schema changes into these files after production use begins. Add `005_...sql`, `006_...sql`, etc.
+On an existing project, apply only migrations not yet applied, in order. Migration 017 is part of the unreleased Course Progress draft; test it against a separate Supabase project before any production application. Do not alter already applied migrations for future changes; create the next numbered file.
 
 ### Create users
 

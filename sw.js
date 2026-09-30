@@ -1,4 +1,4 @@
-const CACHE = 'teryaq-master-tool-v2.6.8-course-progress';
+const CACHE = 'teryaq-master-tool-v2.7.0-purple-guide';
 const SCOPE_URL = new URL(self.registration.scope);
 const ROOT_URL = SCOPE_URL.href;
 const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
@@ -6,11 +6,12 @@ const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
 const CORE_ASSETS = [
   ROOT_URL,
   APP_SHELL_URL,
-  new URL('styles.v2.6.8.css', SCOPE_URL).href,
-  new URL('platform.v2.6.8.js', SCOPE_URL).href,
-  new URL('workflow.v2.6.8.js', SCOPE_URL).href,
-  new URL('app.v2.6.8.js', SCOPE_URL).href,
-  new URL('submissions.v2.6.8.js', SCOPE_URL).href,
+  new URL('styles.v2.7.0.css', SCOPE_URL).href,
+  new URL('platform.v2.7.0.js', SCOPE_URL).href,
+  new URL('workflow.v2.7.0.js', SCOPE_URL).href,
+  new URL('guide.v2.7.0.js', SCOPE_URL).href,
+  new URL('app.v2.7.0.js', SCOPE_URL).href,
+  new URL('submissions.v2.7.0.js', SCOPE_URL).href,
   new URL('vendor/jszip.min.js', SCOPE_URL).href,
   new URL('vendor/JSZip-LICENSE.md', SCOPE_URL).href,
   new URL('vendor/pdf.min.mjs', SCOPE_URL).href,
@@ -22,6 +23,7 @@ const CORE_ASSETS = [
   new URL('fonts/Tajawal-Medium.ttf', SCOPE_URL).href,
   new URL('fonts/Tajawal-Bold.ttf', SCOPE_URL).href,
   new URL('icons/icon-192.png', SCOPE_URL).href,
+  new URL('icons/teryaq-mark.png', SCOPE_URL).href,
   new URL('icons/icon-512.png', SCOPE_URL).href,
   new URL('icons/default-avatar.svg', SCOPE_URL).href,
   new URL('icons/ui/documents.svg', SCOPE_URL).href,
@@ -62,6 +64,7 @@ const CORE_ASSETS = [
   new URL('icons/ui/draft-text.png', SCOPE_URL).href,
   new URL('icons/ui/submission-forms.png', SCOPE_URL).href,
   new URL('icons/ui/archive.png', SCOPE_URL).href,
+  new URL('icons/ui/course-progress.png', SCOPE_URL).href,
   new URL('icons/ui/text-rtl.svg', SCOPE_URL).href,
   new URL('icons/ui/text-ltr.svg', SCOPE_URL).href,
   new URL('icons/ui/drag.png', SCOPE_URL).href,
