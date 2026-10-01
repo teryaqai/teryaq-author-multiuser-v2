@@ -1,4 +1,11 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.7.1
+# TERYAQ Master Tool — Multi-user Offline-First v2.7.2
+
+## v2.7.2 reference palette, workflow map, logo and Sign out icon
+
+- Uses the supplied navy logo at 192 and 512 pixels for the installed app and the full mark in the interface. The application chrome uses navy, warm cream and restrained gold; workflow states remain distinct.
+- Adds an interactive Workflow Map tab to Course Progress. The map derives its cards and arrows from the current chapter cycle's task dependencies, supports parallel branches and task details, and scrolls horizontally on narrow displays. It does not change task state or permissions.
+- Uses the supplied Sign out icon in the account menu and caches it for offline use.
+- No new Supabase migration. Migrations 001–017 remain required. See `UPLOAD_v2.7.2.md`.
 
 ## v2.7.1 neutral palette, Profile icon, and Guide navigation
 
