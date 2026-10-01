@@ -4,9 +4,9 @@ import re, sys, json
 root=Path(__file__).parent
 required=[
     'index.html','styles.css','platform.js','app.js',
-    'styles.v2.7.2.css','platform.v2.7.2.js','guide.js','guide.v2.7.2.js','workflow.js','workflow.v2.7.2.js','guide.v2.7.2.js','app.v2.7.2.js','submissions.js','submissions.v2.7.2.js',
+    'styles.v2.7.3.css','platform.v2.7.3.js','guide.js','guide.v2.7.3.js','workflow.js','workflow.v2.7.3.js','guide.v2.7.3.js','app.v2.7.3.js','submissions.js','submissions.v2.7.3.js',
     'sw.js','manifest.webmanifest','README.md','UPDATE_AND_MIGRATION_POLICY.md',
-    'UPLOAD_v2.7.2.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
+    'UPLOAD_v2.7.3.md','EDGE_FUNCTIONS_SETUP.md','render.yaml','VERSION.json',
     'supabase/migrations/010_governance_admin_tools.sql',
     'supabase/migrations/011_v2_5_1_profiles_updates.sql',
     'supabase/migrations/012_service_role_profiles_select.sql',
@@ -204,12 +204,12 @@ for forbidden in ['.p-Normal{','.p-Heading1{','.p-Heading2{','.p-Heading3{','.p-
         print('V2.4 LAYOUT MUST NOT OVERRIDE DOCUMENT STYLE:',forbidden);sys.exit(1)
 
 version=(root/'VERSION.json').read_text(encoding='utf-8')
-if '"appVersion": "2.7.2"' not in version or '"cloudMigrationVersion": 17' not in version or "teryaq-master-tool-v2.7.2" not in (root/'sw.js').read_text(encoding='utf-8'):
-    print('VERSION/CACHE MISMATCH: expected v2.7.2 / migration 17');sys.exit(1)
-for source,versioned in [('app.js','app.v2.7.2.js'),('platform.js','platform.v2.7.2.js'),('styles.css','styles.v2.7.2.css'),('submissions.js','submissions.v2.7.2.js'),('workflow.js','workflow.v2.7.2.js'),('guide.js','guide.v2.7.2.js')]:
+if '"appVersion": "2.7.3"' not in version or '"cloudMigrationVersion": 17' not in version or "teryaq-master-tool-v2.7.3" not in (root/'sw.js').read_text(encoding='utf-8'):
+    print('VERSION/CACHE MISMATCH: expected v2.7.3 / migration 17');sys.exit(1)
+for source,versioned in [('app.js','app.v2.7.3.js'),('platform.js','platform.v2.7.3.js'),('styles.css','styles.v2.7.3.css'),('submissions.js','submissions.v2.7.3.js'),('workflow.js','workflow.v2.7.3.js'),('guide.js','guide.v2.7.3.js')]:
     if (root/source).read_bytes()!=(root/versioned).read_bytes():
         print('STALE VERSIONED ASSET:',versioned);sys.exit(1)
-for ref in ['styles.v2.7.2.css','platform.v2.7.2.js','workflow.v2.7.2.js','guide.v2.7.2.js','app.v2.7.2.js','submissions.v2.7.2.js','vendor/jszip.min.js']:
+for ref in ['styles.v2.7.3.css','platform.v2.7.3.js','workflow.v2.7.3.js','guide.v2.7.3.js','app.v2.7.3.js','submissions.v2.7.3.js','vendor/jszip.min.js']:
     if ref not in html:
         print('MISSING VERSIONED ASSET REFERENCE:',ref);sys.exit(1)
 for number in range(1,18):
@@ -306,7 +306,7 @@ for marker in ['verifySubmissionFileVersion','assertSubmissionVersions','extract
     if marker not in submissions:
         print('INCOMPLETE DELIVERY VERSION VERIFICATION:',marker);sys.exit(1)
 
-# v2.7.2 safety: cleanup must be explicit, admin-only, version-guarded, and
+# v2.7.3 safety: cleanup must be explicit, admin-only, version-guarded, and
 # independent of push_document. Preview must never enter the upload/submit path.
 migration15=(root/'supabase'/'migrations'/'015_cloud_version_retention.sql').read_text(encoding='utf-8')
 for marker in ['public.is_admin(auth.uid())','admin_version_storage','admin_prune_document_versions',
@@ -320,7 +320,7 @@ if 'disabled aria-label=' not in submissions or 'data-preview-step' not in previ
     print('FORM PREVIEW MUST NOT UPLOAD, SUBMIT, OR REQUIRE FIELDS');sys.exit(1)
 if "'shooting-script'].includes(doc?.templateId)" not in app or "if(!isScript()||!await confirmScientificExportVersion(state.current))" not in app or 'icons/ui/drag.png' not in app:
     print('INCOMPLETE SCRIPT VERSION CONFIRMATION OR DRAG ICON');sys.exit(1)
-for marker in ['--script-left-border:3px','--script-left-border:4px','--script-left-border:0px','- var(--script-left-border,0px)','padding:0;border:1px solid #dae1dc','.script-drag-icon{display:block;width:14px;height:14px']:
+for marker in ['--script-left-border:3px','--script-left-border:4px','--script-left-border:0px','- var(--script-left-border,0px)','padding:0;border:1px solid #dae1dc','.script-drag-icon{display:block;width:11px;height:11px']:
     if marker not in styles:
         print('SCRIPT DRAG HANDLE ALIGNMENT OR ICON CENTERING IS MISSING:',marker);sys.exit(1)
 if any(f'id="{name}"' not in html for name in ['blockSelectionToolbar','selectedBlockCount','deleteSelectedBlocksBtn']):
@@ -328,7 +328,7 @@ if any(f'id="{name}"' not in html for name in ['blockSelectionToolbar','selected
 for marker in ['selectedBlockIds:new Set()','function hasBlockControls()','scientific-draft-text',"checkbox.setAttribute('role','checkbox')",'function deleteSelectedBlocks()','function moveDocumentBlockTo(','pushHistory(\'Before deleting selected sections\')']:
     if marker not in app:
         print('BLOCK SELECTION, UNDO OR REORDER IS MISSING:',marker);sys.exit(1)
-for marker in ['.editor-text-mode .block-controls{','.editor-text-mode .block-select-box{background:#fff','.editor-text-mode .block-select-box[aria-checked="true"]{background:#294261','width:20px;height:20px','@media print{.editor-text-mode .doc-block{min-height:0!important}']:
+for marker in ['.editor-text-mode .doc-block{position:relative;min-height:0}','.editor-text-mode .block-controls{','flex-direction:row;align-items:center;gap:4px','.editor-text-mode .block-select-box{background:#fff','.editor-text-mode .block-select-box[aria-checked="true"]{background:#294261','width:16px;height:16px','@media print{.editor-text-mode .doc-block{min-height:0!important}']:
     if marker not in styles:
         print('BLOCK CONTROLS MUST BE COMPACT, SINGLE-BOX, AND HIDDEN IN PRINT:',marker);sys.exit(1)
 for marker in ['function downloadSubmissionZip(row,button)','orderedSubmissionFiles(row)','new JSZip()','downloadSubmissionFile(file.path)','data-download-zip=','Backup Locations','data-drive-uploaded=']:
@@ -366,7 +366,7 @@ for asset in ['vendor/pdf.min.mjs','vendor/pdf.worker.min.mjs']:
         print('PDF VERSION READER MUST BE AVAILABLE OFFLINE:',asset);sys.exit(1)
 if 'SUPABASE_SERVICE_ROLE_KEY' in platform or 'service_role' in platform.lower():
     print('SERVICE ROLE KEY MUST NEVER APPEAR IN CLIENT PLATFORM CODE');sys.exit(1)
-# v2.7.2 brand, Guide, account-name, and download-location checks.
+# v2.7.3 brand, Guide, account-name, and download-location checks.
 guide=(root/'guide.js').read_text(encoding='utf-8')
 manifest=(root/'manifest.webmanifest').read_text(encoding='utf-8')
 sw=(root/'sw.js').read_text(encoding='utf-8')
@@ -388,6 +388,6 @@ if "user:'profile.png'" not in app or 'icons/ui/profile.png' not in sw or 'icons
     print('PROFILE ICON IS NOT CONSISTENTLY INSTALLED');sys.exit(1)
 if "state.selected=available().find(topic=>topic.section===state.category)?.id||state.selected" not in guide:
     print('GUIDE SECTION MUST OPEN ITS FIRST TOPIC');sys.exit(1)
-if 'guide.v2.7.2.js' not in sw or 'icons/ui/course-progress.png' not in sw:
+if 'guide.v2.7.3.js' not in sw or 'icons/ui/course-progress.png' not in sw:
     print('NEW GUIDE/ICON MUST BE AVAILABLE OFFLINE');sys.exit(1)
 print('Static package checks passed.')

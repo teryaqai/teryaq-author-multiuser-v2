@@ -1,4 +1,11 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.7.2
+# TERYAQ Master Tool — Multi-user Offline-First v2.7.3
+
+## v2.7.3 submission progress and interface refinements
+
+- Submission Forms has an administrator-configurable preparation step before section 1. It derives required and optional deliverables and accepted file types from the form fields, including conditional files.
+- Form answers, current section, and completed upload references are saved locally per account and form. Returning from another page resumes the open form; after a reload, the directory lists saved drafts. Incomplete file uploads ask the user to attach those files again. A successful submission removes its local draft.
+- Main sidebar width, text, icons, and spacing are reduced to about 80% of their previous sizes. Scientific Draft Text and Shooting Script blocks use smaller horizontal drag/selection controls without a two-line minimum. The sign-in logo, title, and description are centered.
+- No new Supabase migration. Migrations 001–017 remain required. See `UPLOAD_v2.7.3.md`.
 
 ## v2.7.2 reference palette, workflow map, logo and Sign out icon
 
