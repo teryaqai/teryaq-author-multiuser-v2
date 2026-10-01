@@ -1,6 +1,6 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.7.4
+# TERYAQ Master Tool — Multi-user Offline-First v2.7.5
 
-## v2.7.4 Submission Forms upload repair
+## v2.7.5 Submission Forms upload repair
 
 - Upload objects now use UUID-only storage keys. Arabic filenames and `.ترياق` remain intact in the form, submission record, archive, and downloads.
 - A file can be removed or replaced in the deliverables section. Completed uploads are deleted from Storage before they are removed from the form; the required field becomes empty again. Removing an in-progress file cancels its upload.

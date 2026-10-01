@@ -1,4 +1,4 @@
-const CACHE = 'teryaq-master-tool-v2.7.4-navy-workflow-map-logo-signout';
+const CACHE = 'teryaq-master-tool-v2.7.5-navy-workflow-map-logo-signout';
 const SCOPE_URL = new URL(self.registration.scope);
 const ROOT_URL = SCOPE_URL.href;
 const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
@@ -6,12 +6,12 @@ const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
 const CORE_ASSETS = [
   ROOT_URL,
   APP_SHELL_URL,
-  new URL('styles.v2.7.4.css', SCOPE_URL).href,
-  new URL('platform.v2.7.4.js', SCOPE_URL).href,
-  new URL('workflow.v2.7.4.js', SCOPE_URL).href,
-  new URL('guide.v2.7.4.js', SCOPE_URL).href,
-  new URL('app.v2.7.4.js', SCOPE_URL).href,
-  new URL('submissions.v2.7.4.js', SCOPE_URL).href,
+  new URL('styles.v2.7.5.css', SCOPE_URL).href,
+  new URL('platform.v2.7.5.js', SCOPE_URL).href,
+  new URL('workflow.v2.7.5.js', SCOPE_URL).href,
+  new URL('guide.v2.7.5.js', SCOPE_URL).href,
+  new URL('app.v2.7.5.js', SCOPE_URL).href,
+  new URL('submissions.v2.7.5.js', SCOPE_URL).href,
   new URL('vendor/jszip.min.js', SCOPE_URL).href,
   new URL('vendor/JSZip-LICENSE.md', SCOPE_URL).href,
   new URL('vendor/pdf.min.mjs', SCOPE_URL).href,
