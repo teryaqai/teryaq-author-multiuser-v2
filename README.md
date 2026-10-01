@@ -1,4 +1,11 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.7.3
+# TERYAQ Master Tool — Multi-user Offline-First v2.7.4
+
+## v2.7.4 Submission Forms upload repair
+
+- Upload objects now use UUID-only storage keys. Arabic filenames and `.ترياق` remain intact in the form, submission record, archive, and downloads.
+- A file can be removed or replaced in the deliverables section. Completed uploads are deleted from Storage before they are removed from the form; the required field becomes empty again. Removing an in-progress file cancels its upload.
+- Accepted file types are centered under their column in the preparation step.
+- Apply `supabase/migrations/018_submission_upload_removal.sql` before using the Remove or Replace action for files that already finished uploading. The upload-key repair itself does not require this migration.
 
 ## v2.7.3 submission progress and interface refinements
 
@@ -369,6 +376,7 @@ Apply the SQL migrations **in numerical order**:
 15. `015_cloud_version_retention.sql`
 16. `016_submission_backup_locations.sql` (backup confirmations and location details)
 17. `017_course_workflows.sql` (Course Progress, account-based assignments, review permissions and notifications)
+18. `018_submission_upload_removal.sql` (authors can delete their own files from unfinished submissions)
 
 On an existing project, apply only migrations not yet applied, in order. Migration 017 is part of the unreleased Course Progress draft; test it against a separate Supabase project before any production application. Do not alter already applied migrations for future changes; create the next numbered file.
 
