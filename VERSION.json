@@ -1,7 +1,7 @@
 {
-  "appVersion": "2.7.6",
+  "appVersion": "2.8.0",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
-  "cloudMigrationVersion": 19,
-  "release": "chapter-first-work-areas-course-management-roles"
+  "cloudMigrationVersion": 20,
+  "release": "scientific-workflow-automation-team-collaboration"
 }

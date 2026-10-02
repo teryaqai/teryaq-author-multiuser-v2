@@ -1,4 +1,12 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.7.6
+# TERYAQ Master Tool — Multi-user Offline-First v2.8.0
+
+## v2.8.0 Scientific Draft workflow automation
+
+- Rebuilds course production around **Course → Chapter → work area**, while preserving the approved chapter-first UI.
+- Adds multi-executor assignment, Course Team assignment, chapter-level Scientific Draft Author, Team & Task Executors, My Tasks, Review Requests, comments, task instructions/checklists, status journey, saved navigation state, and submission history.
+- Implements the approved Scientific Draft & Design numbering and required-file dependencies through Task 14.2.
+- Adds/updates four submission form families: Scientific Draft V1–V5, Scientific Draft V1 Review, Comprehensive Scientific Audit V1/V2, and Designed Scientific Draft V1/V2.
+- Requires migration `020_scientific_workflow_automation.sql`.
 
 ## v2.7.6 Submission Forms upload repair
 
