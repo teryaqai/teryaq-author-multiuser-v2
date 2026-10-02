@@ -1,6 +1,12 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.8.4
+# TERYAQ Master Tool — Multi-user Offline-First v2.8.5
 
-## v2.8.4 task detail layout refinement
+## v2.8.5 numbering and submission layout fix
+- Scientific Draft numbering is pinned to the approved workflow sequence, including legacy task keys.
+- Preparation & Roles is displayed as 1–4.
+- Recent Submissions uses the full available page width on desktop.
+
+
+## v2.8.5 task detail layout refinement
 - Merged Assignment & Schedule and Quick Details into one unified Task Information card.
 - Task Information and Status & Progress now share the first row 50/50.
 - Required Files / Inputs remains full width.
@@ -8,12 +14,12 @@
 - Comments and Activity now appear side-by-side.
 - Keeps searchable Task Executors dropdown, modal authoring, required-input resources, instruction scope, submissions, and Scientific Draft automation from v2.8.x.
 
-## v2.8.4 hotfix
+## v2.8.5 hotfix
 - Fixed `initials is not defined` on **Team & Task Executors**.
 - No new Supabase migration is required beyond migration 021.
 
 
-## v2.8.4 task detail and collaboration UX
+## v2.8.5 task detail and collaboration UX
 
 - Replaces the task detail screen with the approved card-based design for Task Information, Status & Progress, Assignment & Schedule, Required Files / Inputs, Instructions, Checklist, Comments, Submission History, and Activity.
 - Adds a searchable multi-select Task Executor dropdown and an Executor filter in Team & Task Executors.
@@ -21,7 +27,7 @@
 - Adds formatted text authoring, multi-file/multi-image inputs, rich Preparation & Rules resources, and instruction scope: this task only or all matching tasks across chapters in the same course.
 - Requires migration `021_task_ui_resources_instruction_scope.sql` after migration 020.
 
-## v2.8.4 Scientific Draft workflow automation
+## v2.8.5 Scientific Draft workflow automation
 
 - Rebuilds course production around **Course → Chapter → work area**, while preserving the approved chapter-first UI.
 - Adds multi-executor assignment, Course Team assignment, chapter-level Scientific Draft Author, Team & Task Executors, My Tasks, Review Requests, comments, task instructions/checklists, status journey, saved navigation state, and submission history.
