@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="styles.v2.7.5.css">
+  <link rel="stylesheet" href="styles.v2.7.6.css">
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
@@ -84,7 +84,7 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/teryaq-mark.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.7.5</span></small></div>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.7.6</span></small></div>
       <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><span data-ui-icon="panel-close"></span></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
@@ -93,7 +93,7 @@
       <button class="sidebar-link" data-nav="documents" title="Documents"><span class="nav-icon" data-ui-icon="documents"></span><span class="nav-label">Documents</span></button>
       <button class="sidebar-link" data-nav="templates" title="Templates"><span class="nav-icon" data-ui-icon="templates"></span><span class="nav-label">Templates</span></button>
       <button class="sidebar-link" data-nav="submissionForms" title="Submission Forms"><span class="nav-icon" data-ui-icon="submissionForms"></span><span class="nav-label">Submission Forms</span></button>
-      <button class="sidebar-link" data-nav="courseProgress" title="Course Progress"><span class="nav-icon" data-ui-icon="courseProgress"></span><span class="nav-label">Course Progress</span></button>
+      <button class="sidebar-link" data-nav="courseProgress" title="Course Progress"><span class="nav-icon" data-ui-icon="courseProgress"></span><span class="nav-label">Courses</span></button>
       <button class="sidebar-link" data-nav="trash" id="trashBtn" title="Trash"><span class="nav-icon" data-ui-icon="trash"></span><span class="nav-label">Trash</span></button>
       <button class="sidebar-link" data-nav="guide" title="Guide"><span class="nav-icon" data-ui-icon="guide"></span><span class="nav-label">Guide</span></button>
       <button class="sidebar-link hidden" data-nav="admin" id="adminBtn" title="Admin"><span class="nav-icon" data-ui-icon="shield"></span><span class="nav-label">Admin</span></button>
@@ -264,7 +264,7 @@
   <main>
     <section class="view active" id="homeView">
       <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.7.5</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.7.6</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
         <div class="stat-grid" id="dashboardStats"></div>
         <section class="portal-panel dashboard-updates-panel"><div class="section-head"><div><span class="eyebrow">WHAT'S NEW</span><h3>Updates & announcements</h3></div></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
         <div class="portal-grid two-thirds">
@@ -309,7 +309,7 @@
     <section class="view" id="settingsView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">Preferences</span><h2>Settings & Sync</h2><p>Manage automatic synchronization, cloud connection, backups, and this device.</p></div></div><div id="settingsPageBody"></div></div></section>
     <section class="view" id="profileView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">Your account</span><h2>Profile</h2><p>Manage the name and photo shown across TERYAQ.</p></div></div><div id="accountPageBody"></div></div></section>
     <section class="view" id="submissionFormsView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">TERYAQ</span><h2>Submission Forms</h2><p>Choose a submission form to send your completed work.</p></div></div><div id="submissionFormsBody"></div></div></section>
-    <section class="view" id="courseProgressView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">TERYAQ</span><h2>Course Progress</h2><p>Follow each chapter through production, review and publication.</p></div></div><div id="courseProgressBody"></div></div></section>
+    <section class="view" id="courseProgressView"><div class="portal-page"><div class="page-heading"><div><span class="eyebrow">TERYAQ</span><h2>Courses</h2><p>Open a course, choose a chapter, then manage each work area separately.</p></div></div><div id="courseProgressBody"></div></div></section>
     <section class="view" id="adminView"><div class="portal-page admin-center-page"><div class="page-heading"><div><span class="eyebrow">Administration</span><h2>Admin Center</h2><p>Manage access, content, cloud operations, analytics, governance, and user updates.</p></div></div><div id="adminPageBody"></div></div></section>
 
     <section class="view" id="editorView">
@@ -376,10 +376,10 @@
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
-<script src="platform.v2.7.5.js"></script>
-<script src="workflow.v2.7.5.js"></script>
-<script src="guide.v2.7.5.js"></script>
-<script src="app.v2.7.5.js"></script>
-<script src="submissions.v2.7.5.js"></script>
+<script src="platform.v2.7.6.js"></script>
+<script src="workflow.v2.7.6.js"></script>
+<script src="guide.v2.7.6.js"></script>
+<script src="app.v2.7.6.js"></script>
+<script src="submissions.v2.7.6.js"></script>
 </body>
 </html>
