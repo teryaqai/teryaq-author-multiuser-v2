@@ -1,7 +1,7 @@
 {
-  "appVersion": "2.8.1",
+  "appVersion": "2.8.3",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
   "cloudMigrationVersion": 21,
-  "release": "task-detail-modal-resource-upgrade"
+  "release": "hotfix-initials-team-task-executors"
 }

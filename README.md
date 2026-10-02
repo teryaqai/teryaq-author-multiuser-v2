@@ -1,6 +1,19 @@
-# TERYAQ Master Tool — Multi-user Offline-First v2.8.1
+# TERYAQ Master Tool — Multi-user Offline-First v2.8.3
 
-## v2.8.1 task detail and collaboration UX
+## v2.8.3 task detail layout refinement
+- Merged Assignment & Schedule and Quick Details into one unified Task Information card.
+- Task Information and Status & Progress now share the first row 50/50.
+- Required Files / Inputs remains full width.
+- Task Instructions and Task Checklist now appear side-by-side.
+- Comments and Activity now appear side-by-side.
+- Keeps searchable Task Executors dropdown, modal authoring, required-input resources, instruction scope, submissions, and Scientific Draft automation from v2.8.x.
+
+## v2.8.3 hotfix
+- Fixed `initials is not defined` on **Team & Task Executors**.
+- No new Supabase migration is required beyond migration 021.
+
+
+## v2.8.3 task detail and collaboration UX
 
 - Replaces the task detail screen with the approved card-based design for Task Information, Status & Progress, Assignment & Schedule, Required Files / Inputs, Instructions, Checklist, Comments, Submission History, and Activity.
 - Adds a searchable multi-select Task Executor dropdown and an Executor filter in Team & Task Executors.
@@ -8,7 +21,7 @@
 - Adds formatted text authoring, multi-file/multi-image inputs, rich Preparation & Rules resources, and instruction scope: this task only or all matching tasks across chapters in the same course.
 - Requires migration `021_task_ui_resources_instruction_scope.sql` after migration 020.
 
-## v2.8.1 Scientific Draft workflow automation
+## v2.8.3 Scientific Draft workflow automation
 
 - Rebuilds course production around **Course → Chapter → work area**, while preserving the approved chapter-first UI.
 - Adds multi-executor assignment, Course Team assignment, chapter-level Scientific Draft Author, Team & Task Executors, My Tasks, Review Requests, comments, task instructions/checklists, status journey, saved navigation state, and submission history.
