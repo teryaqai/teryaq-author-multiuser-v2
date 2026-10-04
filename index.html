@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="styles.v2.8.6.css">
+  <link rel="stylesheet" href="styles.v2.8.7.css">
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
@@ -84,7 +84,7 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/teryaq-mark.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.8.6</span></small></div>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.8.7</span></small></div>
       <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><span data-ui-icon="panel-close"></span></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
@@ -96,22 +96,8 @@
       <button class="sidebar-link" data-nav="courseProgress" title="Course Progress"><span class="nav-icon" data-ui-icon="courseProgress"></span><span class="nav-label">Courses</span></button>
       <button class="sidebar-link" data-nav="trash" id="trashBtn" title="Trash"><span class="nav-icon" data-ui-icon="trash"></span><span class="nav-label">Trash</span></button>
       <button class="sidebar-link" data-nav="guide" title="Guide"><span class="nav-icon" data-ui-icon="guide"></span><span class="nav-label">Guide</span></button>
-      <div class="sidebar-admin-group hidden" id="adminNavGroup">
-        <button class="sidebar-link sidebar-admin-toggle" id="adminBtn" type="button" title="Admin" aria-expanded="false"><span class="nav-icon" data-ui-icon="shield"></span><span class="nav-label">Admin</span><span class="sidebar-admin-chevron">⌄</span></button>
-        <div class="sidebar-admin-submenu" id="adminSubmenu">
-          <button type="button" data-admin-target="overview">Overview</button>
-          <button type="button" data-admin-target="content">Content Setup</button>
-          <button type="button" data-admin-target="requests">Account Requests</button>
-          <button type="button" data-admin-target="course-progress">Course Progress</button>
-          <button type="button" data-admin-target="forms">Submission Forms</button>
-          <button type="button" data-admin-target="archive">Archive</button>
-          <button type="button" data-admin-target="operations">Cloud Operations</button>
-          <button type="button" data-admin-target="analytics">Analytics</button>
-          <button type="button" data-admin-target="audit">Audit Log</button>
-          <button type="button" data-admin-target="trash">Trash Management</button>
-          <button type="button" data-admin-target="updates">Updates</button>
-        </div>
-      </div>
+      <button class="sidebar-link hidden" data-nav="admin" id="adminBtn" title="Admin"><span class="nav-icon" data-ui-icon="shield"></span><span class="nav-label">Admin</span></button>
+
     </nav>
   </aside>
   <div class="sidebar-scrim hidden" id="sidebarScrim"></div>
@@ -279,7 +265,7 @@
   <main>
     <section class="view active" id="homeView">
       <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.8.6</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.8.7</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
         <div class="stat-grid" id="dashboardStats"></div>
         <section class="portal-panel dashboard-updates-panel"><div class="section-head"><div><span class="eyebrow">WHAT'S NEW</span><h3>Updates & announcements</h3></div></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
         <div class="portal-grid two-thirds">
@@ -391,10 +377,10 @@
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
-<script src="platform.v2.8.6.js"></script>
-<script src="workflow.v2.8.6.js"></script>
-<script src="guide.v2.8.6.js"></script>
-<script src="app.v2.8.6.js"></script>
-<script src="submissions.v2.8.6.js"></script>
+<script src="platform.v2.8.7.js"></script>
+<script src="workflow.v2.8.7.js"></script>
+<script src="guide.v2.8.7.js"></script>
+<script src="app.v2.8.7.js"></script>
+<script src="submissions.v2.8.7.js"></script>
 </body>
 </html>
