@@ -1,0 +1,1376 @@
+/* TERYAQ Master Tool Offline App
+   Local-first, dependency-free PWA prototype.
+   Document data is structured JSON; the DOM is only the editor surface. */
+(() => {
+'use strict';
+
+const APP_VERSION = '2.8.8';
+const SCHEMA_VERSION = '2.0.0';
+const DB_NAME = 'TeryaqAuthorDB';
+const DB_VERSION = 4;
+const SNAPSHOT_INTERVAL_MS = 5 * 60 * 1000;
+const MAX_HISTORY = 120;
+const EMERGENCY_DRAFT_PREFIX = 'teryaq:emergency-draft:';
+const SIDEBAR_COLLAPSED_KEY = 'teryaq:sidebar-collapsed';
+
+const STYLE_CONTRACT = {
+  Normal:{label:'Body',size:11,bold:false,italic:false,color:'#000000'},
+  Heading1:{label:'H1',size:14,bold:true,italic:false,color:'#C45911'},
+  Heading2:{label:'H2',size:13,bold:true,italic:false,color:'#538135'},
+  Heading3:{label:'H3',size:12,bold:true,italic:false,color:'#2E74B5'},
+  Heading4:{label:'H4',size:11,bold:false,italic:true,color:'#2F5496'},
+  Subtitle:{label:'Side Q/A',size:11,bold:false,italic:false,color:'#7F7F7F'},
+  TableCaption:{label:'Table Caption',size:9,bold:false,italic:true,color:'#767171'},
+  SideNote:{label:'Side Note',size:11,bold:false,italic:false,color:'#BF8F00'},
+  NotesToDelete:{label:'Note to Delete',size:9,bold:true,italic:false,color:'#FF0000'},
+  HighYield:{label:'High-Yield',size:11,bold:true,italic:false,underline:true,color:'#7030A0'},
+  ClinicalCorrelation:{label:'Clinical Correlation',size:11,bold:false,italic:false,color:'#39E794'},
+  FigurePlaceholder:{highlight:'#FFED29'},
+  BulletLevels:{1:{marker:'●',indentPt:26},2:{marker:'■',indentPt:44},3:{marker:'◆',indentPt:62}}
+};
+
+const BUILTIN_TEMPLATES = [
+  {
+    id:'scientific-draft-text', version:'1.0.0', name:'Scientific Draft - Text Content', category:'Scientific Content', editor:'rich-document',
+    informationTitle:'Draft information',
+    description:'Structured scientific drafting with Word-mapped styles, headings, figures, tables, validation and A4 output.',
+    newDocument(){ return createTextDocument(); }
+  },
+  {
+    id:'scientific-draft-figures', version:'1.0.0', name:'Scientific Draft - Figures', category:'Scientific Content', editor:'structured-form',
+    informationTitle:'Draft information',
+    description:'Figure request workflow with five outcomes, source/copyright fields, instructions and quick figure navigation.',
+    newDocument(){ return createFigureDocument(); }
+  },
+  {id:'shooting-script',version:'1.3.0',name:'Shooting Script',category:'Production',editor:'rich-document',informationTitle:'Shooting Script information',description:'Spoken text, script cues and an editable teleprompter.',newDocument(){return createScriptDocument();}}
+];
+
+const state = {
+  db:null, view:'home', docs:[], customTemplates:[], current:null, dirty:false,
+  activeBlockId:null, activeTableId:null, activeCell:null, selectionBookmark:null,
+  history:[], historyIndex:-1, typingTimer:null, saveTimer:null, lastSnapshotAt:0,
+  suppressHistory:false, search:'', editRevision:0, savedRevision:0,
+  saveChain:Promise.resolve(true), saveInFlight:0, blockingSaveInFlight:0, syncInFlight:false,
+  pageResizeObserver:null, selectedDocumentIds:new Set(), selectedBlockIds:new Set(), docxImportSession:null,
+  ribbonTab:'styles', viewOnly:false, viewZoom:1, pageView:'one', documentActionMenu:null,
+  contentOptions:{subjects:[],authors:[],chapters:[],categories:[],versions:[],loadedAt:null}
+};
+
+const $ = sel => document.querySelector(sel);
+const $$ = sel => [...document.querySelectorAll(sel)];
+const byId = id => document.getElementById(id);
+const clone = obj => JSON.parse(JSON.stringify(obj));
+const nowIso = () => new Date().toISOString();
+const uid = (prefix='id') => `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const UI_ICON_PATHS={
+  home:'<path d="m3.5 10.5 8.5-7 8.5 7"/><path d="M5.5 9.5v10.5h13V9.5M9.5 20v-6h5v6"/>',documents:'<path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h5M10 12h6M10 16h6"/><path d="M4 7v12h3"/>',templates:'<rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M3 9h18M9 9v12"/>',trash:'<path d="M4 7h16M9 3h6l1 4M18 7l-1 14H7L6 7M10 11v6M14 11v6"/>',guide:'<circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.4 2.4 0 1 1 3.7 2c-1 .65-1.5 1.15-1.5 2.3M12 17h.01"/>',shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/>',
+  text:'<path d="M6 3.5h9l3 3V20.5H6z"/><path d="M15 3.5v4h4M9 11h6M9 15h4"/><path d="m14.5 18.5 4-4 1.5 1.5-4 4H14z"/>',sync:'<path d="M20 7v5h-5"/><path d="M4 17v-5h5"/><path d="M18.5 10A7 7 0 0 0 6.7 6.7L4 9M5.5 14A7 7 0 0 0 17.3 17.3L20 15"/>',refresh:'<path d="M20 7v5h-5"/><path d="M4 17v-5h5"/><path d="M18.5 10A7 7 0 0 0 6.7 6.7L4 9M5.5 14A7 7 0 0 0 17.3 17.3L20 15"/>',conflict:'<path d="M12 3.5 20.5 12 12 20.5 3.5 12z"/><path d="M12 8v5M12 16h.01"/>',local:'<rect x="3" y="5" width="18" height="13" rx="2"/><path d="M8 22h8M12 18v4"/>',figure:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m5 18 5-5 3 3 2-2 4 4"/>',
+  menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',close:'<path d="m6 6 12 12M18 6 6 18"/>','panel-close':'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 3v18"/>','arrow-left':'<path d="m13.5 6-6 6 6 6M8 12h10"/>','arrow-right':'<path d="m10.5 6 6 6-6 6M16 12H6"/>','arrow-up':'<path d="m6 10 6-6 6 6M12 4v16"/>','arrow-down':'<path d="m6 14 6 6 6-6M12 20V4"/>','more-horizontal':'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
+  upload:'<path d="M12 16V4m0 0-4 4m4-4 4 4"/><path d="M4 15v5h16v-5"/>',download:'<path d="M12 4v12m0 0 4-4m-4 4-4-4"/><path d="M4 19v2h16v-2"/>',import:'<path d="M12 4v12m0 0 4-4m-4 4-4-4"/><path d="M4 19v2h16v-2"/>',export:'<path d="M12 16V4m0 0-4 4m4-4 4 4"/><path d="M4 15v5h16v-5"/>',save:'<path d="M4 3h14l2 2v16H4z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/>',settings:'<circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.6-2-3.4-2.5 1A7 7 0 0 0 15 6l-.4-2.7h-4L10 6a7 7 0 0 0-1.5 1L6 6 4 9.4 6.1 11a7 7 0 0 0 0 2L4 14.6 6 18l2.5-1a7 7 0 0 0 1.5-1l2.5 1 2-3.4-2.1-1.6c.1-.3.1-.7.1-1Z"/>',
+  'check-circle':'<circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/>',history:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>','chevron-down':'<path d="m6 9 6 6 6-6"/>',undo:'<path d="M9 7 4 12l5 5"/><path d="M4 12h9a7 7 0 0 1 7 7"/>',redo:'<path d="m15 7 5 5-5 5"/><path d="M20 12h-9a7 7 0 0 0-7 7"/>',
+  bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 22a8 8 0 0 1 16 0"/>','log-out':'<path d="M10 17l5-5-5-5M15 12H3"/><path d="M14 3h7v18h-7"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',cloud:'<path d="M7 19h10a4 4 0 0 0 .7-7.94A6 6 0 0 0 6.25 9.7 4.6 4.6 0 0 0 7 19Z"/>',activity:'<path d="M3 12h4l2-7 4 14 2-7h6"/>',megaphone:'<path d="m3 11 16-6v14L3 13zM3 11v2M7 14l1 6h4l-2-7"/>'
+};
+const UI_CUSTOM_ICON_FILES={
+  settings:'settings.png','arrow-left':'back.png',home:'dashboard.png',templates:'templates.png',trash:'trash.png',shield:'admin.png',
+  documents:'document.png',date:'date.png',save:'save.png',conflict:'conflict.png',chart:'analytics.png',users:'users-access.png',
+  activity:'audit-log.png',content:'content-setup.png',overview:'overview.png',cloud:'cloud-operations.png',text:'draft-text.png',
+  figure:'draft-figure.png',import:'import.png',export:'export.png',bell:'notifications.png',user:'profile.png','log-out':'logout.png',
+  submissionForms:'submission-forms.png',archive:'archive.png',courseProgress:'course-progress.png',
+  'bullet-1':'bullet-circle.png','bullet-2':'bullet-square.png','bullet-3':'bullet-rhomboid.png',
+  success:'success.svg',sync:'sync.png',refresh:'sync.png',megaphone:'updates.svg',guide:'guide.svg'
+};
+const UI_ICON_OVERRIDES={};
+const UI_ICON_ALIASES={
+  'workflow.scientific':'documents','workflow.script':'text','workflow.questions':'check-circle','workflow.flashcards':'templates','workflow.shooting':'figure','workflow.editing':'activity',
+  'task.assignment':'users','task.information':'documents','task.instructions':'text','task.checklist':'check-circle','task.comments':'activity','task.activity':'history','task.attachments':'figure','task.link':'arrow-right','task.image':'figure','task.file':'documents','task.text':'text',
+  'submission.scientific-draft':'documents','submission.designed-draft':'figure','submission.v1-review':'check-circle','submission.audit':'search','submission.directory':'submissionForms','submission.requirements':'documents','submission.search':'search','submission.success':'success',
+  'admin.icons':'settings','admin.account-requests':'users','admin.submission-history':'archive','admin.trash':'trash','admin.audit-log':'activity',
+  'shared.edit':'text','shared.delete':'trash','shared.add':'upload','shared.link':'arrow-right','shared.image':'figure','shared.file':'documents','shared.team':'users','shared.comment':'activity','shared.clock':'history','shared.back':'arrow-left'
+};
+const UI_ICON_CATALOG=[
+  // Navigation
+  ['home','Dashboard','Navigation','Dashboard in the main sidebar'],['documents','Documents','Navigation','Documents in the main sidebar'],['templates','Templates','Navigation','Templates in the main sidebar'],['submissionForms','Submission Forms','Navigation','Submission Forms in the main sidebar'],['courseProgress','Courses','Navigation','Courses / chapter workspace in the main sidebar'],['trash','Trash','Navigation','Trash in the main sidebar'],['guide','Guide','Navigation','Guide in the main sidebar'],['shield','Admin','Navigation','Admin in the main sidebar'],
+  // Workflow / chapter areas
+  ['workflow.scientific','Scientific Draft & Design','Workflow areas','Scientific Draft & Design work-area card/header'],['workflow.script','Script & Presenting','Workflow areas','Script & Presenting work-area card/header'],['workflow.questions','Questions','Workflow areas','Questions work-area card/header'],['workflow.flashcards','Flashcards','Workflow areas','Flashcards work-area card/header'],['workflow.shooting','Shooting / Presenting','Workflow areas','Shooting / Presenting work-area card/header'],['workflow.editing','Montage / Editing','Workflow areas','Montage / Editing work-area card/header'],
+  ['task.information','Task Information','Task pages','Task Information card heading'],['task.assignment','Assignment & Executors','Task pages','Assignment / executor card heading'],['task.instructions','Task Instructions','Task pages','Task Instructions card heading'],['task.checklist','Task Checklist','Task pages','Task Checklist / checklist controls'],['task.comments','Comments','Task pages','Comments card heading'],['task.activity','Activity','Task pages','Activity card heading'],['task.attachments','Required Files','Task pages','Required files and attachments'],['task.image','Image input','Task pages','Image resources'],['task.file','File input','Task pages','File resources'],['task.text','Text input','Task pages','Text resources'],['task.link','Link input','Task pages','Link resources'],
+  ['date','Date','Task pages','Task dates'],['users','Task Executors','Task pages','Executors and team members'],['activity','Activity log','Task pages','Activity / audit log'],['check-circle','Approval','Task pages','Approved/completed state'],['history','History','Task pages','Version and submission history'],['figure','Figures','Task pages','Figures and visual inputs'],['text','Text / Instructions','Task pages','Text and instruction controls'],
+  // Submission forms — every card/visual placement has its own key.
+  ['submission.directory','Submission Forms Header','Submission forms','Submission Forms page header icon'],['submission.scientific-draft','Scientific Draft Submission','Submission forms','Scientific Draft Submission Form card icon'],['submission.designed-draft','Designed Scientific Draft Submission','Submission forms','Designed Scientific Draft Submission Form card icon'],['submission.v1-review','Scientific Draft V1 Review','Submission forms','Scientific Draft V1 Review Submission Form card icon'],['submission.audit','Comprehensive Scientific Audit','Submission forms','Comprehensive Scientific Audit Submission Form card icon'],['submission.requirements','Required Files','Submission forms','Required-files / preflight icon'],['submission.search','Form Search','Submission forms','Submission Forms search icon'],['submission.success','Submission Success','Submission forms','Successful submission confirmation icon'],
+  ['upload','Upload','Submission forms','Upload controls'],['download','Download','Submission forms','Download controls'],['import','Import','Submission forms','Import controls'],['export','Export','Submission forms','Export controls'],['save','Save','Submission forms','Save controls'],['archive','Archive','Submission forms','Submission archive'],
+  // Admin
+  ['overview','Overview','Admin panel','Admin overview'],['users','Users & Access','Admin panel','Users and access management'],['content','Content Setup','Admin panel','Content setup'],['submissionForms','Submission Forms Admin','Admin panel','Submission Forms builder'],['archive','Archive Admin','Admin panel','Archive and submission history'],['cloud','Cloud Operations','Admin panel','Cloud operations'],['chart','Analytics','Admin panel','Analytics'],['activity','Audit Log','Admin panel','Audit log'],['trash','Trash Management','Admin panel','Trash management'],['megaphone','Updates','Admin panel','Updates'],['admin.icons','Icons','Admin panel','Icon Manager entry'],['settings','Settings','Admin panel','Settings controls'],
+  // Editor
+  ['undo','Undo','Editor','Undo'],['redo','Redo','Editor','Redo'],['bullet-1','Bullet level 1','Editor','First bullet level'],['bullet-2','Bullet level 2','Editor','Second bullet level'],['bullet-3','Bullet level 3','Editor','Third bullet level'],['panel-close','Panel control','Editor','Panel controls'],['figure','Figure','Editor','Figure editor controls'],['text','Text','Editor','Text editor controls'],['import','Import','Editor','Editor import'],['export','Export','Editor','Editor export'],['save','Save','Editor','Editor save'],
+  // Shared controls / status icons
+  ['search','Search','Shared controls','Search fields'],['bell','Notifications','Shared controls','Notifications'],['user','Profile','Shared controls','Profile/account'],['log-out','Log out','Shared controls','Sign out'],['menu','Menu','Shared controls','Menu toggle'],['close','Close','Shared controls','Close dialogs'],['arrow-left','Back','Shared controls','Back navigation'],['arrow-right','Forward','Shared controls','Forward navigation'],['arrow-up','Move up','Shared controls','Move upward'],['arrow-down','Move down','Shared controls','Move downward'],['more-horizontal','More','Shared controls','More actions'],['chevron-down','Dropdown','Shared controls','Dropdown indicator'],['sync','Sync','Shared controls','Sync state'],['refresh','Refresh','Shared controls','Refresh action'],['success','Success','Shared controls','Success state'],['conflict','Conflict','Shared controls','Conflict state'],['local','Local device','Shared controls','Local/offline device state'],['upload','Add / upload','Shared controls','Add or upload action'],['download','Download','Shared controls','Download action'],['settings','Settings','Shared controls','Settings'],['shared.edit','Edit','Shared controls','Edit actions'],['shared.delete','Delete','Shared controls','Delete actions'],['shared.add','Add','Shared controls','Add actions'],['shared.link','Link','Shared controls','Link actions'],['shared.image','Image','Shared controls','Image actions'],['shared.file','File','Shared controls','File actions'],['shared.team','Team','Shared controls','Team / people indicators'],['shared.comment','Comment','Shared controls','Comment indicators'],['shared.clock','Time / History','Shared controls','Time and history indicators'],['shared.back','Back','Shared controls','Back buttons']
+].map(([key,name,category,description])=>({key,name,category,description}));
+function defaultUiIcon(name){const resolved=UI_ICON_ALIASES[name]||name,file=UI_CUSTOM_ICON_FILES[resolved];if(file)return `<span class="ui-icon ui-custom-icon${resolved==='arrow-left'?' ui-back-icon':''}" style="--ui-icon:url('icons/ui/${file}')" aria-hidden="true"></span>`;return `<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">${UI_ICON_PATHS[resolved]||UI_ICON_PATHS.documents}</svg>`}
+function uiIcon(name){const override=UI_ICON_OVERRIDES[name];if(override){if(String(override).startsWith('builtin:'))return defaultUiIcon(String(override).slice(8));const safe=String(override).replace(/'/g,'%27');return `<span class="ui-icon ui-custom-icon${name==='arrow-left'?' ui-back-icon':''}" style="--ui-icon:url('${safe}')" aria-hidden="true"></span>`}return defaultUiIcon(name)}
+window.TeryaqUIIcon=uiIcon;
+window.TeryaqDefaultUIIcon=defaultUiIcon;
+window.TeryaqIconCatalog=UI_ICON_CATALOG;
+window.TeryaqSetIconOverrides=map=>{for(const key of Object.keys(UI_ICON_OVERRIDES))delete UI_ICON_OVERRIDES[key];Object.assign(UI_ICON_OVERRIDES,map||{});hydrateStaticIcons()};
+function hydrateStaticIcons(root=document){root.querySelectorAll('[data-ui-icon]').forEach(host=>{host.innerHTML=uiIcon(host.dataset.uiIcon)})}
+
+function toast(msg){ const el=byId('toast'); if(!el)return; el.textContent=msg; el.classList.add('show'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),1800); }
+function statusMarkup(text){return String(text??'').split('✓').map(esc).join(uiIcon('success'))}
+function setSaveStatus(text){ const el=byId('saveStatus'); if(el) el.innerHTML=statusMarkup(text); }
+function updateEditorLocks(){
+  const saving=state.saveInFlight>0,busy=state.blockingSaveInFlight>0||state.syncInFlight;
+  for(const id of ['saveBtn','syncBtnEditor','backBtn','settingsBtnEditor','editorImportBtn','validateBtn','historyBtn','exportMenuButton','backupBtn','saveTemplateBtn','printBtn','figureOnlyExportMenuBtn','htmlExportBtn']){const button=byId(id);if(button)button.disabled=busy}
+  if(busy)closeExportMenu();
+  const save=byId('saveBtn');if(save)save.innerHTML=`${uiIcon('save')}<span>${saving?'Saving…':state.syncInFlight?'Sending…':'Save'}</span>`;
+}
+function fmtDate(iso){ if(!iso)return ''; try{return new Date(iso).toLocaleString();}catch{return iso;} }
+function fileSafe(s){ return String(s||'Teryaq_Document').trim().replace(/[^\w\-]+/g,'_').replace(/_+/g,'_').slice(0,80) || 'Teryaq_Document'; }
+function documentDisplayTitle(doc){
+  const title=String(doc?.title||'Untitled Document'),suffix=doc?.templateId==='scientific-draft-figures'?'Figures':doc?.templateId==='shooting-script'?'Shooting Script':'';
+  if(!suffix)return title;
+  const meta=doc?.metadata||{},base=[meta.course||meta.subject,meta.chapterNumber?`CH ${meta.chapterNumber}`:'',meta.chapterTitle].filter(Boolean).join(' — ');
+  if(base&&title===`${base} — ${suffix}`)return base;
+  if(base&&title===`${base} — ${suffix} Imported`)return `${base} — Imported`;
+  return title;
+}
+function sanitizeChapterNumber(value){
+  const arabic='٠١٢٣٤٥٦٧٨٩',persian='۰۱۲۳۴۵۶۷۸۹';
+  return String(value??'').replace(/[٠-٩]/g,c=>String(arabic.indexOf(c))).replace(/[۰-۹]/g,c=>String(persian.indexOf(c))).replace(/[^0-9.]/g,'');
+}
+const sanitizeNumericCode=sanitizeChapterNumber;
+
+// ---------------- IndexedDB ----------------
+function openDb(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(DB_NAME,DB_VERSION);
+    req.onupgradeneeded=()=>{
+      const db=req.result, upgradeTx=req.transaction;
+      let s;
+      if(!db.objectStoreNames.contains('documents')){s=db.createObjectStore('documents',{keyPath:'id'});s.createIndex('updatedAt','updatedAt');s.createIndex('templateId','templateId');s.createIndex('ownerId','ownerId');}
+      else {s=upgradeTx.objectStore('documents');if(!s.indexNames.contains('ownerId'))s.createIndex('ownerId','ownerId');}
+      if(!db.objectStoreNames.contains('snapshots')){s=db.createObjectStore('snapshots',{keyPath:'id'});s.createIndex('documentId','documentId');s.createIndex('createdAt','createdAt');s.createIndex('ownerId','ownerId');}
+      else {s=upgradeTx.objectStore('snapshots');if(!s.indexNames.contains('ownerId'))s.createIndex('ownerId','ownerId');}
+      if(!db.objectStoreNames.contains('templates')){s=db.createObjectStore('templates',{keyPath:'id'});s.createIndex('ownerId','ownerId');}
+      else {s=upgradeTx.objectStore('templates');if(!s.indexNames.contains('ownerId'))s.createIndex('ownerId','ownerId');}
+      if(!db.objectStoreNames.contains('settings'))db.createObjectStore('settings',{keyPath:'key'});
+      if(!db.objectStoreNames.contains('accounts'))db.createObjectStore('accounts',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('devices')){s=db.createObjectStore('devices',{keyPath:'id'});s.createIndex('ownerId','ownerId');}
+      if(!db.objectStoreNames.contains('syncQueue')){s=db.createObjectStore('syncQueue',{keyPath:'id'});s.createIndex('ownerId','ownerId');}
+      if(!db.objectStoreNames.contains('tombstones')){s=db.createObjectStore('tombstones',{keyPath:'id'});s.createIndex('ownerId','ownerId');}
+      if(!db.objectStoreNames.contains('trash')){s=db.createObjectStore('trash',{keyPath:'id'});s.createIndex('ownerId','ownerId');s.createIndex('deletedAt','deletedAt');}
+      if(!db.objectStoreNames.contains('conflicts')){s=db.createObjectStore('conflicts',{keyPath:'id'});s.createIndex('ownerId','ownerId');}
+      if(!db.objectStoreNames.contains('migrationBackups')){s=db.createObjectStore('migrationBackups',{keyPath:'id'});s.createIndex('ownerId','ownerId');s.createIndex('createdAt','createdAt');}
+      if(!db.objectStoreNames.contains('mediaQueue')){s=db.createObjectStore('mediaQueue',{keyPath:'id'});s.createIndex('ownerId','ownerId');s.createIndex('documentId','documentId');s.createIndex('status','status');}
+      if(!db.objectStoreNames.contains('appCache'))db.createObjectStore('appCache',{keyPath:'key'});
+    };
+    req.onsuccess=()=>resolve(req.result); req.onerror=()=>reject(req.error);
+  });
+}
+function tx(store,mode='readonly'){return state.db.transaction(store,mode).objectStore(store)}
+function idbPut(store,val){return new Promise((res,rej)=>{const r=tx(store,'readwrite').put(val);r.onsuccess=()=>res(val);r.onerror=()=>rej(r.error)})}
+function idbGet(store,key){return new Promise((res,rej)=>{const r=tx(store).get(key);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+function idbDelete(store,key){return new Promise((res,rej)=>{const r=tx(store,'readwrite').delete(key);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+function idbAll(store){return new Promise((res,rej)=>{const r=tx(store).getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error)})}
+function idbByIndex(store,index,key){return new Promise((res,rej)=>{const r=tx(store).index(index).getAll(key);r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error)})}
+function idbPutDocumentPreservingSync(document){
+  return new Promise((resolve,reject)=>{
+    const transaction=state.db.transaction('documents','readwrite'),store=transaction.objectStore('documents');let saved=null,failure=null;
+    const request=store.get(document.id);
+    request.onsuccess=()=>{try{
+      const existing=request.result,next=clone(document),existingBase=Number(existing?.sync?.baseServerVersion||0),nextBase=Number(next.sync?.baseServerVersion||0);
+      next.sync={...(next.sync||{}),baseServerVersion:Math.max(existingBase,nextBase)};
+      if(existingBase>nextBase&&existing?.sync?.lastSyncedAt)next.sync.lastSyncedAt=existing.sync.lastSyncedAt;
+      if(existing?.sync?.status==='conflict')next.sync={...next.sync,status:'conflict',baseServerVersion:Math.max(existingBase,nextBase),lastError:existing.sync.lastError||'Sync conflict needs review.'};
+      store.put(next);saved=next
+    }catch(error){failure=error;transaction.abort()}};
+    transaction.oncomplete=()=>resolve(saved);transaction.onerror=()=>reject(failure||transaction.error);transaction.onabort=()=>reject(failure||transaction.error||new Error('Local save transaction aborted'))
+  })
+}
+
+// ---------------- Models ----------------
+function blankMeta(){ return {name:'',authorIds:[],startDate:'',endDate:'',category:'',categoryId:'',editorialVersion:'',course:'',courseId:'',subject:'',subjectId:'',chapterNumber:'',chapterTitle:'',chapterId:'',generalNotes:''}; }
+function normalBlock(text=''){ return {id:uid('b'),type:'paragraph',style:'Normal',runs:text?[{text,marks:[]}]:[]}; }
+function createTextDocument(){
+  const t=BUILTIN_TEMPLATES[0];
+  return {id:uid('doc'),format:'TeryaqDocument',schemaVersion:SCHEMA_VERSION,appVersion:APP_VERSION,templateId:t.id,templateVersion:t.version,title:'Untitled Document',createdAt:nowIso(),updatedAt:nowIso(),metadata:blankMeta(),content:{blocks:[normalBlock()]},settings:{}};
+}
+function createFigureDocument(){
+  const t=BUILTIN_TEMPLATES[1];
+  return {id:uid('doc'),format:'TeryaqDocument',schemaVersion:SCHEMA_VERSION,appVersion:APP_VERSION,templateId:t.id,templateVersion:t.version,title:'Untitled Document',createdAt:nowIso(),updatedAt:nowIso(),metadata:blankMeta(),content:{figures:[blankFigure()]},settings:{}};
+}
+function createScriptDocument(){const t=BUILTIN_TEMPLATES.find(x=>x.id==='shooting-script');return {id:uid('doc'),format:'TeryaqDocument',schemaVersion:SCHEMA_VERSION,appVersion:APP_VERSION,templateId:t.id,templateVersion:t.version,title:'Untitled Document',createdAt:nowIso(),updatedAt:nowIso(),metadata:blankMeta(),content:{blocks:[normalBlock()]},settings:{teleprompter:{}}}}
+function isScript(){return state.current?.templateId==='shooting-script'}
+function hasBlockControls(){return ['shooting-script','scientific-draft-text'].includes(state.current?.templateId)}
+function blankFigure(){return {id:uid('fig'),code:'',title:'',caption:'',source:'',order:'',details:'',copyright:'',notes:'',image:'',attachmentId:'',storagePath:'',imageStatus:'',imageName:'',imageSize:0,uploadedBytes:0,uploadSpeed:0,uploadEta:0}}
+function getTemplate(id){return BUILTIN_TEMPLATES.find(t=>t.id===id)||state.customTemplates.find(t=>t.id===id)}
+
+// ---------------- Inline structured runs ----------------
+const MARK_CLASS = {SideNote:'mark-SideNote',NotesToDelete:'mark-NotesToDelete',HighYield:'mark-HighYield',ClinicalCorrelation:'mark-ClinicalCorrelation','script-emphasis':'script-emphasis','script-repeat':'script-repeat-inline','script-visual-ref':'script-visual-ref','script-presenter':'script-presenter','script-review':'script-review'};
+const SCRIPT_HIDDEN_PROMPT_MARKS=['script-visual-ref','script-review'];
+function normalizeRuns(runs){
+  const out=[];
+  for(const r of (runs||[])){
+    if(!r || !r.text) continue;
+    const marks=[...(r.marks||[])].sort();
+    const prev=out[out.length-1];
+    if(prev && JSON.stringify(prev.marks)===JSON.stringify(marks)) prev.text+=r.text; else out.push({text:r.text,marks});
+  }
+  return out;
+}
+function runsToHtml(runs,{teleprompter=false}={}){
+  return normalizeRuns(runs).map(r=>{
+    let h=esc(r.text).replace(/\n/g,'<br>');
+    const marks=r.marks||[];
+    if(marks.includes('bold')) h=`<strong>${h}</strong>`;
+    if(marks.includes('italic')) h=`<em>${h}</em>`;
+    if(marks.includes('underline')) h=`<u>${h}</u>`;
+    for(const m of ['SideNote','NotesToDelete','HighYield','ClinicalCorrelation','script-emphasis','script-repeat','script-visual-ref','script-presenter','script-review']) if(marks.includes(m)) h=`<span class="${MARK_CLASS[m]}" data-mark="${m}">${h}</span>`;
+    const fs=marks.find(x=>x.startsWith('font:')); if(fs){const n=parseFloat(fs.split(':')[1]);if(n)h=`<span data-font-size="${n}" style="font-size:${n}pt">${h}</span>`;}
+    if(teleprompter&&marks.some(mark=>SCRIPT_HIDDEN_PROMPT_MARKS.includes(mark)))h=`<span class="script-prompt-hidden-run" contenteditable="false" aria-hidden="true">${h}</span>`;
+    return h;
+  }).join('');
+}
+function elementToRuns(el){
+  const out=[];
+  function walk(node,marks){
+    if(node.nodeType===Node.TEXT_NODE){ if(node.nodeValue) out.push({text:node.nodeValue,marks:[...marks]}); return; }
+    if(node.nodeType!==Node.ELEMENT_NODE)return;
+    const tag=node.tagName.toLowerCase(); const next=[...marks];
+    if(tag==='strong'||tag==='b')next.push('bold'); if(tag==='em'||tag==='i')next.push('italic'); if(tag==='u')next.push('underline');
+    const dm=node.dataset?.mark;if(dm&&MARK_CLASS[dm])next.push(dm);
+    const fs=node.dataset?.fontSize;if(fs)next.push(`font:${fs}`);
+    if(tag==='br'){out.push({text:'\n',marks:[...marks]});return;}
+    [...node.childNodes].forEach(c=>walk(c,next));
+  }
+  [...el.childNodes].forEach(c=>walk(c,[])); return normalizeRuns(out);
+}
+function plainText(runs){return (runs||[]).map(r=>r.text).join('')}
+function textDirection(text){
+  const firstStrong=String(text||'').match(/[A-Za-z\u00C0-\u02AF\u0370-\u052F\u0590-\u08FF\uFB1D-\uFDFD\uFE70-\uFEFC]/u)?.[0]||'';
+  return /[\u0590-\u08FF\uFB1D-\uFDFD\uFE70-\uFEFC]/u.test(firstStrong)?'rtl':'ltr';
+}
+function applyBlockDirection(el,text,explicit){
+  const direction=explicit||textDirection(text);el.setAttribute('dir',direction);const editable=el.matches?.('.editable')?el:el.querySelector?.('.editable');if(editable)editable.setAttribute('dir',direction);return direction;
+}
+function splitRuns(runs,offset){
+  const left=[],right=[];let pos=0;
+  for(const r of runs||[]){const end=pos+r.text.length;if(offset<=pos)right.push(clone(r));else if(offset>=end)left.push(clone(r));else{const cut=offset-pos;if(cut)left.push({text:r.text.slice(0,cut),marks:[...(r.marks||[])]});if(cut<r.text.length)right.push({text:r.text.slice(cut),marks:[...(r.marks||[])]});}pos=end;}
+  return [normalizeRuns(left),normalizeRuns(right)];
+}
+
+// ---------------- App bootstrap ----------------
+async function boot(){
+  state.db=await openDb();
+  hydrateStaticIcons();
+  TeryaqPlatform.attachDb(state.db);
+  TeryaqPlatform.setDataChangedCallback(async()=>{
+    if(!TeryaqPlatform.user())return;
+    await refreshLibrary();
+    // Background sync checks run every 15 seconds. Re-render only views that
+    // display the local document library; rebuilding Admin while the user is
+    // typing would discard the focused field and return the tab to Overview.
+    if(['home','documents','templates','trash'].includes(state.view))await renderActiveView();
+  });
+  for(const id of ['appVersionBadge','sidebarAppVersion']){const el=byId(id);if(el)el.textContent=`v${APP_VERSION}`}
+  bindGlobal();
+  applySidebarPreference();
+  const auth=await TeryaqPlatform.initialize();
+  window.addEventListener('teryaq-authenticated',async()=>{await afterAuthentication();});
+  if(auth.authenticated)await afterAuthentication();
+  window.addEventListener('resize',()=>{syncEditorStickyOffsets();if(state.current?.templateId==='scientific-draft-text'){if(state.viewOnly)applyPreviewScale();else updatePageScale()}else if(isScript()){if(state.ribbonTab==='teleprompter')applyPromptSettings();else updatePageScale()}});
+  window.addEventListener('pagehide',flushEmergencySave);
+  window.addEventListener('teryaq-document-rekeyed',event=>{
+    const detail=event.detail;if(!detail?.document)return;
+    if(state.current?.id===detail.oldId){clearEmergencyDraft(detail.oldId);state.current=clone(detail.document);state.dirty=false;state.editRevision++;state.savedRevision=state.editRevision;setSaveStatus('Ownership repaired safely · syncing new document ID…');toast('Document ownership repaired safely')}
+    else if(state.current?.id===detail.document.id){state.current.sync=clone(detail.document.sync||state.current.sync||{});if(detail.document.sync?.status==='synced')setSaveStatus(`Saved locally ✓ · cloud version ${Number(detail.document.sync.baseServerVersion||1)} ✓`)}
+  });
+  window.addEventListener('teryaq-document-sync-metadata',event=>{
+    const detail=event.detail;if(!detail?.documentId||state.current?.id!==detail.documentId)return;
+    const incoming=detail.sync||{},current=state.current.sync||{},hasNewerUnsaved=state.dirty||state.saveInFlight>0;
+    state.current.sync={...current,...clone(incoming),baseServerVersion:Math.max(Number(current.baseServerVersion||0),Number(incoming.baseServerVersion||0))};
+    if(hasNewerUnsaved&&state.current.sync.status==='synced')state.current.sync.status='pending'
+  });
+  window.addEventListener('teryaq-remote-document-applied',event=>{
+    const document=event.detail?.document;if(!document||state.current?.id!==document.id||state.dirty||state.saveInFlight>0)return;
+    state.current=clone(document);state.editRevision=0;state.savedRevision=0;resetHistory();renderEditor();pushHistory('Cloud refresh');setSaveStatus(`Cloud version ${Number(document.sync?.baseServerVersion||0)} loaded ✓`)
+  });
+  window.addEventListener('teryaq-content-options-updated',event=>{if(event.detail)state.contentOptions=clone(event.detail);if(state.view==='editor'&&state.current){if(['scientific-draft-text','shooting-script'].includes(state.current.templateId))renderMeta();else if(state.current.templateId==='scientific-draft-figures')renderFigureEditor()}});
+  window.addEventListener('teryaq-media-progress',event=>{const record=event.detail;if(!record||state.current?.id!==record.documentId)return;const figure=state.current.content?.figures?.find(item=>item.id===record.figureId);if(figure){figure.imageStatus=record.status;figure.uploadedBytes=Number(record.uploadedBytes||0);figure.imageSize=Number(record.size||figure.imageSize||0);figure.uploadSpeed=Number(record.speed||0);figure.uploadEta=Number(record.eta||0);if(record.storagePath)figure.storagePath=record.storagePath}updateFigureUploadProgressDom(record);renderFigureUploadSummary()});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushEmergencySave();else resumeAndSync()});
+  window.addEventListener('focus',()=>resumeAndSync());
+  window.addEventListener('pageshow',()=>resumeAndSync());
+  window.addEventListener('beforeunload',event=>{
+    if(!state.current||(state.dirty===false&&state.saveInFlight===0))return;
+    persistEmergencyDraft(state.current,state.editRevision);
+    if(state.dirty)void saveCurrent(false);
+    event.preventDefault();event.returnValue='';
+  });
+  setInterval(()=>{if(state.current && state.dirty && Date.now()-state.lastSnapshotAt>SNAPSHOT_INTERVAL_MS)createSnapshot('Auto snapshot')},60000);
+}
+async function afterAuthentication(){
+  await requestPersistentStorage();await TeryaqPlatform.claimAndMigrateLegacyData();const recovered=await recoverEmergencyDrafts();state.contentOptions=await TeryaqPlatform.getContentOptions();await refreshLibrary();renderHome();await refreshUpdates();TeryaqPlatform.updateSyncUi();
+  if(!accountNameReady())await showRequiredAccountName();
+  if(recovered)toast(`Recovered ${recovered} emergency draft${recovered===1?'':'s'}`);
+  if(navigator.onLine)TeryaqPlatform.syncNow({silent:true});
+}
+let resumeSyncPromise=null;
+async function resumeAndSync(){
+  if(resumeSyncPromise||!TeryaqPlatform.user()||document.visibilityState==='hidden')return resumeSyncPromise;
+  resumeSyncPromise=(async()=>{if(state.current&&state.dirty)await saveCurrent(false);TeryaqPlatform.scheduleAutoSync(350)})();
+  try{return await resumeSyncPromise}finally{resumeSyncPromise=null}
+}
+async function requestPersistentStorage(){
+  try{
+    if(!navigator.storage?.persist)return false;
+    const already=await navigator.storage.persisted?.();const granted=already||await navigator.storage.persist();
+    try{localStorage.setItem('teryaq:storage-persistence',granted?'granted':'best-effort')}catch(_){}
+    return granted
+  }catch(error){console.warn('Persistent storage request unavailable:',error);return false}
+}
+async function refreshLibrary(){
+  const u=TeryaqPlatform.user();if(!u){state.docs=[];state.customTemplates=[];return}
+  state.docs=(await idbAll('documents')).filter(d=>d.ownerId===u.id).sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
+  state.customTemplates=(await idbAll('templates')).filter(t=>t.ownerId===u.id).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
+}
+function bindGlobal(){
+  byId('homeBtn').onclick=()=>goHome();byId('backBtn').onclick=()=>goHome();byId('newDocumentBtn').onclick=()=>showNewDocumentWizard();byId('documentsNewBtn').onclick=()=>showNewDocumentWizard();byId('importBtn').onclick=()=>byId('importFile').click(); byId('importFile').onchange=e=>e.target.files[0]&&importPackage(e.target.files[0]);
+  byId('searchDocs').addEventListener('input',e=>{state.search=e.target.value.toLowerCase();state.selectedDocumentIds.clear();renderDocuments()});
+  byId('documentStatusFilter').addEventListener('change',()=>{state.selectedDocumentIds.clear();renderDocuments()});
+  byId('globalSearch').addEventListener('input',e=>{state.search=e.target.value.toLowerCase();byId('searchDocs').value=e.target.value;activateView('documents')});
+  byId('closeValidation').onclick=()=>byId('validationPanel').classList.add('hidden');
+  byId('closeModal').onclick=()=>closeModal();
+  byId('syncBtn').onclick=()=>TeryaqPlatform.syncNow();
+  byId('resolveConflictsBtn').onclick=()=>TeryaqPlatform.resolveConflicts();
+  byId('bulkDeleteDocuments').onclick=()=>deleteSelectedDocumentsToTrash();byId('clearDocumentSelection').onclick=()=>{state.selectedDocumentIds.clear();renderDocuments()};
+  $$('[data-nav]').forEach(button=>button.addEventListener('click',()=>activateView(button.dataset.nav)));
+  const notificationsButton=byId('notificationsButton'),notificationsPanel=byId('notificationsPanel'),profileButton=byId('profileMenuButton'),profilePanel=byId('profileMenuPanel');
+  notificationsButton.onclick=event=>{event.stopPropagation();const opening=notificationsPanel.classList.contains('hidden');notificationsPanel.classList.toggle('hidden',!opening);profilePanel.classList.add('hidden');notificationsButton.setAttribute('aria-expanded',String(opening));profileButton.setAttribute('aria-expanded','false');if(opening)refreshUpdates()};
+  profileButton.onclick=event=>{event.stopPropagation();const opening=profilePanel.classList.contains('hidden');profilePanel.classList.toggle('hidden',!opening);notificationsPanel.classList.add('hidden');profileButton.setAttribute('aria-expanded',String(opening));notificationsButton.setAttribute('aria-expanded','false')};
+  byId('topbarSignOut').onclick=async()=>{await TeryaqPlatform.signOut();location.reload()};
+  for(const id of ['notificationItems','dashboardUpdates'])byId(id).addEventListener('click',event=>{const item=event.target.closest('[data-update-id]');if(item)void readUpdate(item.dataset.updateId)});
+  byId('sidebarToggle').onclick=()=>setSidebarOpen(true);byId('sidebarClose').onclick=()=>setSidebarOpen(false);byId('sidebarScrim').onclick=()=>setSidebarOpen(false);byId('sidebarCollapse').onclick=()=>setSidebarCollapsed(!byId('appShell').classList.contains('sidebar-collapsed'));
+  document.addEventListener('pointerdown',event=>{if(!event.target.closest('#exportMenu'))closeExportMenu();if(!event.target.closest('#tableOutlinePanel,#tableOutlineBtn'))closeTableOutline();if(!event.target.closest('.document-action-menu-panel')&&!event.target.closest('.row-more'))closeDocumentActionMenu();if(!event.target.closest('.topbar-popover-wrap')){notificationsPanel.classList.add('hidden');profilePanel.classList.add('hidden');notificationsButton.setAttribute('aria-expanded','false');profileButton.setAttribute('aria-expanded','false')}});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'){closeExportMenu();closeTableOutline();closeDocumentActionMenu();setOutlineDrawerOpen(false);if(!byId('modal').classList.contains('hidden'))closeModal()}});
+  window.addEventListener('resize',closeDocumentActionMenu);window.addEventListener('scroll',closeDocumentActionMenu,true);
+}
+function closeModal(){if(state.exportVersionCancel){state.exportVersionCancel();return}byId('modal').classList.add('hidden');byId('modal').querySelector('.modal-card')?.classList.remove('wizard-modal','docx-import-modal');state.docxImportSession=null}
+
+// ---------------- Home/library ----------------
+function setSidebarOpen(open){byId('appShell').classList.toggle('sidebar-open',open);byId('sidebarScrim').classList.toggle('hidden',!open)}
+function applySidebarPreference(){let collapsed=false;try{const saved=localStorage.getItem(SIDEBAR_COLLAPSED_KEY);if(saved!==null)collapsed=saved==='true'}catch(_){}setSidebarCollapsed(collapsed,false)}
+function setSidebarCollapsed(collapsed,persist=true){const shell=byId('appShell'),button=byId('sidebarCollapse');if(!shell||!button)return;shell.classList.toggle('sidebar-collapsed',collapsed);button.setAttribute('aria-expanded',String(!collapsed));button.setAttribute('aria-label',collapsed?'Expand sidebar':'Collapse sidebar');button.title=collapsed?'Expand sidebar':'Collapse sidebar';if(persist)try{localStorage.setItem(SIDEBAR_COLLAPSED_KEY,String(collapsed))}catch(_){}requestAnimationFrame(()=>{syncEditorStickyOffsets();if(state.current?.templateId==='scientific-draft-text')updatePageScale()})}
+function syncEditorStickyOffsets(){const topbar=document.querySelector('.app-frame>.topbar');if(topbar)document.documentElement.style.setProperty('--topbar-height',`${Math.ceil(topbar.getBoundingClientRect().height)}px`);document.documentElement.style.setProperty('--editor-ribbon-height','0px')}
+async function activateView(name){
+  if(state.current&&name!=='editor'&&!(await ensureCurrentSaved()))return false;
+  if(state.view==='submissionForms'&&name!=='submissionForms'&&!(await window.TeryaqSubmissions.suspend()))return false;
+  if(name!=='editor')state.current=null;
+  byId('notificationsPanel')?.classList.add('hidden');byId('profileMenuPanel')?.classList.add('hidden');byId('notificationsButton')?.setAttribute('aria-expanded','false');byId('profileMenuButton')?.setAttribute('aria-expanded','false');
+  state.view=name;byId('appShell').classList.toggle('editor-mode',name==='editor');$$('.view').forEach(v=>v.classList.remove('active'));const view=byId(`${name}View`);if(view)view.classList.add('active');
+  $$('.sidebar-link[data-nav]').forEach(b=>b.classList.toggle('active',b.dataset.nav===name));byId('adminBtn')?.classList.toggle('active',name==='admin');byId('editorActions').classList.toggle('hidden',name!=='editor');byId('homeActions').classList.toggle('hidden',name==='editor');byId('backBtn').classList.toggle('hidden',name!=='editor');setSidebarOpen(false);
+  if(name!=='editor'){byId('docTitle').textContent=name==='home'?'TERYAQ Master Tool':name==='courseProgress'?'Courses':name[0].toUpperCase()+name.slice(1);await renderActiveView()}requestAnimationFrame(syncEditorStickyOffsets);
+  return true;
+}
+async function renderActiveView(){
+  if(state.view==='home'){renderDashboard();renderDocuments()}
+  else if(state.view==='documents')renderDocuments();
+  else if(state.view==='templates')renderTemplatesPage();
+  else if(state.view==='guide')window.TeryaqGuide?.render();
+  else if(state.view==='submissionForms')await window.TeryaqSubmissions.renderDirectory(byId('submissionFormsBody'),{resumeActive:true});
+  else if(state.view==='courseProgress')await window.TeryaqWorkflow.render(byId('courseProgressBody'));
+  else if(state.view==='trash')await TeryaqPlatform.showTrashPage('trashPageBody');
+  else if(state.view==='settings')await TeryaqPlatform.showSettingsPage('settingsPageBody');
+  else if(state.view==='profile')await TeryaqPlatform.showAccountPage('accountPageBody');
+  else if(state.view==='admin')await TeryaqPlatform.showAdminDashboard('overview','adminPageBody');
+}
+function renderHome(){
+  const u=TeryaqPlatform.user();byId('welcomeEmail').textContent=u?.displayName?.trim()||u?.email||'';activateView('home');
+}
+function renderDashboard(){
+  const u=TeryaqPlatform.user(),docs=state.docs,pending=docs.filter(d=>['pending','local-only'].includes(d.sync?.status)).length,conflicts=docs.filter(d=>d.sync?.status==='conflict').length;
+  byId('welcomeEmail').textContent=u?.displayName?.trim()||u?.email||'';
+  byId('dashboardStats').innerHTML=`<article class="stat-card"><span class="stat-icon">${uiIcon('documents')}</span><div><b>${docs.length}</b><small>Documents</small></div></article><article class="stat-card indigo"><span class="stat-icon">${uiIcon('text')}</span><div><b>${docs.filter(d=>d.templateId==='scientific-draft-text').length}</b><small>Text drafts</small></div></article><article class="stat-card gold"><span class="stat-icon">${uiIcon('sync')}</span><div><b>${pending}</b><small>Waiting sync</small></div></article><article class="stat-card wine"><span class="stat-icon">${uiIcon('conflict')}</span><div><b>${conflicts}</b><small>Conflicts</small></div></article>`;
+  const host=byId('dashboardTemplates');host.innerHTML='';BUILTIN_TEMPLATES.forEach(t=>{const card=document.createElement('article');card.className='quick-template';card.innerHTML=`<span class="template-icon">${uiIcon(t.editor==='structured-form'?'figure':'text')}</span><div><h4>${esc(t.name)}</h4><p>${esc(t.description)}</p></div><button class="btn small primary">Use</button>`;card.querySelector('button').onclick=()=>showNewDocumentWizard(t.id);host.appendChild(card)})
+  void refreshUpdates();
+}
+async function refreshUpdates(){
+  if(!TeryaqPlatform.user()||!TeryaqPlatform.getUpdates)return;const [result,workflowNotices]=await Promise.all([TeryaqPlatform.getUpdates(),TeryaqPlatform.workflowNotifications()]),items=[...(result?.items||[]),...workflowNotices.map(n=>({...n,id:`wf:${n.id}`,taskId:n.task_id}))].sort((a,b)=>Date.parse(b.created_at||0)-Date.parse(a.created_at||0)).slice(0,50),unread=new Set([...(result?.unreadIds||[]),...workflowNotices.filter(n=>!n.read_at).map(n=>`wf:${n.id}`)]),badge=byId('notificationBadge');badge.textContent=String(unread.size);badge.classList.toggle('hidden',!unread.size);
+  const markup=items.length?items.map(item=>`<button type="button" class="update-item ${unread.has(item.id)?'unread':''}" data-update-id="${esc(item.id)}" ${item.taskId?`data-task-id="${esc(item.taskId)}"`:''} aria-label="${esc(item.title)}${unread.has(item.id)?' — unread':' — read'}"><span class="update-dot"></span><span><b>${esc(item.title)}</b><p>${esc(item.body)}</p><small>${esc(fmtDate(item.created_at||item.createdAt))}</small></span></button>`).join(''):'<div class="empty-state compact">No updates yet.</div>';
+  byId('notificationItems').innerHTML=markup;byId('dashboardUpdates').innerHTML=markup;
+}
+async function readUpdate(id){
+  const entries=$$('[data-update-id]'),visible=[...entries].filter(item=>item.dataset.updateId===id),taskId=visible[0]?.dataset.taskId;
+  if(!visible.some(item=>item.classList.contains('unread'))){if(taskId){await activateView('courseProgress');await window.TeryaqWorkflow.openTaskId(taskId)}return}
+  for(const item of visible){item.classList.remove('unread');item.setAttribute('aria-label',item.getAttribute('aria-label').replace(' — unread',' — read'))}
+  const badge=byId('notificationBadge'),remaining=new Set([...entries].filter(item=>item.closest('#notificationItems')&&item.classList.contains('unread')).map(item=>item.dataset.updateId));badge.textContent=String(remaining.size);badge.classList.toggle('hidden',!remaining.size);
+  try{if(id.startsWith('wf:'))await TeryaqPlatform.workflowMarkNotificationRead(id.slice(3));else await TeryaqPlatform.markUpdateRead(id);await refreshUpdates();if(taskId){await activateView('courseProgress');await window.TeryaqWorkflow.openTaskId(taskId)}}catch(error){console.error('Could not mark update as read:',error);await refreshUpdates()}
+}
+function renderDocuments(){
+  closeDocumentActionMenu();
+  let docs=state.docs;
+  if(state.search)docs=docs.filter(d=>JSON.stringify([d.title,d.metadata?.course||d.metadata?.subject,d.metadata?.chapterTitle,d.metadata?.chapterNumber]).toLowerCase().includes(state.search));
+  const status=state.view==='documents'?(byId('documentStatusFilter')?.value||''):'';if(status)docs=docs.filter(d=>(d.sync?.status||'local-only')===status);
+  const visibleIds=new Set(docs.map(d=>d.id));state.selectedDocumentIds=new Set([...state.selectedDocumentIds].filter(id=>visibleIds.has(id)));
+  const cardHost=byId('documentCards');if(cardHost){cardHost.innerHTML='';const recent=docs.slice(0,4);if(!recent.length)cardHost.innerHTML='<div class="empty-state"><b>No saved documents yet.</b><br>Create your first document from a template.</div>';recent.forEach(d=>cardHost.appendChild(documentCard(d)))}
+  const stats=byId('documentStats');if(stats)stats.innerHTML=`<article class="stat-card"><span class="stat-icon">${uiIcon('documents')}</span><div><b>${state.docs.length}</b><small>Active</small></div></article><article class="stat-card gold"><span class="stat-icon">${uiIcon('sync')}</span><div><b>${state.docs.filter(d=>d.sync?.status==='pending').length}</b><small>Waiting sync</small></div></article><article class="stat-card wine"><span class="stat-icon">${uiIcon('conflict')}</span><div><b>${state.docs.filter(d=>d.sync?.status==='conflict').length}</b><small>Conflicts</small></div></article><article class="stat-card indigo"><span class="stat-icon">${uiIcon('local')}</span><div><b>${state.docs.filter(d=>d.sync?.status==='local-only').length}</b><small>Local only</small></div></article>`;
+  updateDocumentBulkBar();const table=byId('documentsTable');if(!table)return;if(!docs.length){table.innerHTML='<div class="empty-state">No documents match these filters.</div>';return}const allSelected=docs.every(d=>state.selectedDocumentIds.has(d.id));table.innerHTML=`<table class="documents-table"><thead><tr><th class="select-col"><label class="selection-box" title="Select all visible documents"><input type="checkbox" class="documents-select-all" aria-label="Select all visible documents" ${allSelected?'checked':''}><span></span></label></th><th>Document</th><th>Template</th><th>Edited</th><th>Status</th><th>Actions</th></tr></thead><tbody>${docs.map(d=>`<tr data-doc-id="${esc(d.id)}" class="${state.selectedDocumentIds.has(d.id)?'selected-row':''}"><td class="select-col"><label class="selection-box"><input type="checkbox" class="document-select" aria-label="Select ${esc(documentDisplayTitle(d))}" ${state.selectedDocumentIds.has(d.id)?'checked':''}><span></span></label></td><td class="doc-main"><b>${esc(documentDisplayTitle(d))}</b><small>${esc(d.metadata?.course||d.metadata?.subject||'No course')}</small></td><td>${esc(getTemplate(d.templateId)?.name||d.templateId)}</td><td>${esc(fmtDate(d.updatedAt))}</td><td><button class="chip sync-chip ${esc(d.sync?.status||'local-only')} row-status">${esc(d.sync?.status||'local-only')}</button></td><td><div class="row-actions"><button class="btn primary small row-open">Open</button><button class="btn small row-history">History & Versions</button><button class="btn small row-more" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="More actions for ${esc(documentDisplayTitle(d))}">•••</button></div></td></tr>`).join('')}</tbody></table>`;
+  table.querySelectorAll('.row-more').forEach(button=>button.innerHTML=uiIcon('more-horizontal'));const selectAll=table.querySelector('.documents-select-all');selectAll.indeterminate=!allSelected&&state.selectedDocumentIds.size>0;selectAll.onchange=()=>{if(selectAll.checked)docs.forEach(d=>state.selectedDocumentIds.add(d.id));else docs.forEach(d=>state.selectedDocumentIds.delete(d.id));renderDocuments()};
+  table.querySelectorAll('tr[data-doc-id]').forEach(row=>{const d=state.docs.find(x=>x.id===row.dataset.docId);row.querySelector('.document-select').onchange=e=>{if(e.target.checked)state.selectedDocumentIds.add(d.id);else state.selectedDocumentIds.delete(d.id);renderDocuments()};row.querySelector('.row-open').onclick=()=>openDocument(d.id);row.querySelector('.row-history').onclick=async()=>{await openDocument(d.id);showSnapshots()};row.querySelector('.row-status').onclick=()=>d.sync?.status==='conflict'&&TeryaqPlatform.resolveConflicts(d.id);row.querySelector('.row-more').onclick=event=>{event.stopPropagation();openDocumentActionMenu(row.querySelector('.row-more'),d)}})
+}
+function closeDocumentActionMenu(){const active=state.documentActionMenu;if(!active)return;active.trigger?.setAttribute('aria-expanded','false');active.panel?.remove();state.documentActionMenu=null}
+function openDocumentActionMenu(trigger,doc){
+  if(state.documentActionMenu?.trigger===trigger){closeDocumentActionMenu();return}closeDocumentActionMenu();
+  const panel=document.createElement('div');panel.className='document-action-menu-panel';panel.setAttribute('role','menu');panel.innerHTML='<button type="button" role="menuitem" class="row-duplicate">Duplicate</button><button type="button" role="menuitem" class="row-export">Export .ترياق</button><button type="button" role="menuitem" class="row-delete danger">Move to Trash</button>';document.body.appendChild(panel);state.documentActionMenu={panel,trigger};trigger.setAttribute('aria-expanded','true');
+  if(innerWidth>620){const rect=trigger.getBoundingClientRect(),width=190,height=panel.offsetHeight||130,left=Math.max(10,Math.min(innerWidth-width-10,rect.right-width)),below=innerHeight-rect.bottom,top=below>=height+8?rect.bottom+6:Math.max(10,rect.top-height-6);panel.style.left=`${Math.round(left)}px`;panel.style.top=`${Math.round(top)}px`}
+  panel.querySelector('.row-duplicate').onclick=()=>{closeDocumentActionMenu();duplicateDocument(doc.id)};panel.querySelector('.row-export').onclick=async()=>{closeDocumentActionMenu();if(await confirmScientificExportVersion(doc))exportDocumentPackage(doc)};panel.querySelector('.row-delete').onclick=()=>{closeDocumentActionMenu();deleteDocumentToTrash(doc)};panel.querySelector('button')?.focus();
+}
+function updateDocumentBulkBar(){const bar=byId('documentBulkBar'),count=state.selectedDocumentIds.size;if(!bar)return;bar.classList.toggle('hidden',!count);byId('selectedDocumentCount').textContent=`${count} selected`}
+function documentCard(d){const t=getTemplate(d.templateId),hasConflict=d.sync?.status==='conflict',course=d.metadata?.course||d.metadata?.subject||'',card=document.createElement('div');card.className=`doc-card${hasConflict?' has-conflict':''}`;card.innerHTML=`${hasConflict?'<div class="document-conflict-alert"><b>Sync conflict / تعارض مزامنة</b><span>Review this document before continuing.</span></div>':''}<h4>${esc(documentDisplayTitle(d))}</h4><p>${esc(t?.name||d.templateId)}${course?' · '+esc(course):''}</p><div class="meta"><span class="chip">${esc(fmtDate(d.updatedAt))}</span><span class="chip sync-chip ${esc(d.sync?.status||'local-only')}">${esc(d.sync?.status||'local-only')}</span></div><div class="card-actions"><button class="btn primary small open">Open</button>${hasConflict?'<button class="btn small resolve">Resolve conflict</button>':''}</div>`;card.querySelector('.open').onclick=()=>openDocument(d.id);card.querySelector('.resolve')?.addEventListener('click',()=>TeryaqPlatform.resolveConflicts(d.id));return card}
+async function deleteDocumentToTrash(d){if(confirm(`Move “${d.title}” to Trash?`)){await snapshotDocument(d,'Before deletion');await TeryaqPlatform.queueDelete(d);state.selectedDocumentIds.delete(d.id);await refreshLibrary();await renderActiveView();toast('Moved to Trash')}}
+async function deleteSelectedDocumentsToTrash(){const docs=state.docs.filter(d=>state.selectedDocumentIds.has(d.id));if(!docs.length)return;if(!confirm(`Move ${docs.length} selected document${docs.length===1?'':'s'} to Trash?`))return;const button=byId('bulkDeleteDocuments');button.disabled=true;button.textContent='Moving…';try{for(const d of docs){await snapshotDocument(d,'Before bulk deletion');await TeryaqPlatform.queueDelete(d)}state.selectedDocumentIds.clear();await refreshLibrary();await renderActiveView();toast(`${docs.length} document${docs.length===1?'':'s'} moved to Trash`)}finally{button.disabled=false;button.textContent='Move selected to Trash'}}
+function renderTemplatesPage(){const host=byId('templatesPageGrid');host.innerHTML='';[...BUILTIN_TEMPLATES,...state.customTemplates].forEach(t=>{const item=document.createElement('article');item.className='template-choice-wrap';item.innerHTML=`<button class="template-choice" type="button"><span class="template-icon">${uiIcon(t.editor==='structured-form'?'figure':'text')}</span><span><strong>${esc(t.name)}</strong><small>${esc(t.description||'Reusable custom template')}</small><span class="template-meta">${esc(t.category||'Custom')} · v${esc(t.version||'1.0.0')}</span></span><span class="choice-check">${uiIcon('arrow-right')}</span></button>${t.custom?'<button class="btn danger small delete-template">Delete custom template</button>':''}`;item.querySelector('.template-choice').onclick=()=>showNewDocumentWizard(t.id);item.querySelector('.delete-template')?.addEventListener('click',async()=>{if(confirm(`Delete custom template “${t.name}”?`)){await idbDelete('templates',t.id);await refreshLibrary();renderTemplatesPage()}});host.appendChild(item)})}
+function templateInformationFields(t){
+  const script=t.id==='shooting-script'||t.baseDocument?.templateId==='shooting-script',metadata={...blankMeta(),...(t.baseDocument?.metadata||{})},fields=[{key:'name',label:script?'Script writer':'Author',type:'author',required:true},{key:'categoryId',label:'Category',type:'category',required:true},{key:'subject',label:'Course',type:'course',required:true},{key:'chapterNumber',label:'Chapter',type:'chapter',required:true},{key:'editorialVersion',label:'Version',type:'version',required:true}];
+  if('startDate' in metadata)fields.push({key:'startDate',label:'Start date',type:'date',required:false});if('endDate' in metadata)fields.push({key:'endDate',label:'End date',type:'date',required:false});if('generalNotes' in metadata)fields.push({key:'generalNotes',label:script?'Script notes':'General notes',type:'textarea',required:false});return fields
+}
+function activeCatalog(kind){return (state.contentOptions?.[kind]||[]).filter(item=>item.active!==false).sort((a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0)||String(a.name||a.title||a.chapter_number||'').localeCompare(String(b.name||b.title||b.chapter_number||'')))}
+function splitAuthorNames(value){return String(value||'').split(/[،,;]/).map(x=>x.trim()).filter(Boolean)}
+function metadataCatalogReady(){return activeCatalog('accountAuthors').length&&activeCatalog('categories').length&&activeCatalog('subjects').length&&activeCatalog('chapters').length&&activeCatalog('versions').length}
+function bindMetadataCatalogFields(ids,metadata,onChanged=()=>{}){
+  const authorEl=byId(ids.author),categoryEl=byId(ids.category),courseEl=byId(ids.course),chapterEl=byId(ids.chapter),versionEl=byId(ids.version);
+  if(!authorEl||!courseEl||!chapterEl)return;
+  const authors=activeCatalog('accountAuthors'),categories=activeCatalog('categories'),courses=activeCatalog('subjects'),chapters=activeCatalog('chapters');
+  const selectedAuthors=new Set(Array.isArray(metadata.authorIds)?metadata.authorIds:[]),oldNames=splitAuthorNames(metadata.name);
+  if(!selectedAuthors.size)for(const author of authors)if(oldNames.includes(author.name))selectedAuthors.add(author.id);
+  const unmatched=oldNames.filter(name=>!authors.some(author=>author.name===name&&selectedAuthors.has(author.id)));for(const name of unmatched)selectedAuthors.add(`legacy:${name}`);
+  renderAuthorPicker(authorEl,authors,unmatched,selectedAuthors,metadata,onChanged,{locked:!authorEl.id.startsWith('wizard-')});
+  const matchedCourse=courses.find(course=>course.id===(metadata.courseId||metadata.subjectId)||course.name===(metadata.course||metadata.subject));
+  if(matchedCourse){metadata.courseId=matchedCourse.id;metadata.subjectId=matchedCourse.id;metadata.course=matchedCourse.name;metadata.subject=matchedCourse.name;if(!metadata.categoryId)metadata.categoryId=matchedCourse.category_id}
+  if(categoryEl){
+    categoryEl.innerHTML=`<option value="">Select category…</option>${categories.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('')}`;
+    categoryEl.value=metadata.categoryId||'';
+    if(metadata.categoryId){metadata.category=categories.find(c=>c.id===metadata.categoryId)?.name||metadata.category||''}
+  }
+  const populateChapters=(reset=false)=>{
+    if(reset){metadata.chapterId='';metadata.chapterNumber='';metadata.chapterTitle=''}
+    const allowed=chapters.filter(ch=>ch.subject_id===courseEl.value),match=allowed.find(ch=>ch.id===metadata.chapterId||ch.chapter_number===metadata.chapterNumber&&ch.title===metadata.chapterTitle);
+    chapterEl.innerHTML=`<option value="">${courseEl.value?'Select chapter…':'Select a course first…'}</option>${allowed.map(ch=>`<option value="${esc(ch.id)}">${esc(ch.chapter_number)} — ${esc(ch.title)}</option>`).join('')}`;
+    chapterEl.value=match?.id||'';chapterEl.disabled=!courseEl.value||!allowed.length;
+    if(match){metadata.chapterId=match.id;metadata.chapterNumber=match.chapter_number;metadata.chapterTitle=match.title}
+  };
+  const populateCourses=(reset=false)=>{
+    if(reset){metadata.courseId='';metadata.subjectId='';metadata.course='';metadata.subject=''}
+    const allowed=courses.filter(course=>!categoryEl||course.category_id===categoryEl.value);
+    courseEl.innerHTML=`<option value="">${categoryEl&&!categoryEl.value?'Select a category first…':'Select course…'}</option>${allowed.map(course=>`<option value="${esc(course.id)}">${esc(course.name)}</option>`).join('')}`;
+    courseEl.value=allowed.some(course=>course.id===metadata.courseId)?metadata.courseId:'';
+    courseEl.disabled=!!categoryEl&&!categoryEl.value||!allowed.length;
+    populateChapters(reset)
+  };
+  if(categoryEl)categoryEl.onchange=()=>{metadata.categoryId=categoryEl.value;metadata.category=categories.find(c=>c.id===categoryEl.value)?.name||'';populateCourses(true);onChanged('category')};
+  courseEl.onchange=()=>{const course=courses.find(c=>c.id===courseEl.value);metadata.courseId=course?.id||'';metadata.subjectId=metadata.courseId;metadata.course=course?.name||'';metadata.subject=metadata.course;populateChapters(true);onChanged('course')};
+  chapterEl.onchange=()=>{const ch=chapters.find(c=>c.id===chapterEl.value);metadata.chapterId=ch?.id||'';metadata.chapterNumber=ch?.chapter_number||'';metadata.chapterTitle=ch?.title||'';onChanged('chapter')};
+  populateCourses(false);
+  if(versionEl){const available=activeCatalog('versions').filter(v=>v.template_id===ids.templateId);versionEl.innerHTML=`<option value="">Select version…</option>${available.map(v=>`<option value="${esc(v.version_label)}">Version ${esc(v.version_label)}</option>`).join('')}`;versionEl.value=metadata.editorialVersion||'';versionEl.onchange=()=>{metadata.editorialVersion=versionEl.value;onChanged('version')}}
+}
+function renderAuthorPicker(host,authors,legacyNames,selectedIds,metadata,onChanged,{locked=false}={}){
+  const all=[...authors.map(author=>({id:author.id,name:author.name,legacy:false})),...legacyNames.map(name=>({id:`legacy:${name}`,name,legacy:true}))],selectedNames=()=>all.filter(item=>selectedIds.has(item.id)).map(item=>item.name);
+  const commit=ids=>{selectedIds.clear();ids.forEach(id=>selectedIds.add(id));const selected=all.filter(item=>selectedIds.has(item.id));metadata.authorIds=selected.filter(item=>!item.legacy).map(item=>item.id);metadata.name=selected.map(item=>item.name).join('، ');onChanged('name')};
+  const draw=editing=>{
+    if(!all.length){host.innerHTML='<div class="author-picker-empty">No active accounts are available yet.</div>';return}
+    if(locked&&!editing){const names=selectedNames();host.innerHTML=`<div class="author-picker-summary"><div class="author-chips">${names.length?names.map(name=>`<span>${esc(name)}</span>`).join(''):'<small>No author selected</small>'}</div><button class="btn small author-edit" type="button">Edit</button></div>`;host.querySelector('.author-edit').onclick=()=>draw(true);return}
+    const working=new Set(selectedIds);host.innerHTML=`<div class="author-check-list">${all.map(item=>`<label><input type="checkbox" value="${esc(item.id)}" ${working.has(item.id)?'checked':''}><span>${esc(item.name)}${item.legacy?' (current)':''}</span></label>`).join('')}</div>${locked?'<div class="author-picker-actions"><button class="btn small author-cancel" type="button">Cancel</button><button class="btn primary small author-save" type="button">Save changes</button></div>':''}`;
+    host.querySelectorAll('input').forEach(input=>input.onchange=()=>{if(input.checked)working.add(input.value);else working.delete(input.value);if(!locked)commit(working)});
+    if(locked){host.querySelector('.author-cancel').onclick=()=>draw(false);host.querySelector('.author-save').onclick=()=>{commit(working);draw(false)}}
+  };draw(false)
+}
+function wizardFieldMarkup(field){
+  const common=`id="wizard-${esc(field.key)}" data-key="${esc(field.key)}" data-field-type="${esc(field.type)}"`;
+  if(field.type==='textarea')return `<textarea ${common} rows="4"></textarea>`;
+  if(field.type==='author')return `<div ${common} class="author-picker-host" aria-label="Authors"></div><small class="field-hint">Select one or more authors.</small>`;
+  if(['category','course','chapter','version'].includes(field.type))return `<select ${common}></select>${field.type==='chapter'?'<small class="field-hint">Only chapters from the selected course appear here.</small>':''}`;
+  return `<input ${common} type="${field.type}" ${field.required?'required':''}>`
+}
+function accountNameReady(){return String(TeryaqPlatform.user()?.displayName||'').trim().length>=2}
+async function showRequiredAccountName(){
+  await activateView('profile');
+  const status=byId('displayNameStatus');if(status)status.textContent='Set your account name before creating a document. Save it here, then return to Templates.';
+  byId('profileDisplayName')?.focus();
+}
+function requireAccountName(){if(accountNameReady())return true;void showRequiredAccountName();return false}
+function showNewDocumentWizard(selectedId=''){
+  if(!requireAccountName())return;
+  const templates=[...BUILTIN_TEMPLATES,...state.customTemplates];let selected=selectedId&&templates.some(t=>t.id===selectedId)?selectedId:'';const body=byId('newDocumentBody');activateView('newDocument');
+  const renderChoice=()=>{
+    body.innerHTML=`<section class="wizard-page-card"><div class="wizard-head"><div><span class="eyebrow">New document</span><h3>Choose a template</h3><p>Select one template, then continue to its required information.</p></div><div class="wizard-steps"><span class="active">1 · Template</span><span>2 · Information</span></div></div><div class="template-picker"></div><div class="wizard-footer"><button class="btn" id="wizardCancel">← Documents</button><button class="btn primary" id="wizardNext" ${selected?'':'disabled'}>Next →</button></div></section>`;
+    const picker=body.querySelector('.template-picker');
+    templates.forEach(t=>{const item=document.createElement('article');item.className='template-choice-wrap';item.innerHTML=`<button class="template-choice${selected===t.id?' selected':''}" type="button" aria-pressed="${selected===t.id}"><span class="template-icon">${uiIcon(t.editor==='structured-form'?'figure':'text')}</span><span><strong>${esc(t.name)}</strong><small>${esc(t.description||'Reusable custom template')}</small><span class="template-meta">${esc(t.category||'Custom')} · v${esc(t.version||'1.0.0')}</span></span><span class="choice-check">✓</span></button>${t.custom?'<button class="btn danger small delete-template" type="button">Delete custom template</button>':''}`;
+      item.querySelector('.template-choice').onclick=()=>{selected=t.id;renderChoice()};const del=item.querySelector('.delete-template');if(del)del.onclick=async()=>{if(confirm(`Delete custom template “${t.name}”?`)){await idbDelete('templates',t.id);await refreshLibrary();selected='';showNewDocumentWizard()}};picker.appendChild(item)});
+    byId('wizardCancel').onclick=()=>activateView('documents');byId('wizardNext').onclick=()=>renderInformation(templates.find(t=>t.id===selected));
+  };
+  const renderInformation=t=>{const fields=templateInformationFields(t),metadata={...blankMeta()};body.innerHTML=`<section class="wizard-page-card"><div class="wizard-head"><div><span class="eyebrow">New document</span><h3>${esc(t.informationTitle||'Draft information')}</h3><p>Choose category, course, chapter and version.</p></div><div class="wizard-steps"><span>1 · Template</span><span class="active">2 · Information</span></div></div><div class="selected-template-summary"><b>${esc(t.name)}</b><span>${esc(t.category||'Custom')}</span></div>${metadataCatalogReady()?'':'<div class="issue warn">Some content lists are empty. Ask an administrator to complete Content Setup first.</div>'}<form class="wizard-form" id="documentInfoForm">${fields.map(f=>`<div class="field${f.type==='textarea'||f.type==='chapter'?' span-2':''}"><label for="wizard-${esc(f.key)}">${f.type==='date'?uiIcon('date'):''}${esc(f.label)}${f.required?' *':''}</label>${wizardFieldMarkup(f)}</div>`).join('')}<div class="wizard-footer span-2"><button class="btn" type="button" id="wizardBack">← Back</button><button class="btn primary" type="submit">Create & continue</button></div></form></section>`;bindMetadataCatalogFields({author:'wizard-name',category:'wizard-categoryId',course:'wizard-subject',chapter:'wizard-chapterNumber',version:'wizard-editorialVersion',templateId:t.baseDocument?.templateId||t.id},metadata);byId('wizardBack').onclick=renderChoice;byId('documentInfoForm').onsubmit=async e=>{e.preventDefault();for(const field of fields.filter(f=>!['author','category','course','chapter','version'].includes(f.type))){const el=byId(`wizard-${field.key}`);metadata[field.key]=el?.value?.trim?.()||''}if(!metadata.name)return toast('Select at least one author');if(!metadata.categoryId)return toast('Select a category');if(!metadata.courseId)return toast('Select a course');if(!metadata.chapterId)return toast('Select a chapter');if(!metadata.editorialVersion)return toast('Select a version');await createFromTemplate(t,metadata)}};
+  renderChoice();
+}
+async function createFromTemplate(t,metadata={}){
+  if(!requireAccountName())return;
+  let doc;
+  if(t.custom){doc=clone(t.baseDocument);doc.id=uid('doc');doc.createdAt=doc.updatedAt=nowIso();doc.title=t.name+' - New';}
+  else doc=t.newDocument();
+  doc.metadata={...(doc.metadata||{}),...metadata};doc.title=[doc.metadata.course||doc.metadata.subject,doc.metadata.chapterNumber?`CH ${doc.metadata.chapterNumber}`:'',doc.metadata.chapterTitle,''].filter(Boolean).join(' — ')||'Untitled Document';
+  TeryaqPlatform.decorateNewDocument(doc);
+  await idbPut('documents',doc);await TeryaqPlatform.queueDocument(doc);await refreshLibrary();openDocument(doc.id);
+}
+window.TeryaqAppWorkflow={
+  refreshNotifications:refreshUpdates,
+  activate:activateView,
+  linkedDocumentId(taskId){return state.docs.find(doc=>doc.metadata?.workflowTaskId===taskId)?.id||null},
+  async openTask(task,workflow,options){
+    if(task.owner_id!==TeryaqPlatform.user()?.id&&!TeryaqPlatform.isAdmin())return toast('This task belongs to another user');
+    if(['approved','blocked','planned'].includes(task.status))return toast('This task is not open for editing');
+    if(!task.template_id)return toast('This checkpoint does not use an editor template');
+    const existing=state.docs.find(doc=>doc.metadata?.workflowTaskId===task.id);
+    if(existing)return openDocument(existing.id);
+    if(!requireAccountName())return;
+    const template=BUILTIN_TEMPLATES.find(item=>item.id===task.template_id);
+    if(!template)return toast('The assigned template is unavailable');
+    if(!task.author_id)return toast('Ask the Course Lead to select a document author for this task');
+    const subject=options.subjects.find(item=>item.id===workflow.course_id),chapter=options.chapters.find(item=>item.id===workflow.chapter_id),category=options.categories.find(item=>item.id===subject?.category_id),author=options.accountAuthors.find(item=>item.id===task.author_id);
+    if(!subject||!chapter||!category||!author)return toast('Task content options need review');
+    const metadata={...blankMeta(),workflowTaskId:task.id,name:author.name,authorIds:[author.id],category:category.name,categoryId:category.id,course:subject.name,courseId:subject.id,subject:subject.name,subjectId:subject.id,chapterId:chapter.id,chapterNumber:chapter.chapter_number,chapterTitle:chapter.title,editorialVersion:task.expected_version||'1'};
+    await createFromTemplate(template,metadata);
+  }
+};
+async function duplicateDocument(id){if(!requireAccountName())return;const d=await idbGet('documents',id);if(!d)return;const c=clone(d);c.id=uid('doc');c.title=(d.title||'Document')+' Copy';c.createdAt=c.updatedAt=nowIso();TeryaqPlatform.decorateNewDocument(c);await idbPut('documents',c);await TeryaqPlatform.queueDocument(c);await refreshLibrary();await renderActiveView();toast('Duplicated');}
+async function openDocument(id){const d=await idbGet('documents',id);if(!d)return;state.current=d;state.dirty=false;state.editRevision=0;state.savedRevision=0;state.ribbonTab=d.templateId==='shooting-script'?'formatting':'styles';state.viewOnly=false;state.viewZoom=1;state.pageView='one';state.activeTableId=null;state.activeCell=null;resetHistory();await activateView('editor');renderEditor();pushHistory('Open');}
+async function ensureCurrentSaved(){
+  if(!state.current)return true;
+  if(state.dirty)return saveCurrent(true);
+  if(state.saveInFlight)return state.saveChain;
+  return true;
+}
+async function goHome(){if(!(await ensureCurrentSaved()))return;state.current=null;await refreshLibrary();renderHome();}
+
+// ---------------- Current document save/history ----------------
+function currentSnapshot(){return state.current?clone({metadata:state.current.metadata,content:state.current.content,title:state.current.title,settings:state.current.settings}):null}
+function resetHistory(){state.history=[];state.historyIndex=-1;updateUndoRedo()}
+function pushHistory(reason='Edit'){
+  if(state.suppressHistory||!state.current)return;const snap=currentSnapshot();const serialized=JSON.stringify(snap);const current=state.history[state.historyIndex];if(current&&current.serialized===serialized)return;
+  state.history=state.history.slice(0,state.historyIndex+1);state.history.push({serialized,snap,reason});if(state.history.length>MAX_HISTORY)state.history.shift();state.historyIndex=state.history.length-1;updateUndoRedo();
+}
+function scheduleTypingHistory(){clearTimeout(state.typingTimer);state.typingTimer=setTimeout(()=>pushHistory('Typing'),550)}
+function undo(){if(state.historyIndex<=0)return;state.historyIndex--;restoreHistory(state.history[state.historyIndex].snap)}
+function redo(){if(state.historyIndex>=state.history.length-1)return;state.historyIndex++;restoreHistory(state.history[state.historyIndex].snap)}
+function restoreHistory(snap){state.suppressHistory=true;Object.assign(state.current,clone(snap));renderEditor(false);state.suppressHistory=false;markDirty(false);updateUndoRedo()}
+function updateUndoRedo(){const canU=state.historyIndex>0,canR=state.historyIndex>=0&&state.historyIndex<state.history.length-1;$$('[data-action="undo"]').forEach(b=>b.disabled=!canU);$$('[data-action="redo"]').forEach(b=>b.disabled=!canR)}
+function emergencyKey(ownerId,documentId){return `${EMERGENCY_DRAFT_PREFIX}${encodeURIComponent(ownerId)}:${encodeURIComponent(documentId)}`}
+function persistEmergencyDraft(doc,revision=state.editRevision){
+  const ownerId=TeryaqPlatform.user()?.id||doc?.ownerId;if(!doc?.id||!ownerId)return false;
+  const payload={format:'TeryaqEmergencyDraft',savedAt:nowIso(),revision,ownerId,imagesOmitted:false,document:clone(doc)};
+  try{localStorage.setItem(emergencyKey(ownerId,doc.id),JSON.stringify(payload));return true}catch(_){
+    try{
+      for(const figure of payload.document?.content?.figures||[])if(figure.image){figure.image='';payload.imagesOmitted=true}
+      localStorage.setItem(emergencyKey(ownerId,doc.id),JSON.stringify(payload));return true
+    }catch(error){console.warn('Emergency draft storage unavailable:',error);return false}
+  }
+}
+function clearEmergencyDraft(documentId,maxRevision=Infinity){
+  const ownerId=TeryaqPlatform.user()?.id;if(!ownerId||!documentId)return;
+  const key=emergencyKey(ownerId,documentId);
+  try{const payload=JSON.parse(localStorage.getItem(key)||'null');if(!payload||Number(payload.revision||0)<=maxRevision)localStorage.removeItem(key)}catch(error){console.warn('Emergency draft cleanup unavailable:',error)}
+}
+function mergeEmergencyImages(recovered,local){
+  if(!local||!Array.isArray(recovered?.content?.figures))return recovered;
+  const images=new Map((local.content?.figures||[]).map(figure=>[figure.id,figure.image]));
+  for(const figure of recovered.content.figures)if(!figure.image&&images.get(figure.id))figure.image=images.get(figure.id);
+  return recovered;
+}
+async function recoverEmergencyDrafts(){
+  const ownerId=TeryaqPlatform.user()?.id;if(!ownerId)return 0;const prefix=`${EMERGENCY_DRAFT_PREFIX}${encodeURIComponent(ownerId)}:`;let recoveredCount=0;
+  let keys=[];try{keys=Object.keys(localStorage).filter(key=>key.startsWith(prefix))}catch(error){console.warn('Emergency draft scan unavailable:',error);return 0}
+  for(const key of keys){
+    try{
+      const payload=JSON.parse(localStorage.getItem(key)||'null'),draft=payload?.document;
+      if(payload?.format!=='TeryaqEmergencyDraft'||payload.ownerId!==ownerId||!draft?.id){localStorage.removeItem(key);continue}
+      const local=await idbGet('documents',draft.id);const draftTime=Date.parse(draft.updatedAt||payload.savedAt||0)||0,localTime=Date.parse(local?.updatedAt||0)||0;
+      if(!local||draftTime>localTime){
+        const restored=mergeEmergencyImages(clone(draft),local);restored.ownerId=ownerId;TeryaqPlatform.markDocumentPending(restored);await idbPut('documents',restored);await TeryaqPlatform.queueDocument(restored);recoveredCount++;
+      }
+      localStorage.removeItem(key);
+    }catch(error){console.warn('Emergency draft recovery failed:',error)}
+  }
+  return recoveredCount;
+}
+function flushEmergencySave(){
+  if(!state.current||!state.dirty)return;
+  persistEmergencyDraft(state.current,state.editRevision);void saveCurrent(false);
+}
+function markDirty(history=true){
+  if(!state.current)return;state.dirty=true;state.editRevision++;state.current.updatedAt=nowIso();persistEmergencyDraft(state.current,state.editRevision);setSaveStatus('Saving…');if(history)scheduleTypingHistory();clearTimeout(state.saveTimer);state.saveTimer=setTimeout(()=>saveCurrent(false),250)
+}
+async function saveCurrent(manual=false){
+  if(!state.current)return true;
+  clearTimeout(state.saveTimer);state.saveTimer=null;
+  const documentId=state.current.id,revision=state.editRevision,snapshot=clone(state.current);snapshot.updatedAt=nowIso();snapshot.localSavedAt=snapshot.updatedAt;snapshot.localSaveToken=uid('save');TeryaqPlatform.markDocumentPending(snapshot);
+  if(state.current?.id===documentId){state.current.updatedAt=snapshot.updatedAt;state.current.localSavedAt=snapshot.localSavedAt;state.current.localSaveToken=snapshot.localSaveToken;state.current.sync=clone(snapshot.sync)}
+  persistEmergencyDraft(snapshot,revision);state.saveInFlight++;if(manual)state.blockingSaveInFlight++;updateEditorLocks();setSaveStatus('Saving…');
+  const task=state.saveChain.then(async()=>{
+    try{
+      const persisted=await idbPutDocumentPreservingSync(snapshot);snapshot.sync=clone(persisted.sync||snapshot.sync||{});if(state.current?.id===documentId){state.current.sync={...(state.current.sync||{}),baseServerVersion:Math.max(Number(state.current.sync?.baseServerVersion||0),Number(snapshot.sync?.baseServerVersion||0))};if(snapshot.sync?.status==='conflict')state.current.sync={...state.current.sync,status:'conflict',lastError:snapshot.sync.lastError}}await TeryaqPlatform.queueDocument(snapshot);const verified=await idbGet('documents',documentId);if(verified?.localSaveToken!==snapshot.localSaveToken)throw new Error('IndexedDB read-back verification failed');
+      if(state.current?.id===documentId&&state.editRevision<=revision){state.dirty=false;state.savedRevision=revision;clearEmergencyDraft(documentId,revision);setSaveStatus(navigator.onLine?'Saved locally ✓ · sync pending':'Saved locally ✓ · offline')}
+      else if(state.current?.id===documentId)setSaveStatus('Newer changes waiting to save…');
+      TeryaqPlatform.updateSyncUi();if(manual&&state.current?.id===documentId&&state.editRevision<=revision)toast('Saved locally ✓');return true
+    }catch(error){
+      console.error(error);if(state.current?.id===documentId){state.dirty=true;persistEmergencyDraft(state.current,state.editRevision);setSaveStatus('Save failed · emergency draft kept')}
+      if(manual)alert(`Local save failed. Your emergency draft was kept on this device.\n\n${error.message}`);return false
+    }
+  });
+  state.saveChain=task.catch(()=>false);
+  try{return await task}finally{state.saveInFlight=Math.max(0,state.saveInFlight-1);if(manual)state.blockingSaveInFlight=Math.max(0,state.blockingSaveInFlight-1);updateEditorLocks()}
+}
+async function saveAndSyncCurrent(){
+  if(!state.current)return;const documentId=state.current.id;
+  if(!(await saveCurrent(true)))return;
+  state.syncInFlight=true;updateEditorLocks();setSaveStatus('Sending to cloud…');
+  try{
+    let result=await TeryaqPlatform.syncNow(),activeDocumentId=state.current?.id||documentId,stored=await idbGet('documents',activeDocumentId);
+    if(result?.ok&&stored?.sync?.status==='pending'&&navigator.onLine){result=await TeryaqPlatform.syncNow();activeDocumentId=state.current?.id||activeDocumentId;stored=await idbGet('documents',activeDocumentId)}
+    activeDocumentId=state.current?.id||activeDocumentId;if(!stored||stored.id!==activeDocumentId)stored=await idbGet('documents',activeDocumentId);
+    if(stored&&state.current?.id===activeDocumentId)state.current.sync=clone(stored.sync||{});
+    if(result?.ok&&!result?.pending&&stored?.sync?.status==='synced'){
+      const version=Number(stored.sync.baseServerVersion||0);setSaveStatus(version?`Saved locally ✓ · cloud version ${version} ✓`:'Saved locally ✓ · synced ✓');toast(version?`Synced · cloud version ${version}`:'Synced ✓')
+    }else if(result?.mediaPending)setSaveStatus(`Saved locally ✓ · ${result.mediaPending} image upload${result.mediaPending===1?'':'s'} pending`);
+    else if(stored?.sync?.status==='conflict')setSaveStatus('Saved locally ✓ · sync conflict needs review');
+    else setSaveStatus(navigator.onLine?'Saved locally ✓ · sync pending':'Saved locally ✓ · offline');
+  }finally{state.syncInFlight=false;updateEditorLocks()}
+}
+async function snapshotDocument(doc,reason='Snapshot'){const s={id:uid('snap'),ownerId:TeryaqPlatform.user()?.id||doc.ownerId,documentId:doc.id,createdAt:nowIso(),reason,document:clone(doc)};await idbPut('snapshots',s);state.lastSnapshotAt=Date.now();return s}
+async function createSnapshot(reason='Manual snapshot'){if(!state.current)return;await saveCurrent(false);await snapshotDocument(state.current,reason);toast('Recovery snapshot created')}
+
+// ---------------- Render editor shell ----------------
+function renderEditor(resetSelection=true){
+  const d=state.current;if(!d)return;byId('docTitle').textContent=documentDisplayTitle(d);
+  if(resetSelection)state.selectedBlockIds.clear();
+  closeTableOutline();
+  byId('appShell').classList.toggle('editor-text-mode',d.templateId==='scientific-draft-text'||d.templateId==='shooting-script');byId('appShell').classList.toggle('editor-script-mode',d.templateId==='shooting-script');
+  byId('appShell').classList.toggle('editor-figure-mode',d.templateId==='scientific-draft-figures');
+  byId('textEditorArea').classList.toggle('hidden',!['scientific-draft-text','shooting-script'].includes(d.templateId));byId('figureEditorArea').classList.toggle('hidden',d.templateId!=='scientific-draft-figures');
+  if(d.templateId==='scientific-draft-text')renderTextEditor(resetSelection);else if(d.templateId==='shooting-script')renderScriptEditor(resetSelection);else{renderFigureEditor();setRibbonTab('file')}
+  bindEditorActionButtons();updateUndoRedo();
+}
+function bindEditorActionButtons(){
+  byId('saveBtn').onclick=()=>saveCurrent(true);byId('validateBtn').onclick=()=>showValidation();byId('historyBtn').onclick=()=>showSnapshots();bindExportMenu();
+  byId('copyOutlineBtn').classList.toggle('hidden',state.current?.templateId!=='scientific-draft-text');byId('copyOutlineBtn').onclick=()=>copyCurrentOutline();byId('openSubmissionBtn').onclick=async()=>{try{if(await window.TeryaqWorkflow.openSubmissionForDocument(state.current))return;window.TeryaqSubmissions.setPreferredDocument(state.current);await activateView('submissionForms')}catch(error){toast(error.message)}};
+  byId('syncBtnEditor').onclick=()=>saveAndSyncCurrent();byId('settingsBtnEditor').onclick=()=>activateView('settings');byId('editorImportBtn').onclick=()=>byId('importFile').click();updateEditorLocks();
+}
+function bindExportMenu(){
+  const trigger=byId('exportMenuButton');if(!trigger)return;
+  trigger.onclick=event=>{event.stopPropagation();const panel=byId('exportMenuPanel'),open=panel.classList.contains('hidden');panel.classList.toggle('hidden',!open);trigger.setAttribute('aria-expanded',String(open));if(open)panel.querySelector('[role="menuitem"]')?.focus()};
+  byId('backupBtn').onclick=async()=>{closeExportMenu();if(!ensureFigureExportReady()||!await confirmScientificExportVersion(state.current))return;if(await saveCurrent(true))exportDocumentPackage(state.current)};
+  byId('printBtn').onclick=async()=>{closeExportMenu();if(!ensureFigureExportReady()||!await confirmScientificExportVersion(state.current))return;void saveCurrent(false);printCurrent()};
+  byId('figureOnlyExportMenuBtn').onclick=()=>{closeExportMenu();void exportFigureOnlyPdf()};
+  byId('montageExportBtn').onclick=async()=>{closeExportMenu();if(!isScript()||!await confirmScientificExportVersion(state.current))return;void saveCurrent(false);printCurrent({montage:true})};
+  byId('saveTemplateBtn').onclick=async()=>{closeExportMenu();if(!ensureFigureExportReady())return;if(await saveCurrent(true))saveAsTemplate()};
+  byId('htmlExportBtn').onclick=async()=>{closeExportMenu();if(!ensureFigureExportReady()||!await confirmScientificExportVersion(state.current))return;if(await saveCurrent(true))await exportStandaloneHtml()};
+}
+function closeExportMenu(){const panel=byId('exportMenuPanel'),trigger=byId('exportMenuButton');if(panel)panel.classList.add('hidden');if(trigger)trigger.setAttribute('aria-expanded','false')}
+
+
+// ---------------- Text editor render ----------------
+function renderTextEditor(resetSelection=true){
+  const d=state.current;renderMeta();renderBlocks();renderOutline();renderRegisters();observeWritingPage();if(resetSelection){state.activeBlockId=d.content.blocks[0]?.id||null;state.selectionBookmark=null;}bindTextControls();byId('deleteSelectedBlocksBtn').onclick=deleteSelectedBlocks;setRibbonTab(state.ribbonTab||'styles');updateTableTabAvailability();applyViewOnlyState();requestAnimationFrame(()=>{syncEditorStickyOffsets();updatePageScale()});
+}
+function renderMeta(){
+  const m=state.current.metadata||blankMeta();
+  const script=isScript(),card=byId('textEditorArea').querySelector('.draft-information-card');
+  card.querySelector('.cover-title h2').textContent=script?'Shooting Script information':'Draft information';
+  card.querySelector('.cover-title .chip').textContent=script?'Shooting Script':'Scientific Draft - Text Content';
+  byId('metaName').closest('.field').querySelector('label').textContent=script?'Script writer':'Author';
+  byId('metaNotes').closest('.field').querySelector('label').textContent=script?'Script notes':'General notes';
+  state.current.metadata=m;bindMetadataCatalogFields({author:'metaName',category:'metaCategory',course:'metaCourse',chapter:'metaChapter',version:'metaVersion',templateId:state.current.templateId},m,()=>{updateDocumentTitle();markDirty();renderRegisters()});
+  for(const [id,key] of [['metaStart','startDate'],['metaEnd','endDate'],['metaNotes','generalNotes']]){const el=byId(id);el.value=m[key]||'';el.oninput=()=>{m[key]=el.value;markDirty()}}
+}
+function updateDocumentTitle(){const m=state.current.metadata;state.current.title=[m.course||m.subject,m.chapterNumber?`CH ${m.chapterNumber}`:'',m.chapterTitle].filter(Boolean).join(' — ')||'Untitled Document';byId('docTitle').textContent=state.current.title}
+function renderBlocks(){
+  const host=byId('blockList');host.innerHTML='';let h1=0,h2=0,numSeq=0;
+  const validIds=new Set(state.current.content.blocks.map(b=>b.id));for(const id of state.selectedBlockIds)if(!validIds.has(id))state.selectedBlockIds.delete(id);
+  for(const block of state.current.content.blocks){
+    if(block.type==='paragraph'&&block.style==='Heading1'){h1++;h2=0;numSeq=0;} else if(block.type==='paragraph'&&block.style==='Heading2'){h2++;numSeq=0;} else if(block.type!=='number')numSeq=0;
+    if(block.type==='number')numSeq++;
+    host.appendChild(renderBlock(block,{h1,h2,numSeq}));
+  }
+  if(!state.current.content.blocks.length){const b=normalBlock();state.current.content.blocks.push(b);host.appendChild(renderBlock(b,{h1:0,h2:0,numSeq:0}));}
+  updateBlockSelectionToolbar();
+}
+function renderBlock(block,ctx){
+  let el=document.createElement('div');el.className='doc-block';el.dataset.blockId=block.id;el.dataset.type=block.type;if(['paragraph','bullet','number'].includes(block.type))applyBlockDirection(el,plainText(block.runs||[]),block.direction);
+  if(isScript()&&['left','center','right'].includes(block.alignment))el.style.textAlign=block.alignment;
+  if(block.type==='paragraph'){
+    el.classList.add(`p-${block.style||'Normal'}`);if(block.style==='Heading1'||block.style==='Heading2'){
+      const n=document.createElement('span');n.className='heading-num';n.textContent=(block.style==='Heading1'?ctx.h1:ctx.h2)+'.';el.appendChild(n);
+      const ed=editableForBlock(block);ed.classList.add('heading-text');el.appendChild(ed);
+    } else el.appendChild(editableForBlock(block));
+  } else if(block.type==='bullet'){
+    el.classList.add('bullet-block',`level-${block.level}`);const m=document.createElement('span');m.className='bullet-marker';m.innerHTML=uiIcon(`bullet-${block.level}`);el.appendChild(m);el.appendChild(editableForBlock(block));
+  } else if(block.type==='number'){
+    el.classList.add('number-block');const m=document.createElement('span');m.className='bullet-marker';m.textContent=`${ctx.numSeq}.`;el.appendChild(m);el.appendChild(editableForBlock(block));
+  } else if(block.type==='cue'){
+    el.classList.add('script-cue',`script-cue-${block.kind}`);
+    if(block.kind!=='heading'){
+      const label=document.createElement('span');label.className='script-cue-label';
+      label.textContent=({instruction:'تعليمات لا تُقرأ',intro:'انترو','light-break':'فاصل خفيف',silence:'سكوت',repeat:'×2'})[block.kind]||'';el.appendChild(label);
+    }
+    if(['instruction','heading'].includes(block.kind)){
+      const editor=editableForBlock(block);editor.dataset.placeholder=block.kind==='heading'?'اكتب عنوان المقطع…':'اكتب تعليمات غير منطوقة…';
+      if(block.kind==='heading')editor.setAttribute('aria-label','Non-spoken script heading');el.appendChild(editor);
+    }
+    const add=document.createElement('button');add.className='script-cue-add';add.type='button';add.setAttribute('aria-label','Add spoken line after cue');add.textContent='+';add.onclick=()=>{setActiveBlock(block.id);insertSpokenLine()};el.appendChild(add);
+    const remove=document.createElement('button');remove.className='script-cue-remove';remove.type='button';remove.setAttribute('aria-label','Remove cue');remove.textContent='×';remove.onclick=()=>removeBlock(block.id);el.appendChild(remove);
+  } else if(block.type==='figure_placeholder'){
+    el.classList.add('figure-placeholder');el.dataset.figureCode=block.code||'';el.dataset.placement=block.placement||'main';el.textContent=`[POSITION OF ${block.placement==='margin'?'MARGIN ':''}FIGURE ${block.code||'?'}]`;el.tabIndex=0;
+  } else if(block.type==='table'){
+    el.classList.add('table-block');el.appendChild(renderTable(block));
+  }
+  if(hasBlockControls()){
+    const controls=document.createElement('div');controls.className='block-controls';controls.contentEditable='false';
+    const handle=document.createElement('button');handle.className='script-drag-handle';handle.type='button';handle.title='Drag to move · arrow keys move one place';handle.setAttribute('aria-label','Drag section to reorder; use arrow keys for one place');handle.innerHTML='<img class="script-drag-icon" src="icons/ui/drag.png" alt="" aria-hidden="true">';handle.onpointerdown=event=>beginBlockDrag(event,block.id,handle);handle.onkeydown=event=>{if(event.key==='ArrowUp'||event.key==='ArrowDown'){event.preventDefault();moveDocumentBlock(block.id,event.key==='ArrowUp'?-1:1)}};controls.appendChild(handle);
+    const checkbox=document.createElement('button');checkbox.className='block-select-box';checkbox.type='button';checkbox.setAttribute('role','checkbox');checkbox.setAttribute('aria-label','Select section for deletion');checkbox.setAttribute('aria-checked',String(state.selectedBlockIds.has(block.id)));checkbox.title='Select section for deletion';checkbox.onpointerdown=event=>event.stopPropagation();checkbox.onclick=event=>{event.stopPropagation();toggleBlockSelected(block.id)};controls.appendChild(checkbox);el.appendChild(controls);
+  }
+  el.addEventListener('pointerdown',()=>setActiveBlock(block.id));el.addEventListener('focusin',()=>setActiveBlock(block.id));el.addEventListener('click',()=>setActiveBlock(block.id));
+  return el;
+}
+function editableForBlock(block){
+  const ed=document.createElement('div');ed.className='editable';ed.contentEditable='true';ed.spellcheck=true;applyBlockDirection(ed,plainText(block.runs||[]),block.direction);ed.dataset.placeholder='Type here…';ed.innerHTML=runsToHtml(block.runs||[]);
+  if(isScript()&&['left','center','right'].includes(block.alignment))ed.style.textAlign=block.alignment;
+  ed.addEventListener('input',()=>{block.runs=elementToRuns(ed);applyBlockDirection(ed.closest('.doc-block')||ed,plainText(block.runs),block.direction);captureSelection();markDirty();if(block.style?.startsWith('Heading')){renderOutline();renderRegisters();}});
+  ed.addEventListener('beforeinput',e=>insertBodySpaceAfterRepeat(e,ed,block));
+  ed.addEventListener('focus',()=>{setActiveBlock(block.id);captureSelection()});ed.addEventListener('keyup',captureSelection);ed.addEventListener('mouseup',captureSelection);ed.addEventListener('touchend',()=>setTimeout(captureSelection,0));
+  ed.addEventListener('paste',e=>handlePaste(e,block,ed));ed.addEventListener('keydown',e=>handleBlockKeydown(e,block,ed));
+  return ed;
+}
+function handlePaste(e,block,ed){
+  e.preventDefault();const text=(e.clipboardData||window.clipboardData).getData('text/plain').replace(/\r\n?/g,'\n');insertPlainTextAtSelection(ed,text);block.runs=elementToRuns(ed);applyBlockDirection(ed.closest('.doc-block')||ed,plainText(block.runs),block.direction);captureSelection();markDirty();
+}
+function insertPlainTextAtSelection(ed,text){
+  const sel=window.getSelection();if(!sel.rangeCount||!ed.contains(sel.anchorNode)){ed.focus();const r=document.createRange();r.selectNodeContents(ed);r.collapse(false);sel.removeAllRanges();sel.addRange(r);}const r=sel.getRangeAt(0);r.deleteContents();const parts=text.split('\n');const frag=document.createDocumentFragment();parts.forEach((p,i)=>{if(i)frag.appendChild(document.createElement('br'));frag.appendChild(document.createTextNode(p));});const last=frag.lastChild;r.insertNode(frag);if(last){r.setStartAfter(last);r.collapse(true);sel.removeAllRanges();sel.addRange(r)}}
+function handleBlockKeydown(e,block,ed){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(block.type==='cue'){setActiveBlock(block.id);insertSpokenLine()}else splitCurrentBlock(block,ed);return;}
+  if(e.key==='Backspace'&&selectionOffset(ed)===0&&block.type!=='cue'){if(plainText(block.runs).length===0){e.preventDefault();removeBlock(block.id,true);} }
+}
+function selectionOffset(ed){const sel=window.getSelection();if(!sel.rangeCount||!ed.contains(sel.anchorNode))return -1;const r=sel.getRangeAt(0);if(!r.collapsed)return -1;const pre=document.createRange();pre.selectNodeContents(ed);pre.setEnd(r.startContainer,r.startOffset);return pre.toString().length}
+function splitCurrentBlock(block,ed){
+  captureSelection();const bm=state.selectionBookmark;const off=bm?.blockId===block.id?bm.start:plainText(block.runs).length;block.runs=elementToRuns(ed);const [left,right]=splitRuns(block.runs,off);block.runs=left;
+  let next;if(block.type==='bullet')next={id:uid('b'),type:'bullet',level:block.level,runs:right};else if(block.type==='number')next={id:uid('b'),type:'number',runs:right};else next={id:uid('b'),type:'paragraph',style:(block.style==='Heading1'||block.style==='Heading2')?'Normal':(block.style||'Normal'),runs:right};
+  if(block.direction)next.direction=block.direction;if(block.alignment)next.alignment=block.alignment;const arr=state.current.content.blocks,idx=arr.findIndex(b=>b.id===block.id);arr.splice(idx+1,0,next);markDirty(false);pushHistory('New paragraph');renderBlocks();renderOutline();renderRegisters();setTimeout(()=>focusBlock(next.id,0),0);
+}
+function removeBlock(id,focusPrev=false){const arr=state.current.content.blocks;const idx=arr.findIndex(b=>b.id===id);if(idx<0)return;const prev=arr[idx-1];arr.splice(idx,1);if(!arr.length)arr.push(normalBlock());markDirty(false);pushHistory('Delete block');renderBlocks();renderOutline();renderRegisters();if(focusPrev&&prev)setTimeout(()=>focusBlock(prev.id,plainText(prev.runs||[]).length),0)}
+function updateBlockSelectionToolbar(){const bar=byId('blockSelectionToolbar');if(!bar)return;const count=state.selectedBlockIds.size;bar.classList.toggle('hidden',!hasBlockControls()||!count);byId('selectedBlockCount').textContent=`${count} selected`;byId('deleteSelectedBlocksBtn').disabled=!count||state.viewOnly}
+function toggleBlockSelected(id){if(!hasBlockControls()||state.viewOnly||!getBlock(id))return;const selected=state.selectedBlockIds;if(selected.has(id))selected.delete(id);else selected.add(id);const box=byId('blockList')?.querySelector(`[data-block-id="${CSS.escape(id)}"] .block-select-box`);box?.setAttribute('aria-checked',String(selected.has(id)));updateBlockSelectionToolbar()}
+function deleteSelectedBlocks(){if(!hasBlockControls()||state.viewOnly)return;const blocks=state.current.content.blocks,selected=state.selectedBlockIds,first=blocks.findIndex(block=>selected.has(block.id)),count=blocks.filter(block=>selected.has(block.id)).length;if(!count)return;if(!confirm(`Delete ${count} selected section${count===1?'':'s'}? You can undo this action.`))return;pushHistory('Before deleting selected sections');let remaining=blocks.filter(block=>!selected.has(block.id));if(!remaining.length)remaining=[normalBlock()];state.current.content.blocks=remaining;state.activeBlockId=remaining[Math.min(first,remaining.length-1)].id;state.activeTableId=null;state.activeCell=null;state.selectionBookmark=null;selected.clear();markDirty(false);pushHistory('Delete selected sections');renderBlocks();renderOutline();renderRegisters();updateTableTabAvailability();if(isScript())updateScriptBlockButtons(getBlock());requestAnimationFrame(updatePageScale);toast(`${count} section${count===1?'':'s'} deleted · Undo available`)}
+function moveDocumentBlock(id,delta){if(!hasBlockControls()||state.viewOnly)return;const blocks=state.current.content.blocks,index=blocks.findIndex(b=>b.id===id),target=index+delta;if(index<0||target<0||target>=blocks.length)return;pushHistory('Before moving section');[blocks[index],blocks[target]]=[blocks[target],blocks[index]];markDirty(false);pushHistory('Move section');renderBlocks();renderOutline();renderRegisters();setActiveBlock(id);const item=byId('blockList')?.querySelector(`[data-block-id="${CSS.escape(id)}"]`);item?.scrollIntoView({block:'nearest',behavior:'smooth'})}
+function moveDocumentBlockTo(id,targetId,after){if(!hasBlockControls()||state.viewOnly||id===targetId)return;const blocks=state.current.content.blocks,from=blocks.findIndex(b=>b.id===id);if(from<0||!blocks.some(b=>b.id===targetId))return;pushHistory('Before moving section');const [moved]=blocks.splice(from,1),target=blocks.findIndex(b=>b.id===targetId)+(after?1:0);if(target===from){blocks.splice(from,0,moved);return}blocks.splice(target,0,moved);markDirty(false);pushHistory('Move section');renderBlocks();renderOutline();renderRegisters();setActiveBlock(id);byId('blockList')?.querySelector(`[data-block-id="${CSS.escape(id)}"] .script-drag-handle`)?.focus({preventScroll:true})}
+function beginBlockDrag(event,id,handle){if(state.viewOnly||event.pointerType==='mouse'&&event.button!==0)return;event.preventDefault();event.stopPropagation();const source=handle.closest('.doc-block'),startX=event.clientX,startY=event.clientY;let dragging=false,target=null,after=false;handle.setPointerCapture(event.pointerId);
+ const clear=()=>{target?.classList.remove('script-drop-before','script-drop-after');source.classList.remove('script-is-dragging');document.body.classList.remove('script-drag-active');handle.onpointermove=null;handle.onpointerup=null;handle.onpointercancel=null};
+ handle.onpointermove=move=>{if(!dragging&&Math.hypot(move.clientX-startX,move.clientY-startY)<5)return;if(!dragging){dragging=true;source.classList.add('script-is-dragging');document.body.classList.add('script-drag-active')}const found=document.elementFromPoint(move.clientX,move.clientY)?.closest('.doc-block');if(target!==found){target?.classList.remove('script-drop-before','script-drop-after');target=found}if(target&&target!==source){after=move.clientY>target.getBoundingClientRect().top+target.getBoundingClientRect().height/2;target.classList.toggle('script-drop-before',!after);target.classList.toggle('script-drop-after',after)}else target=null;if(move.clientY<75)window.scrollBy(0,-14);else if(move.clientY>innerHeight-75)window.scrollBy(0,14)};
+ handle.onpointerup=()=>{const targetId=dragging?target?.dataset.blockId:null,insertAfter=after;clear();if(targetId)moveDocumentBlockTo(id,targetId,insertAfter)};
+ handle.onpointercancel=clear;
+}
+function setActiveBlock(id){state.activeBlockId=id;const block=getBlock(id);if(block?.type!=='table'){state.activeTableId=null;state.activeCell=null;$$('.selected-cell').forEach(x=>x.classList.remove('selected-cell'));updateTableTabAvailability()}$$('.doc-block.active').forEach(x=>x.classList.remove('active'));const el=document.querySelector(`[data-block-id="${CSS.escape(id)}"]`);if(el)el.classList.add('active');if(isScript())updateScriptBlockButtons(block)}
+function getBlock(id=state.activeBlockId){return state.current?.content?.blocks?.find(b=>b.id===id)}
+function focusBlock(id,offset=0){const el=document.querySelector(`[data-block-id="${CSS.escape(id)}"] .editable`);if(!el)return;el.focus();setCaretByCharOffset(el,offset);setActiveBlock(id);captureSelection()}
+function setCaretByCharOffset(root,offset){const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n,pos=0;while(n=walker.nextNode()){const end=pos+n.nodeValue.length;if(offset<=end){const r=document.createRange();r.setStart(n,Math.max(0,offset-pos));r.collapse(true);const s=window.getSelection();s.removeAllRanges();s.addRange(r);return}pos=end}const r=document.createRange();r.selectNodeContents(root);r.collapse(false);const s=window.getSelection();s.removeAllRanges();s.addRange(r)}
+
+// Stable selection bookmark per active block
+function captureSelection(){
+  const sel=window.getSelection();if(!sel.rangeCount)return;const r=sel.getRangeAt(0);
+  const editable=node=>(node.nodeType===1?node:node.parentElement)?.closest?.('.editable,.script-prompt-editable');
+  const ed=editable(r.startContainer);if(!ed)return;
+  const inEditor=byId('blockList').contains(ed),inPrompt=byId('scriptPromptTrack').contains(ed);
+  if(!inEditor&&!inPrompt)return;
+  if(editable(r.endContainer)!==ed){state.selectionBookmark=null;return}
+  const blockId=inEditor?ed.closest('.doc-block')?.dataset.blockId:ed.closest('.script-prompt-line')?.dataset.sourceId;
+  if(!blockId)return;
+  const pre=document.createRange(),pre2=document.createRange();pre.selectNodeContents(ed);pre.setEnd(r.startContainer,r.startOffset);pre2.selectNodeContents(ed);pre2.setEnd(r.endContainer,r.endOffset);
+  state.selectionBookmark={blockId,start:pre.toString().length,end:pre2.toString().length,selectedText:r.toString()};state.activeBlockId=blockId;
+}
+function restoreSelection(){const bm=state.selectionBookmark;if(!bm)return false;const ed=document.querySelector(`[data-block-id="${CSS.escape(bm.blockId)}"] .editable`);if(!ed)return false;const points=[findPoint(ed,bm.start),findPoint(ed,bm.end)];if(!points[0]||!points[1])return false;const r=document.createRange();r.setStart(points[0].node,points[0].offset);r.setEnd(points[1].node,points[1].offset);const s=window.getSelection();s.removeAllRanges();s.addRange(r);return true}
+function findPoint(root,target){const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n,pos=0,last=null;while(n=w.nextNode()){last=n;const end=pos+n.nodeValue.length;if(target<=end)return{node:n,offset:Math.max(0,target-pos)};pos=end}if(last)return{node:last,offset:last.nodeValue.length};const t=document.createTextNode('');root.appendChild(t);return{node:t,offset:0}}
+
+function bindToolbarSafe(el,fn){if(!el)return;el.onpointerdown=e=>{e.preventDefault();if(!state.selectionBookmark||state.selectionBookmark.start===state.selectionBookmark.end||!window.getSelection()?.isCollapsed)captureSelection();fn(e)}}
+function bindTextControls(){
+  $$('button[data-style]').forEach(b=>bindToolbarSafe(b,()=>applyParagraphStyle(b.dataset.style)));
+  $$('button[data-mark]').forEach(b=>bindToolbarSafe(b,()=>applyMark(b.dataset.mark)));
+  $$('button[data-action="bullet"]').forEach(b=>bindToolbarSafe(b,()=>convertToBullet(+b.dataset.level)));
+  bindToolbarSafe(byId('numberBtn'),()=>convertToNumber());bindToolbarSafe(byId('mainFigBtn'),()=>insertFigurePlaceholder('main'));bindToolbarSafe(byId('marginFigBtn'),()=>insertFigurePlaceholder('margin'));bindToolbarSafe(byId('newTableBtn'),()=>insertTable());bindToolbarSafe(byId('importDocxTableBtn'),()=>showDocxImportDialog());
+  bindToolbarSafe(byId('boldBtn'),()=>applyMark('bold'));bindToolbarSafe(byId('italicBtn'),()=>applyMark('italic'));bindToolbarSafe(byId('underlineBtn'),()=>applyMark('underline'));byId('fontSizeSelect').onpointerdown=()=>captureSelection();byId('fontSizeSelect').onchange=()=>{const v=byId('fontSizeSelect').value;if(v)applyMark(`font:${v}`);byId('fontSizeSelect').value=''};
+  for(const [id,action] of [['rowUpBtn','rowAbove'],['rowDownBtn','rowBelow'],['colLeftBtn','colLeft'],['colRightBtn','colRight'],['delRowBtn','delRow'],['delColBtn','delCol'],['deleteTableBtn','deleteTable'],['equalColsBtn','equalCols']])bindToolbarSafe(byId(id),()=>tableAction(action));
+  bindToolbarSafe(byId('applyColWidthBtn'),()=>tableAction('setWidth',+byId('colWidthInput').value));
+  $$('[data-action="undo"]').forEach(b=>bindToolbarSafe(b,undo));$$('[data-action="redo"]').forEach(b=>bindToolbarSafe(b,redo));
+  $$('[data-ribbon-tab]').forEach(button=>{button.onpointerdown=captureSelection;button.onclick=()=>!button.disabled&&setRibbonTab(button.dataset.ribbonTab)});
+  byId('tableOutlineBtn').onclick=()=>{const panel=byId('tableOutlinePanel'),open=panel.classList.contains('hidden');setOutlineDrawerOpen(false);panel.classList.toggle('hidden',!open);byId('tableOutlineBtn').setAttribute('aria-expanded',String(open))};
+  byId('closeTableOutlineBtn').onclick=closeTableOutline;
+  byId('outlineViewBtn').onclick=()=>setOutlineDrawerOpen(!byId('rightPanel').classList.contains('drawer-open'));byId('outlineCloseBtn').onclick=()=>setOutlineDrawerOpen(false);byId('outlineScrim').onclick=()=>setOutlineDrawerOpen(false);
+  byId('viewOnlyBtn').onclick=()=>{state.viewOnly=!state.viewOnly;if(state.viewOnly){state.ribbonTab='view';state.viewZoom=1;setOutlineDrawerOpen(false)}applyViewOnlyState();setRibbonTab(state.viewOnly?'view':'styles')};
+  byId('zoomOutBtn').onclick=()=>setViewZoom(state.viewZoom-.1);byId('zoomInBtn').onclick=()=>setViewZoom(state.viewZoom+.1);byId('zoomResetBtn').onclick=()=>setViewZoom(1);
+  byId('onePageBtn').onclick=()=>setPageView('one');
+  byId('twoPagesBtn').onclick=()=>setPageView('two');
+  bindScriptControls();
+}
+function setRibbonTab(name){
+  const previous=state.ribbonTab,tableButton=document.querySelector('[data-ribbon-tab="table"]');if(state.current?.templateId==='scientific-draft-figures')name='file';if(name==='table'&&tableButton?.disabled)name='styles';if(isScript()&&!['file','formatting','cues','teleprompter'].includes(name))name='formatting';if(state.viewOnly&&name!=='view')name='view';state.ribbonTab=name;
+  if(isScript()&&previous==='teleprompter'&&name!=='teleprompter'){stopPromptPlayback();renderBlocks();requestAnimationFrame(updatePageScale)}
+  if(name!=='file')closeExportMenu();
+  if(name!=='table')closeTableOutline();
+  $$('[data-ribbon-tab]').forEach(button=>{const active=button.dataset.ribbonTab===name;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active))});
+  $$('[data-ribbon-panel]').forEach(panel=>panel.hidden=panel.dataset.ribbonPanel!==name);if(isScript()){byId('scriptTeleprompter').classList.toggle('hidden',name!=='teleprompter');byId('textEditorArea').querySelector('.editor-layout').classList.toggle('hidden',name==='teleprompter');if(name==='teleprompter')renderTeleprompter()}requestAnimationFrame(syncEditorStickyOffsets)
+}
+function updateTableTabAvailability(){const button=document.querySelector('[data-ribbon-tab="table"]'),available=!!(state.activeTableId&&state.activeCell);if(!button)return;button.disabled=state.viewOnly;button.title=available?'Table outline and selected table tools':'Table outline · select a table cell to edit its rows and columns';for(const id of ['rowUpBtn','rowDownBtn','colLeftBtn','colRightBtn','delRowBtn','delColBtn','deleteTableBtn','equalColsBtn','applyColWidthBtn','colWidthInput'])byId(id).disabled=state.viewOnly||!available}
+function closeTableOutline(){const panel=byId('tableOutlinePanel'),button=byId('tableOutlineBtn');panel?.classList.add('hidden');button?.setAttribute('aria-expanded','false')}
+function setOutlineDrawerOpen(open){const panel=byId('rightPanel'),button=byId('outlineViewBtn'),scrim=byId('outlineScrim');if(!panel||!button||!scrim)return;if(open)closeTableOutline();panel.classList.toggle('drawer-open',open);button.setAttribute('aria-expanded',String(open));scrim.classList.toggle('hidden',!open)}
+function applyViewOnlyState(){const area=byId('textEditorArea'),button=byId('viewOnlyBtn'),editor=byId('editorContentColumn'),preview=byId('printPreviewWorkspace');if(!area||!button||!editor||!preview)return;area.classList.toggle('view-only-mode',state.viewOnly);document.body.classList.toggle('document-view-only',state.viewOnly);button.setAttribute('aria-pressed',String(state.viewOnly));button.classList.toggle('primary',state.viewOnly);area.querySelectorAll('.editable,.table-cell-editor').forEach(el=>el.contentEditable=state.viewOnly?'false':'true');area.querySelectorAll('.draft-information-card input,.draft-information-card textarea,.draft-information-card select').forEach(el=>{if(el.matches('select'))el.disabled=state.viewOnly;else el.readOnly=state.viewOnly});byId('tableOutlinePanel')?.querySelectorAll('input').forEach(el=>el.readOnly=state.viewOnly);editor.classList.toggle('hidden',state.viewOnly);preview.classList.toggle('hidden',!state.viewOnly);$$('[data-ribbon-tab="styles"],[data-ribbon-tab="formatting"],[data-ribbon-tab="insert"],[data-ribbon-tab="table"]').forEach(tab=>tab.disabled=state.viewOnly);updateTableTabAvailability();updatePageViewButtons();if(state.viewOnly){closeTableOutline();renderPrintPreview()}else requestAnimationFrame(updatePageScale)}
+function setViewZoom(value){state.viewZoom=Math.max(.5,Math.min(1.5,Math.round(value*10)/10));const label=byId('zoomResetBtn');if(label)label.textContent=`${Math.round(state.viewZoom*100)}%`;requestAnimationFrame(()=>state.viewOnly?applyPreviewScale():updatePageScale())}
+function setPageView(mode){if(mode==='two'&&innerWidth<=900){state.pageView='one';toast('Two pages is available on wider laptop screens. Mobile keeps one A4 page without reflow.')}else state.pageView=mode==='two'?'two':'one';if(!state.viewOnly){state.viewOnly=true;state.ribbonTab='view';applyViewOnlyState();setRibbonTab('view')}updatePageViewButtons();requestAnimationFrame(applyPreviewScale)}
+function updatePageViewButtons(){const effective=state.pageView==='two'&&innerWidth>900?'two':'one';byId('onePageBtn')?.setAttribute('aria-pressed',String(effective==='one'));byId('twoPagesBtn')?.setAttribute('aria-pressed',String(effective==='two'));byId('onePageBtn')?.classList.toggle('primary',effective==='one');byId('twoPagesBtn')?.classList.toggle('primary',effective==='two')}
+function newPreviewPage(kind='content'){
+  const host=byId('printPreviewPages'),shell=document.createElement('div'),page=document.createElement('section'),content=document.createElement('div');shell.className='print-preview-page-shell';shell.dataset.previewKind=kind;page.className=`print-preview-page preview-${kind}`;content.className='print-preview-page-content';page.appendChild(content);shell.appendChild(page);host.appendChild(shell);return content
+}
+function currentPreviewContent(kind='content'){const shells=byId('printPreviewPages')?.querySelectorAll('.print-preview-page-shell'),last=shells?.[shells.length-1];return last?.dataset.previewKind===kind?last.querySelector('.print-preview-page-content'):newPreviewPage(kind)}
+function previewOverflow(content){return content.scrollHeight>content.clientHeight+2}
+function appendPreviewNode(node,kind='content'){
+  let content=currentPreviewContent(kind);content.appendChild(node);if(previewOverflow(content)&&content.children.length>1){node.remove();content=newPreviewPage(kind);content.appendChild(node)}return content
+}
+function createPreviewTable(headerCells=[],className='preview-register-table'){
+  const table=document.createElement('table');table.className=className;if(headerCells.length){const head=document.createElement('thead'),row=document.createElement('tr');headerCells.forEach(label=>{const th=document.createElement('th');th.textContent=label;row.appendChild(th)});head.appendChild(row);table.appendChild(head)}const body=document.createElement('tbody');table.appendChild(body);return {table,body}
+}
+function appendPreviewRows(rows,headers=[],kind='cover',className='preview-register-table'){
+  let content=currentPreviewContent(kind),parts=createPreviewTable(headers,className);content.appendChild(parts.table);
+  for(const cells of rows){const row=document.createElement('tr');cells.forEach((value,index)=>{const cell=document.createElement(index===0&&className==='preview-meta-table'?'th':'td');cell.innerHTML=value;row.appendChild(cell)});parts.body.appendChild(row);if(previewOverflow(content)){row.remove();content=newPreviewPage(kind);parts=createPreviewTable(headers,className);content.appendChild(parts.table);parts.body.appendChild(row)}}
+}
+function previewBlockNode(block,ctx){
+  const node=document.createElement('div'),direction=textDirection(plainText(block.runs||[]));node.dataset.sourceBlockId=block.id;node.setAttribute('dir',direction);node.className='preview-document-block';
+  if(block.type==='paragraph'){node.classList.add(`p-${block.style||'Normal'}`);if(block.style==='Heading1'||block.style==='Heading2'){node.innerHTML=`<span class="heading-num">${block.style==='Heading1'?ctx.h1:ctx.h2}.</span><span class="heading-text">${runsPrintHtml(block.runs)}</span>`}else node.innerHTML=runsPrintHtml(block.runs)}
+  else if(block.type==='bullet'){node.classList.add('bullet-block',`level-${block.level}`);node.innerHTML=`<span class="bullet-marker">${uiIcon(`bullet-${block.level}`)}</span><div>${runsPrintHtml(block.runs)}</div>`}
+  else if(block.type==='number'){node.classList.add('number-block');node.innerHTML=`<span class="bullet-marker">${ctx.numSeq}.</span><div>${runsPrintHtml(block.runs)}</div>`}
+  else if(block.type==='figure_placeholder'){node.classList.add('figure-placeholder');node.textContent=`[POSITION OF ${block.placement==='margin'?'MARGIN ':''}FIGURE ${block.code||'?'}]`}
+  return node
+}
+function appendPreviewDocumentTable(block){
+  const kind='content',rows=block.rows||[];let content=currentPreviewContent(kind),tableParts=createPreviewTable([], 'doc-table preview-doc-table');tableParts.table.dataset.sourceBlockId=block.id;content.appendChild(tableParts.table);const header=block.headerRow!==false?rows[0]:null;
+  const appendRow=(rowData,rowIndex)=>{const row=document.createElement('tr'),tag=block.headerRow!==false&&rowIndex===0?'th':'td';rowData.forEach((cell,index)=>{const td=document.createElement(tag);if(block.widths?.[index])td.style.width=`${block.widths[index]}%`;td.innerHTML=runsPrintHtml(cell.runs);row.appendChild(td)});tableParts.body.appendChild(row);if(previewOverflow(content)){row.remove();content=newPreviewPage(kind);tableParts=createPreviewTable([], 'doc-table preview-doc-table');tableParts.table.dataset.sourceBlockId=block.id;content.appendChild(tableParts.table);if(header&&rowIndex>0){const repeated=document.createElement('tr');header.forEach((cell,index)=>{const th=document.createElement('th');if(block.widths?.[index])th.style.width=`${block.widths[index]}%`;th.innerHTML=runsPrintHtml(cell.runs);repeated.appendChild(th)});tableParts.body.appendChild(repeated)}tableParts.body.appendChild(row)}};
+  rows.forEach(appendRow);const caption=tableCaptionText(block);if(caption){const cap=document.createElement('div');cap.className='preview-table-caption';cap.textContent=caption;appendPreviewNode(cap,kind)}
+}
+function renderPrintPreview(){
+  if(!state.current||!state.viewOnly)return;const host=byId('printPreviewPages');if(!host)return;host.innerHTML='';const d=state.current,m=d.metadata||{},headings=headingStructure(),tables=d.content.blocks.filter(block=>block.type==='table');newPreviewPage('cover');
+  appendPreviewRows([['Name',esc(m.name||'')],['Start date',esc(m.startDate||'')],['End date',esc(m.endDate||'')],['Course',esc(m.course||m.subject||'')],['Chapter number',esc(m.chapterNumber||'')],['Chapter title',esc(m.chapterTitle||'')]],[],'cover','preview-meta-table');
+  appendPreviewRows(Array.from({length:Math.max(12,headings.length)},(_,index)=>[String(index+1),esc(headings[index]?.title||'')]),['Headings 1',''],'cover','preview-register-table');
+  appendPreviewRows(tables.length?tables.map(table=>[esc(table.code||''),esc(table.title||''),esc(table.caption||'')]):[['','','']],['Table code','Table title','Table caption'],'cover','preview-register-table');
+  newPreviewPage('content');let h1=0,h2=0,numSeq=0;for(const block of d.content.blocks){if(block.type==='paragraph'&&block.style==='Heading1'){h1++;h2=0;numSeq=0}else if(block.type==='paragraph'&&block.style==='Heading2'){h2++;numSeq=0}else if(block.type!=='number')numSeq=0;if(block.type==='number')numSeq++;if(block.type==='table')appendPreviewDocumentTable(block);else appendPreviewNode(previewBlockNode(block,{h1,h2,numSeq}),'content')}
+  host.querySelectorAll('.print-preview-page').forEach((page,index)=>{const label=document.createElement('span');label.className='print-preview-page-number';label.textContent=String(index+1);page.appendChild(label)});const ready=document.fonts?.ready||Promise.resolve();ready.then(()=>requestAnimationFrame(applyPreviewScale));updatePageViewButtons()
+}
+function applyPreviewScale(){
+  if(!state.viewOnly)return;const host=byId('printPreviewPages'),workspace=byId('printPreviewWorkspace');if(!host||!workspace)return;const baseWidth=793.7,baseHeight=1122.5,gap=18,columns=state.pageView==='two'&&innerWidth>900?2:1,available=Math.max(280,workspace.clientWidth-24),fit=Math.min(1,(available-gap*(columns-1))/(baseWidth*columns)),scale=Math.max(.35,Math.min(1.5,fit*state.viewZoom));host.classList.toggle('two-pages',columns===2);host.classList.toggle('one-page',columns===1);host.style.gridTemplateColumns=`repeat(${columns}, ${Math.round(baseWidth*scale)}px)`;host.querySelectorAll('.print-preview-page-shell').forEach(shell=>{shell.style.width=`${Math.round(baseWidth*scale)}px`;shell.style.height=`${Math.round(baseHeight*scale)}px`;const page=shell.querySelector('.print-preview-page');page.style.transform=`scale(${scale})`});const label=byId('zoomResetBtn');if(label)label.textContent=`${Math.round(state.viewZoom*100)}%`
+}
+function applyParagraphStyle(style){
+  const b=getBlock();if(!b)return toast('Click in a paragraph first');if(b.type==='figure_placeholder'||b.type==='table')return toast('Select a text block first');
+  if(!STYLE_CONTRACT[style])return;
+  if(b.type!=='paragraph'){b.type='paragraph';delete b.level;}b.style=style;
+  // A paragraph preset owns its whole appearance; old inline formatting must not override it.
+  b.runs=normalizeRuns((b.runs||[]).map(r=>({text:r.text,marks:(r.marks||[]).filter(m=>!VISUAL_STYLE_MARKS.includes(m)&&!m.startsWith('font:'))})));
+  markDirty(false);pushHistory(`Style ${style}`);renderBlocks();renderOutline();renderRegisters();setTimeout(()=>focusBlock(b.id,plainText(b.runs).length),0);
+}
+function applyMark(mark){
+  const bookmark=state.selectionBookmark,b=getBlock(bookmark?.blockId);if(!b||!['paragraph','bullet','number'].includes(b.type)||['script-emphasis','script-visual-ref','script-presenter','script-review'].includes(mark)&&!isScript()||!bookmark||bookmark.start===bookmark.end)return toast('Select text first');
+  const start=Math.min(bookmark.start,bookmark.end),end=Math.max(bookmark.start,bookmark.end);
+  if(bookmark.selectedText&&plainText(b.runs||[]).slice(start,end)!==bookmark.selectedText)return toast('Select the text again before formatting');
+  b.runs=NAMED_STYLE_MARKS.includes(mark)?applyNamedStyleToRuns(b.runs,start,end,mark):applyMarkToRuns(b.runs,start,end,mark);
+  markDirty(false);pushHistory(`Format ${mark}`);renderBlocks();setTimeout(()=>{state.selectionBookmark={blockId:b.id,start,end,selectedText:plainText(b.runs).slice(start,end)};restoreSelection()},0);
+}
+const NAMED_STYLE_MARKS=['SideNote','NotesToDelete','HighYield','ClinicalCorrelation'];
+const VISUAL_STYLE_MARKS=[...NAMED_STYLE_MARKS,'bold','italic','underline'];
+function applyNamedStyleToRuns(runs,start,end,style){
+  const out=[];let pos=0;
+  for(const r of runs||[]){
+    const a=pos,b=pos+r.text.length;pos=b;
+    if(end<=a||start>=b){out.push(clone(r));continue}
+    const s=Math.max(start,a)-a,e=Math.min(end,b)-a,marks=r.marks||[];
+    if(s)out.push({text:r.text.slice(0,s),marks:[...marks]});
+    out.push({text:r.text.slice(s,e),marks:[...marks.filter(m=>!VISUAL_STYLE_MARKS.includes(m)&&!m.startsWith('font:')),style]});
+    if(e<r.text.length)out.push({text:r.text.slice(e),marks:[...marks]});
+  }
+  return normalizeRuns(out);
+}
+function applyMarkToRuns(runs,start,end,mark){
+  const out=[];let pos=0;const isFont=mark.startsWith('font:');
+  for(const r of runs||[]){const a=pos,b=pos+r.text.length;if(end<=a||start>=b){out.push(clone(r));pos=b;continue}const s=Math.max(start,a)-a,e=Math.min(end,b)-a;const before=r.text.slice(0,s),mid=r.text.slice(s,e),after=r.text.slice(e);if(before)out.push({text:before,marks:[...(r.marks||[])]});if(mid){let marks=[...(r.marks||[])];if(isFont)marks=marks.filter(x=>!x.startsWith('font:'));if(marks.includes(mark))marks=marks.filter(x=>x!==mark);else marks.push(mark);out.push({text:mid,marks});}if(after)out.push({text:after,marks:[...(r.marks||[])]});pos=b;}
+  return normalizeRuns(out);
+}
+function convertToBullet(level){const b=getBlock();if(!b||!['paragraph','bullet','number'].includes(b.type))return;b.type='bullet';b.level=level;delete b.style;markDirty(false);pushHistory(`Bullet ${level}`);renderBlocks();renderOutline();renderRegisters();setTimeout(()=>focusBlock(b.id,plainText(b.runs||[]).length),0)}
+function convertToNumber(){const b=getBlock();if(!b||!['paragraph','bullet','number'].includes(b.type))return;b.type='number';delete b.style;delete b.level;markDirty(false);pushHistory('Numbered item');renderBlocks();renderOutline();renderRegisters();setTimeout(()=>focusBlock(b.id,plainText(b.runs||[]).length),0)}
+function insertFigurePlaceholder(placement){const raw=prompt(`${placement==='margin'?'Margin f':'F'}igure code (numbers and dots only, e.g., 3.1):`,'');if(raw===null)return;const code=sanitizeNumericCode(raw);if(!code)return toast('Figure code must contain numbers and dots only');const b={id:uid('b'),type:'figure_placeholder',placement,code};insertBlockAfterActive(b);}
+function insertBlockAfterActive(block){const arr=state.current.content.blocks;let idx=arr.findIndex(x=>x.id===state.activeBlockId);if(idx<0)idx=arr.length-1;arr.splice(idx+1,0,block);markDirty(false);pushHistory('Insert block');renderBlocks();renderOutline();renderRegisters();setActiveBlock(block.id)}
+
+// ---------------- Tables ----------------
+function insertTable(){
+  const rowInput=prompt('Rows:','3');if(rowInput===null)return;const colInput=prompt('Columns:','3');if(colInput===null)return;
+  const rows=Math.max(2,Math.min(20,+rowInput||3)),cols=Math.max(2,Math.min(8,+colInput||3));const rawCode=prompt('Table code (numbers and dots only):','');if(rawCode===null)return;const code=sanitizeNumericCode(rawCode);const title=prompt('Table title:','');if(title===null)return;const caption=prompt('Table caption (optional):','');if(caption===null)return;
+  if(!code||!title.trim())return toast('A numeric Table code and Table title are required');
+  const block={id:uid('tbl'),type:'table',code,title:title.trim(),caption:caption.trim(),headerRow:true,widths:Array(cols).fill(100/cols),rows:Array.from({length:rows},()=>Array.from({length:cols},()=>({runs:[]})))},arr=state.current.content.blocks;let idx=arr.findIndex(x=>x.id===state.activeBlockId);if(idx<0)idx=arr.length-1;arr.splice(idx+1,0,block);const next=arr[idx+2];if(!next||!['paragraph','bullet','number'].includes(next.type))arr.splice(idx+2,0,normalBlock());markDirty(false);pushHistory('Insert table');renderBlocks();renderOutline();renderRegisters();setActiveBlock(block.id)
+}
+function tableCaptionText(block){const lead=['Table',String(block.code||'').trim()].filter(Boolean).join(' '),title=String(block.title||'').trim(),caption=String(block.caption||'').trim();return `${lead}${lead&&title?' — ':''}${title}${caption?`${lead||title?' · ':''}${caption}`:''}`.trim()}
+function refreshRenderedTableCaption(block){const caption=document.querySelector(`[data-block-id="${CSS.escape(block.id)}"] .table-caption`);if(caption)caption.textContent=tableCaptionText(block)}
+function renderTable(block){
+  const wrap=document.createElement('div');const sc=document.createElement('div');sc.className='table-wrap';const table=document.createElement('table');table.className='doc-table';table.dataset.tableId=block.id;const body=document.createElement('tbody');
+  block.rows.forEach((row,ri)=>{const tr=document.createElement('tr');row.forEach((cell,ci)=>{const td=document.createElement(block.headerRow!==false&&ri===0?'th':'td');if(block.widths?.[ci])td.style.width=block.widths[ci]+'%';const ed=document.createElement('div');ed.className='table-cell-editor';ed.contentEditable='true';ed.setAttribute('dir','auto');ed.innerHTML=runsToHtml(cell.runs||[]);ed.addEventListener('focus',()=>selectTableCell(block.id,ri,ci,td));ed.addEventListener('click',()=>selectTableCell(block.id,ri,ci,td));ed.addEventListener('input',()=>{cell.runs=elementToRuns(ed);selectTableCell(block.id,ri,ci,td);markDirty()});ed.addEventListener('paste',e=>{e.preventDefault();insertPlainTextAtSelection(ed,(e.clipboardData||window.clipboardData).getData('text/plain'));cell.runs=elementToRuns(ed);markDirty()});td.appendChild(ed);tr.appendChild(td)});body.appendChild(tr)});table.appendChild(body);sc.appendChild(table);wrap.appendChild(sc);
+  const cap=document.createElement('div');cap.className='table-caption';cap.textContent=tableCaptionText(block);wrap.appendChild(cap);const continueButton=document.createElement('button');continueButton.type='button';continueButton.className='table-continue-button';continueButton.innerHTML='<span aria-hidden="true">＋</span> Continue writing';continueButton.addEventListener('pointerdown',e=>{e.preventDefault();continueWritingAfterTable(block.id)});wrap.appendChild(continueButton);return wrap;
+}
+function continueWritingAfterTable(tableId){const arr=state.current.content.blocks,idx=arr.findIndex(b=>b.id===tableId);if(idx<0)return;let next=arr[idx+1];if(!next||!['paragraph','bullet','number'].includes(next.type)){next=normalBlock();arr.splice(idx+1,0,next);markDirty(false);pushHistory('Continue after table');renderBlocks();renderOutline();renderRegisters()}setTimeout(()=>focusBlock(next.id,0),0)}
+function selectTableCell(tableId,row,col,td){state.activeTableId=tableId;state.activeCell={row,col};state.activeBlockId=tableId;$$('.selected-cell').forEach(x=>x.classList.remove('selected-cell'));td?.classList.add('selected-cell');updateTableTabAvailability();if(!state.viewOnly)setRibbonTab('table')}
+function tableAction(action,value){const t=getBlock(state.activeTableId);if(!t||t.type!=='table'||!state.activeCell)return toast('Click inside a table cell first');let {row,col}=state.activeCell;const cols=t.rows[0]?.length||0;
+  if(action==='deleteTable'){if(!confirm(`Delete Table ${t.code||''}${t.title?` — ${t.title}`:''}?`))return;const arr=state.current.content.blocks,index=arr.findIndex(block=>block.id===t.id);arr.splice(index,1);if(!arr.length)arr.push(normalBlock());state.activeTableId=null;state.activeCell=null;state.activeBlockId=arr[Math.max(0,index-1)]?.id||arr[0]?.id||null;markDirty(false);pushHistory('Delete table');renderBlocks();renderOutline();renderRegisters();updateTableTabAvailability();setRibbonTab('styles');toast('Table deleted · Undo is available');return}
+  if(action==='rowAbove')t.rows.splice(row,0,Array.from({length:cols},()=>({runs:[]})));
+  if(action==='rowBelow')t.rows.splice(row+1,0,Array.from({length:cols},()=>({runs:[]})));
+  if(action==='delRow'){if(t.rows.length<=1)return toast('Table must keep at least one row');t.rows.splice(row,1);row=Math.max(0,row-1)}
+  if(action==='colLeft'||action==='colRight'){const at=action==='colLeft'?col:col+1;t.rows.forEach(r=>r.splice(at,0,{runs:[]}));t.widths=Array(t.rows[0].length).fill(100/t.rows[0].length);col=at}
+  if(action==='delCol'){if(cols<=1)return toast('Table must keep at least one column');t.rows.forEach(r=>r.splice(col,1));t.widths=Array(t.rows[0].length).fill(100/t.rows[0].length);col=Math.max(0,col-1)}
+  if(action==='equalCols')t.widths=Array(cols).fill(100/cols);
+  if(action==='setWidth'&&value>0&&value<100){const n=t.rows[0].length;const remain=100-value;const others=(n>1)?remain/(n-1):0;t.widths=Array.from({length:n},(_,i)=>i===col?value:others)}
+  state.activeCell={row,col};markDirty(false);pushHistory(`Table ${action}`);renderBlocks();renderRegisters();
+}
+
+// ---------------- DOCX table import ----------------
+const WORD_NS='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+function showDocxImportDialog(){
+  if(!state.current||state.current.templateId!=='scientific-draft-text')return toast('Open a text document first');
+  state.docxImportSession={fileName:'',tables:[]};const body=byId('modalBody'),card=byId('modal').querySelector('.modal-card');card.classList.add('wizard-modal','docx-import-modal');
+  body.innerHTML=`<div class="wizard-head"><div><span class="eyebrow">TABLE IMPORT</span><h3>Import tables from DOCX</h3><p>The file is read locally on this device and is never uploaded.</p></div><div class="wizard-steps"><span class="active">1 Choose file</span><span>2 Select tables</span><span>3 Table information</span></div></div><div class="docx-dropzone" id="docxDropzone" tabindex="0" role="button"><span class="docx-file-icon">W</span><b>Choose or drop a .docx file</b><small>Maximum 25 MB · tables become editable TERYAQ blocks</small><input id="docxFileInput" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden></div><div class="docx-status" id="docxStatus" role="status"></div><div class="wizard-footer"><span class="wizard-note">Merged or nested tables will be flagged for review.</span><button class="btn" id="cancelDocxImport">Cancel</button></div>`;
+  const drop=byId('docxDropzone'),input=byId('docxFileInput');drop.onclick=()=>input.click();drop.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();input.click()}};drop.ondragover=e=>{e.preventDefault();drop.classList.add('dragging')};drop.ondragleave=()=>drop.classList.remove('dragging');drop.ondrop=e=>{e.preventDefault();drop.classList.remove('dragging');if(e.dataTransfer.files[0])loadDocxFile(e.dataTransfer.files[0])};input.onchange=()=>input.files[0]&&loadDocxFile(input.files[0]);byId('cancelDocxImport').onclick=closeModal;byId('modal').classList.remove('hidden')
+}
+async function loadDocxFile(file){
+  const status=byId('docxStatus');try{
+    if(!/\.docx$/i.test(file.name))throw new Error('Choose a .docx file.');if(file.size>25*1024*1024)throw new Error('The DOCX file is larger than 25 MB.');if(typeof JSZip==='undefined')throw new Error('The offline DOCX reader is unavailable. Reload the updated app once while online.');
+    status.textContent='Reading tables locally…';const tables=await parseDocxTables(file);if(!tables.length)throw new Error('No tables were found in this DOCX file.');state.docxImportSession={fileName:file.name,tables};renderDocxTableSelection()
+  }catch(error){console.error(error);if(status)status.textContent=`Import could not start: ${error.message}`}
+}
+async function parseDocxTables(file){
+  const zip=await JSZip.loadAsync(await file.arrayBuffer()),entry=zip.file('word/document.xml');if(!entry)throw new Error('The DOCX document body is missing.');const maxXmlBytes=15*1024*1024,reportedSize=Number(entry._data?.uncompressedSize||0);if(reportedSize>maxXmlBytes)throw new Error('The DOCX document body is too large to import safely.');const xmlText=await entry.async('string');if(xmlText.length>maxXmlBytes)throw new Error('The DOCX document body is too large to import safely.');const xml=new DOMParser().parseFromString(xmlText,'application/xml');if(xml.getElementsByTagName('parsererror').length)throw new Error('The DOCX document XML is invalid.');
+  const all=[...xml.getElementsByTagNameNS(WORD_NS,'tbl')],top=all.filter(table=>!ancestorWithLocalName(table.parentNode,'tbl'));if(top.length>200)throw new Error('This DOCX contains more than 200 tables. Split it into smaller files first.');
+  return top.map((table,index)=>parseWordTable(table,index));
+}
+function ancestorWithLocalName(node,name,stop=null){for(let current=node;current&&current!==stop;current=current.parentNode)if(current.localName===name)return current;return null}
+function directWordChildren(node,name){return [...(node?.childNodes||[])].filter(child=>child.nodeType===1&&child.namespaceURI===WORD_NS&&child.localName===name)}
+function wordAttribute(node,name){for(const attribute of [...(node?.attributes||[])])if(attribute.localName===name)return attribute.value;return ''}
+function wordPropertyOn(node,name){const property=[...node.getElementsByTagNameNS(WORD_NS,name)][0];if(!property)return false;const value=wordAttribute(property,'val').toLowerCase();return !['0','false','off','none'].includes(value)}
+function wordRunText(run){let text='';const visit=node=>{for(const child of [...(node.childNodes||[])]){if(child.nodeType!==1)continue;if(child.namespaceURI===WORD_NS&&child.localName==='t')text+=child.textContent||'';else if(child.namespaceURI===WORD_NS&&child.localName==='tab')text+='\t';else if(child.namespaceURI===WORD_NS&&(child.localName==='br'||child.localName==='cr'))text+='\n';else visit(child)}};visit(run);return text}
+function parseWordParagraph(paragraph){const out=[];for(const run of [...paragraph.getElementsByTagNameNS(WORD_NS,'r')]){if(ancestorWithLocalName(run.parentNode,'p')!==paragraph)continue;const text=wordRunText(run);if(!text)continue;const properties=directWordChildren(run,'rPr')[0],marks=[];if(properties&&wordPropertyOn(properties,'b'))marks.push('bold');if(properties&&wordPropertyOn(properties,'i'))marks.push('italic');out.push({text,marks})}return normalizeRuns(out)}
+function parseWordCell(cell){const paragraphs=[...cell.getElementsByTagNameNS(WORD_NS,'p')].filter(p=>ancestorWithLocalName(p.parentNode,'tc')===cell&&!ancestorWithLocalName(p.parentNode,'tbl',cell));const runs=[];paragraphs.forEach((paragraph,index)=>{if(index)runs.push({text:'\n',marks:[]});runs.push(...parseWordParagraph(paragraph))});return normalizeRuns(runs)}
+function parseWordTable(table,index){
+  const warnings=[];if(table.getElementsByTagNameNS(WORD_NS,'tbl').length)warnings.push('Nested table content was flattened.');let hasMerge=false,oversizedSpan=false;
+  const rows=directWordChildren(table,'tr').map(row=>{const cells=[];for(const cell of directWordChildren(row,'tc')){const tcPr=directWordChildren(cell,'tcPr')[0],spanNode=tcPr?[...tcPr.getElementsByTagNameNS(WORD_NS,'gridSpan')][0]:null,rawSpan=Math.max(1,Number(wordAttribute(spanNode,'val'))||1),span=Math.min(51,rawSpan),vMerge=tcPr?[...tcPr.getElementsByTagNameNS(WORD_NS,'vMerge')][0]:null;if(rawSpan>50)oversizedSpan=true;if(span>1||vMerge)hasMerge=true;cells.push({runs:parseWordCell(cell)});for(let extra=1;extra<span;extra++)cells.push({runs:[]})}return cells});
+  if(hasMerge)warnings.push('Merged cells are not supported and were converted to a flat grid.');const columns=Math.max(0,...rows.map(row=>row.length));rows.forEach(row=>{while(row.length<columns)row.push({runs:[]})});const cellCount=rows.length*columns,tooLarge=!rows.length||!columns||oversizedSpan||columns>50||cellCount>5000;if(!rows.length||!columns)warnings.push('This table has no usable cells.');else if(tooLarge)warnings.push('This table is too large to import safely (maximum 50 columns or 5,000 cells).');
+  return {index,rows,columns,cellCount,warnings,selected:!tooLarge,disabled:tooLarge,headerRow:true,code:'',title:`Imported table ${index+1}`,caption:''}
+}
+function renderDocxTableSelection(){
+  const session=state.docxImportSession,body=byId('modalBody');body.innerHTML=`<div class="wizard-head"><div><span class="eyebrow">${esc(session.fileName)}</span><h3>Select tables</h3><p>${session.tables.length} table${session.tables.length===1?'':'s'} detected. Preview and choose what to import.</p></div><div class="wizard-steps"><span>1 Choose file</span><span class="active">2 Select tables</span><span>3 Table information</span></div></div><div class="docx-table-list" id="docxTableList"></div><div class="wizard-footer"><button class="btn" id="chooseAnotherDocx">Choose another file</button><div><button class="btn" id="cancelDocxImport">Cancel</button> <button class="btn primary" id="docxMetadataNext">Next</button></div></div>`;
+  const list=byId('docxTableList');session.tables.forEach(table=>{const item=document.createElement('label');item.className=`docx-table-choice${table.disabled?' disabled':''}`;const previewRows=table.rows.slice(0,4).map(row=>`<tr>${row.slice(0,5).map(cell=>`<td dir="auto">${esc(plainText(cell.runs)||' ')}</td>`).join('')}</tr>`).join('');item.innerHTML=`<div class="docx-choice-head"><input class="docx-table-select" type="checkbox" data-index="${table.index}" ${table.selected?'checked':''} ${table.disabled?'disabled':''}><span><b>Table ${table.index+1}</b><small>${table.rows.length} rows × ${table.columns} columns</small></span>${table.warnings.length?'<span class="docx-review-badge">Needs review</span>':'<span class="docx-ready-badge">Ready</span>'}</div><div class="docx-preview"><table><tbody>${previewRows}</tbody></table>${table.rows.length>4||table.columns>5?'<small>Preview truncated</small>':''}</div>${table.warnings.length?`<ul class="docx-warnings">${table.warnings.map(w=>`<li>${esc(w)}</li>`).join('')}</ul>`:''}`;list.appendChild(item)});
+  byId('chooseAnotherDocx').onclick=showDocxImportDialog;byId('cancelDocxImport').onclick=closeModal;byId('docxMetadataNext').onclick=()=>{list.querySelectorAll('.docx-table-select').forEach(input=>{session.tables[Number(input.dataset.index)].selected=input.checked});if(!session.tables.some(table=>table.selected))return toast('Select at least one table');renderDocxMetadataStep()}
+}
+function renderDocxMetadataStep(){
+  const session=state.docxImportSession,selected=session.tables.filter(table=>table.selected),existing=state.current.content.blocks.filter(block=>block.type==='table').length,body=byId('modalBody'),chapter=sanitizeChapterNumber(state.current.metadata?.chapterNumber||'');selected.forEach((table,index)=>{if(!table.code)table.code=chapter?`${chapter}.${existing+index+1}`:String(existing+index+1)});
+  body.innerHTML=`<div class="wizard-head"><div><span class="eyebrow">TABLE INFORMATION</span><h3>Complete table details</h3><p>Code and title are required. Caption is optional.</p></div><div class="wizard-steps"><span>1 Choose file</span><span>2 Select tables</span><span class="active">3 Table information</span></div></div><div class="docx-metadata-list">${selected.map(table=>`<section class="docx-metadata-card" data-index="${table.index}"><div class="docx-metadata-title"><b>Table ${table.index+1}</b><span>${table.rows.length} × ${table.columns}</span></div><div class="docx-metadata-grid"><div class="field"><label>Table code *</label><input data-field="code" value="${esc(table.code)}" inputmode="decimal" pattern="[0-9.]*" title="Numbers and dots only" required></div><div class="field"><label>Table title *</label><input data-field="title" value="${esc(table.title)}" required></div><div class="field span-2"><label>Table caption (optional)</label><input data-field="caption" value="${esc(table.caption)}"></div></div><label class="docx-header-toggle"><input data-field="headerRow" type="checkbox" ${table.headerRow?'checked':''}> Use the first row as a header row</label>${table.warnings.length?`<div class="docx-inline-warning"><b>Needs review:</b> ${esc(table.warnings.join(' '))}</div>`:''}</section>`).join('')}</div><div class="wizard-footer"><button class="btn" id="backToDocxTables">Back</button><div><button class="btn" id="cancelDocxImport">Cancel</button> <button class="btn primary" id="insertDocxTables">Insert ${selected.length} table${selected.length===1?'':'s'}</button></div></div>`;
+  body.querySelectorAll('[data-field="code"]').forEach(input=>input.addEventListener('input',()=>{input.value=sanitizeNumericCode(input.value)}));byId('backToDocxTables').onclick=renderDocxTableSelection;byId('cancelDocxImport').onclick=closeModal;byId('insertDocxTables').onclick=()=>insertSelectedDocxTables()
+}
+function insertSelectedDocxTables(){
+  const session=state.docxImportSession,selected=session.tables.filter(table=>table.selected);for(const card of byId('modalBody').querySelectorAll('.docx-metadata-card')){const table=session.tables[Number(card.dataset.index)];card.querySelectorAll('[data-field]').forEach(input=>{table[input.dataset.field]=input.type==='checkbox'?input.checked:(input.dataset.field==='code'?sanitizeNumericCode(input.value):input.value.trim())});if(!table.code||!table.title){card.querySelector('[data-field="'+(!table.code?'code':'title')+'"]').focus();return toast('A numeric Table code and Table title are required')}}
+  const blocks=state.current.content.blocks;let at=blocks.findIndex(block=>block.id===state.activeBlockId);if(at<0)at=blocks.length-1;const imported=selected.map(table=>({id:uid('tbl'),type:'table',code:table.code,title:table.title,caption:table.caption,headerRow:table.headerRow,widths:Array(table.columns).fill(100/table.columns),rows:clone(table.rows),importedFrom:{format:'docx',fileName:session.fileName,tableIndex:table.index+1,importedAt:nowIso(),warnings:clone(table.warnings)}}));blocks.splice(at+1,0,...imported);const after=blocks[at+1+imported.length];if(!after||!['paragraph','bullet','number'].includes(after.type))blocks.splice(at+1+imported.length,0,normalBlock());markDirty(false);pushHistory(`Import ${imported.length} DOCX table${imported.length===1?'':'s'}`);closeModal();renderBlocks();renderOutline();renderRegisters();setActiveBlock(imported[0].id);toast(`${imported.length} DOCX table${imported.length===1?'':'s'} imported`)
+}
+
+// ---------------- Outline/register ----------------
+function headingStructure(){const out=[];let current=null;let h1n=0,h2n=0;for(const b of state.current.content.blocks){if(b.type==='paragraph'&&b.style==='Heading1'){h1n++;h2n=0;current={id:b.id,n:h1n,title:plainText(b.runs).trim(),h2:[]};out.push(current)}else if(b.type==='paragraph'&&b.style==='Heading2'&&current){h2n++;current.h2.push({id:b.id,n:h2n,title:plainText(b.runs).trim()})}}return out}
+function renderOutline(){const host=byId('outlineList');if(!host)return;const hs=headingStructure();host.innerHTML='';if(!hs.length){host.innerHTML='<div class="outline-empty">No Heading 1 sections yet.</div>';return;}for(const h of hs){const d=document.createElement('details');d.className='outline-group';d.open=true;const s=document.createElement('summary');s.innerHTML=`<span>${h.n}</span><span>${esc(h.title||'(Untitled heading)')}</span>`;s.onclick=e=>{if(e.target.closest('summary'))setTimeout(()=>scrollToBlock(h.id),0)};d.appendChild(s);if(h.h2.length){const list=document.createElement('div');list.className='outline-h2s';h.h2.forEach(x=>{const b=document.createElement('button');b.className='outline-link';b.innerHTML=`<strong>${x.n}</strong>&nbsp;&nbsp;${esc(x.title||'(Untitled)')}`;b.onclick=()=>scrollToBlock(x.id);list.appendChild(b)});d.appendChild(list)}host.appendChild(d)}}
+async function copyCurrentOutline(){
+  const headings=(state.current?.content?.blocks||[]).filter(b=>b.type==='paragraph'&&/^Heading[1-4]$/.test(b.style||''));
+  if(!headings.length)return toast('No headings in this draft yet');
+  let first=0,second=0,third=0,fourth=0;
+  const lines=headings.map(block=>{
+    const level=Number(block.style.slice(-1)),title=plainText(block.runs||[]).trim();
+    if(level===1){first++;second=third=fourth=0;return `${first}. ${title}`}
+    if(level===2){second++;third=fourth=0;return first?`  ${first}.${second} ${title}`:`  ${title}`}
+    if(level===3){third++;fourth=0;return first&&second?`    ${first}.${second}.${third} ${title}`:`    ${title}`}
+    fourth++;return first&&second&&third?`      ${first}.${second}.${third}.${fourth} ${title}`:`      ${title}`;
+  });
+  try{await navigator.clipboard.writeText(lines.join('\n'));toast('Outline copied')}catch(error){alert('Could not copy outline: '+error.message)}
+}
+function scrollToBlock(id){const el=state.viewOnly?document.querySelector(`[data-source-block-id="${CSS.escape(id)}"]`):document.querySelector(`[data-block-id="${CSS.escape(id)}"]`);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});if(innerWidth<=820)setOutlineDrawerOpen(false)}
+function renderRegisters(){
+  const tables=state.current.content.blocks.filter(b=>b.type==='table'),tr=byId('tableRegister');if(!tr)return;tr.innerHTML='<div class="table-register-header"><span>Table code</span><span>Table title</span><span>Table caption (optional)</span></div>';
+  if(!tables.length){tr.insertAdjacentHTML('beforeend','<div class="table-register-empty">Insert a table to add its information here automatically.</div>');return}
+  tables.forEach((table,index)=>{const row=document.createElement('div');row.className='table-register-row';row.dataset.tableId=table.id;row.innerHTML=`<div class="field"><label class="sr-only" for="table-code-${index}">Table code</label><input id="table-code-${index}" data-table-field="code" value="${esc(table.code||'')}" placeholder="e.g., 3.1" inputmode="decimal" pattern="[0-9.]*" title="Numbers and dots only"></div><div class="field"><label class="sr-only" for="table-title-${index}">Table title</label><input id="table-title-${index}" data-table-field="title" value="${esc(table.title||'')}" placeholder="Table title"></div><div class="field"><label class="sr-only" for="table-caption-${index}">Table caption</label><input id="table-caption-${index}" data-table-field="caption" value="${esc(table.caption||'')}" placeholder="Optional caption"></div>`;row.querySelectorAll('[data-table-field]').forEach(input=>input.addEventListener('input',()=>{if(input.dataset.tableField==='code')input.value=sanitizeNumericCode(input.value);table[input.dataset.tableField]=input.value;refreshRenderedTableCaption(table);markDirty()}));tr.appendChild(row)
+  })
+}
+
+// ---------------- Validation ----------------
+function validateCurrent(){const d=state.current,issues=[];const err=m=>issues.push({level:'error',message:m}),warn=m=>issues.push({level:'warn',message:m});if(!d)return issues;
+  if(d.templateId==='scientific-draft-text'){
+    const m=d.metadata||{};if(!String(m.name||'').trim())warn('Name is empty.');if(!String(m.course||m.subject||'').trim())warn('Course is empty.');for(const [k,l] of [['chapterNumber','Chapter number'],['chapterTitle','Chapter title']])if(!String(m[k]||'').trim())warn(`${l} is empty.`);
+    let seenH1=false;const figCodes=new Map(),tableCodes=new Map();
+    for(const b of d.content.blocks){if(b.type==='paragraph'&&b.style==='Heading1'){seenH1=true;if(!plainText(b.runs).trim())err('An empty Heading 1 exists.')}if(b.type==='paragraph'&&b.style==='Heading2'&&!seenH1)err(`Heading 2 “${plainText(b.runs).trim()||'(empty)'}” appears before any Heading 1.`);if(b.type==='figure_placeholder'){if(!String(b.code||'').trim())err('A figure placeholder has no code.');else{if(!/^[0-9.]+$/.test(b.code))err(`Figure code ${b.code} must contain numbers and dots only.`);figCodes.set(b.code,(figCodes.get(b.code)||0)+1)}}if(b.type==='table'&&b.code){if(!/^[0-9.]+$/.test(b.code))err(`Table code ${b.code} must contain numbers and dots only.`);tableCodes.set(b.code,(tableCodes.get(b.code)||0)+1)}if(['paragraph','bullet','number'].includes(b.type)&&(b.runs||[]).some(r=>(r.marks||[]).includes('NotesToDelete')))warn('A “Note to Delete” remains in the document.');if(b.type==='table'){const lens=b.rows.map(r=>r.length);if(new Set(lens).size>1)err(`Table ${b.code||'(uncoded)'} has inconsistent row lengths.`)}}
+    for(const [c,n] of figCodes)if(n>1)err(`Figure code ${c} is duplicated ${n} times.`);for(const [c,n] of tableCodes)if(n>1)err(`Table code ${c} is duplicated ${n} times.`);if(!seenH1)warn('No Heading 1 exists yet.');
+  } else if(d.templateId==='shooting-script'){
+    const m=d.metadata||{};if(!String(m.name||'').trim())warn('Script writer is empty.');if(!String(m.course||m.subject||'').trim())warn('Course is empty.');if(!String(m.chapterId||m.chapterTitle||'').trim())warn('Chapter is empty.');
+    if(!(d.content.blocks||[]).some(b=>['paragraph','bullet','number'].includes(b.type)&&plainText(b.runs||[]).trim()))warn('The shooting script has no spoken text yet.');
+    for(const [index,block] of (d.content.blocks||[]).entries())if(block.type==='cue'&&block.kind==='repeat'&&!d.content.blocks.slice(index+1).some(next=>['paragraph','bullet','number'].includes(next.type)&&plainText(next.runs||[]).trim()))warn('A ×2 cue has no following spoken line to repeat.');
+  } else {
+    const codes=new Map();for(const f of d.content.figures||[]){if(!f.code)err('A figure has no code.');else if(!/^[0-9.]+$/.test(f.code))err(`Figure code ${f.code} must contain numbers and dots only.`);if(!f.title)err(`Figure ${f.code||'?'} has no title.`);if(!f.source)err(`Figure ${f.code||'?'} has no source.`);if(!f.order)err(`Figure ${f.code||'?'} has no order.`);if(!f.copyright)err(`Figure ${f.code||'?'} has no copyright status.`);if(f.code)codes.set(f.code,(codes.get(f.code)||0)+1)}for(const [c,n] of codes)if(n>1)err(`Figure code ${c} is duplicated ${n} times.`)
+  }
+  return issues;
+}
+function ensureFigureExportReady(){
+  if(state.current?.templateId!=='scientific-draft-figures')return true;let first=null,missing=false;
+  for(const [index,figure] of (state.current.content.figures||[]).entries())for(const key of ['code','title','source','order','copyright'])if(!String(figure[key]||'').trim()){missing=true;const input=byId(`fig-card-${index+1}`)?.querySelector(`[data-k="${key}"]`);input?.classList.add('invalid-required');if(!first&&input)first=input}
+  if(!missing)return true;if(first){first.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>first.focus(),350)}showValidation();alert('Export is blocked until every figure has Figure code, Figure title, Source, Order, and Copyright status. Missing fields are highlighted in red.');return false
+}
+function showValidation(){const issues=validateCurrent(),host=byId('issues');host.innerHTML='';if(!issues.length)host.innerHTML='<div class="issue">✓ No structural issues found.</div>';else issues.forEach(i=>{const d=document.createElement('div');d.className=`issue ${i.level}`;d.textContent=(i.level==='error'?'ERROR: ':'WARNING: ')+i.message;host.appendChild(d)});byId('validationPanel').classList.remove('hidden')}
+
+// ---------------- Export/import/backups ----------------
+function confirmScientificExportVersion(doc){
+  if(!['scientific-draft-text','scientific-draft-figures','shooting-script'].includes(doc?.templateId))return Promise.resolve(true);
+  const current=String(doc.metadata?.editorialVersion||''),available=activeCatalog('versions').filter(item=>item.template_id===doc.templateId).map(item=>String(item.version_label));
+  const versions=[...new Set([...available,...(current?[current]:[])])],body=byId('modalBody'),modal=byId('modal');
+  body.innerHTML=`<div class="export-version-dialog"><h3>Are you sure about this version?</h3><p>You are about to export <strong>${current?`Version ${esc(current)}`:'a document without a selected version'}</strong>. Check it before sending the files.</p><label>Version<select id="exportVersionChoice"><option value="">Select version…</option>${versions.map(version=>`<option value="${esc(version)}" ${version===current?'selected':''}>Version ${esc(version)}</option>`).join('')}</select></label><p class="export-version-help">You can change the version here. The selected version will also be saved in the document.</p><div class="modal-actions"><button class="btn" id="exportVersionCancel" type="button">Cancel</button><button class="btn primary" id="exportVersionConfirm" type="button">Confirm & export</button></div></div>`;
+  modal.classList.remove('hidden');
+  return new Promise(resolve=>{
+    let settled=false;
+    const cancel=()=>{if(settled)return;settled=true;state.exportVersionCancel=null;closeModal();resolve(false)};
+    state.exportVersionCancel=cancel;byId('exportVersionCancel').onclick=cancel;
+    byId('exportVersionConfirm').onclick=async()=>{
+      if(settled)return;const selected=byId('exportVersionChoice').value;if(!selected)return toast('Select the correct version before exporting');
+      const button=byId('exportVersionConfirm');button.disabled=true;
+      try{
+        if(selected!==current){
+          doc.metadata.editorialVersion=selected;
+          if(doc===state.current){const field=byId(doc.templateId==='scientific-draft-figures'?'figMetaVersion':'metaVersion');if(field)field.value=selected;markDirty(false)}
+          else{doc.updatedAt=nowIso();await idbPutDocumentPreservingSync(doc);await TeryaqPlatform.queueDocument(doc);await refreshLibrary()}
+        }
+        if(settled)return;settled=true;state.exportVersionCancel=null;closeModal();resolve(true);
+      }catch(error){button.disabled=false;alert(`Could not update the version: ${error.message}`)}
+    };
+    byId('exportVersionChoice').focus();
+  });
+}
+function exportDocumentPackage(doc){const pkg={format:'TeryaqPackage',packageVersion:'1.0.0',exportedAt:nowIso(),appVersion:APP_VERSION,document:clone(doc)};downloadBlob(new Blob([JSON.stringify(pkg,null,2)],{type:'application/json'}),`${fileSafe(documentDisplayTitle(doc))}.ترياق`)}
+function downloadBlob(blob,name){void TeryaqPlatform.downloadBlobToDevice(blob,name).catch(error=>alert(error.message))}
+async function importPackage(file){try{if(!requireAccountName())return;const txt=await file.text();const pkg=JSON.parse(txt);let doc=pkg.document||pkg;if(!doc.templateId||!doc.content)throw new Error('Not a Teryaq document');await snapshotIfConflict(doc);const sourceOwner=doc.ownerId,currentOwner=TeryaqPlatform.user()?.id;if((sourceOwner&&sourceOwner!==currentOwner)||await idbGet('documents',doc.id)){doc=clone(doc);doc.id=uid('doc');doc.title=(doc.title||'Imported')+' Imported';}if(String(doc.schemaVersion||'1.0.0')>SCHEMA_VERSION)throw new Error('This document was created with a newer document schema. Update TERYAQ Master Tool before editing it.');doc=TeryaqPlatform.decorateImportedDocument(doc);doc.updatedAt=nowIso();await idbPut('documents',doc);await TeryaqPlatform.queueDocument(doc);await refreshLibrary();renderHome();toast('Imported successfully')}catch(e){alert('Import failed: '+e.message)}finally{byId('importFile').value=''}}
+async function snapshotIfConflict(doc){const old=await idbGet('documents',doc.id);if(old)await snapshotDocument(old,'Before import conflict')}
+async function saveAsTemplate(){const name=prompt('Template name:',(state.current.title||'Document')+' Template');if(!name)return;const informationTitle=isScript()?'Shooting Script information':prompt('Information step title:','Draft information')||'Draft information';const base=clone(state.current);base.id='TEMPLATE_BASE';base.createdAt=base.updatedAt='';if(base.metadata){for(const k of Object.keys(base.metadata))base.metadata[k]=Array.isArray(base.metadata[k])?[]:''}const t={id:uid('tpl'),ownerId:TeryaqPlatform.user()?.id,custom:true,name,version:'1.0.0',category:'Custom',informationTitle,description:'Custom reusable template saved locally.',editor:getTemplate(state.current.templateId)?.editor||'rich-document',baseDocument:base,createdAt:nowIso()};await idbPut('templates',t);await refreshLibrary();toast('Saved as reusable template')}
+async function blobDataUrl(blob){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(reader.error);reader.readAsDataURL(blob)})}
+async function embeddedTajawalCss(){try{const files=[['Regular',400],['Medium',500],['Bold',700]],fonts=await Promise.all(files.map(async([name,weight])=>{const response=await fetch(`fonts/Tajawal-${name}.ttf`);if(!response.ok)throw new Error(`Font ${name} unavailable`);return `@font-face{font-family:'Tajawal';src:url('${await blobDataUrl(await response.blob())}') format('truetype');font-style:normal;font-weight:${weight};font-display:swap}`}));return fonts.join('')}catch(error){console.warn('HTML export font embedding unavailable:',error);return ''}}
+async function exportStandaloneHtml(){
+  if(!state.current)return;const documentCopy=clone(state.current),fontCss=await embeddedTajawalCss(),screenCss=`${fontCss}@media screen{body{background:#eef1f4;padding:24px}.cover,body>main,body>section:not(.cover){display:block;width:min(210mm,100%);min-height:297mm;margin:0 auto 20px;padding:21mm 16mm 18mm;background:#fff;box-shadow:0 10px 35px rgba(17,28,45,.12)}.cover{page-break-after:auto}body>main{min-height:297mm}}@media(max-width:760px){body{padding:0}.cover,body>main,body>section:not(.cover){width:100%;min-height:0;margin:0;padding:18px;box-shadow:none}}@media print{body{background:#fff;padding:0}.cover,body>main,body>section:not(.cover){width:auto;min-height:0;margin:0;padding:0;box-shadow:none}}`,base=documentCopy.templateId==='shooting-script'?buildScriptPrintHtml(documentCopy):documentCopy.templateId==='scientific-draft-text'?buildTextPrintHtml(documentCopy):buildFigurePrintHtml(documentCopy),html=base.replace('</style>',`${screenCss}</style>`).replace('<meta charset="utf-8">','<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">');downloadBlob(new Blob([html],{type:'text/html;charset=utf-8'}),`${fileSafe(documentDisplayTitle(documentCopy))}.html`);toast('Standalone HTML exported')
+}
+
+// ---------------- Version history ----------------
+async function showSnapshots(){if(!state.current)return;const snaps=(await idbByIndex('snapshots','documentId',state.current.id)).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt))).slice(0,50),body=byId('modalBody');body.innerHTML='<h3>History / Recovery Versions</h3><div class="history-explainer"><b>Local recovery snapshots</b><br>Restore one if you need an earlier state on this device. Cloud versions are immutable snapshots created after successful synchronization and can be compared or downloaded when online.</div><div class="modal-actions"><button class="btn primary" id="createSnapshotNow">Create local snapshot</button><button class="btn" id="openCloudVersions">Cloud versions & compare</button></div>';if(!snaps.length)body.innerHTML+='<p>No local recovery snapshots yet. Create one now, or keep editing and the app will create recovery points automatically.</p>';snaps.forEach(s=>{const r=document.createElement('div');r.className='snapshot-row';r.innerHTML=`<div><strong>${esc(fmtDate(s.createdAt))}</strong><br><small>${esc(s.reason||'Snapshot')}</small></div><button class="btn small">Restore</button>`;r.querySelector('button').onclick=async()=>{if(confirm('Restore this snapshot? Current state will first be saved as a snapshot.')){await createSnapshot('Before restore');state.current=clone(s.document);await saveCurrent(false);resetHistory();renderEditor();pushHistory('Restored');byId('modal').classList.add('hidden');toast('Snapshot restored')}};body.appendChild(r)});byId('createSnapshotNow').onclick=async()=>{await createSnapshot('Manual snapshot');showSnapshots()};byId('openCloudVersions').onclick=()=>TeryaqPlatform.showCloudVersions(state.current.id);byId('modal').classList.remove('hidden')}
+
+// ---------------- Print renderer ----------------
+function printCurrent({montage=false}={}){const issues=validateCurrent();if(issues.some(i=>i.level==='error')&&!confirm('Validation has errors. Print anyway?'))return;const html=state.current.templateId==='shooting-script'?buildScriptPrintHtml(state.current,{montage}):state.current.templateId==='scientific-draft-text'?buildTextPrintHtml(state.current):buildFigurePrintHtml(state.current);const w=window.open('','_blank');if(!w)return alert('Please allow popups for printing.');w.document.open();w.document.write(html);w.document.close();setTimeout(()=>{w.focus();w.print()},450)}
+function basePrintCss(){return `@page{size:A4;margin:21mm 16mm 18mm}*{box-sizing:border-box}body{margin:0;font-family:Tajawal,Arial,sans-serif;color:#000;font-size:11pt;line-height:1.30}.cover{page-break-after:always}.meta{width:100%;border-collapse:collapse}.meta td{border:1px solid #000;padding:6px}.meta td:first-child{width:28%;font-weight:bold}.reg{width:100%;border-collapse:collapse;margin-top:14px}.reg td,.reg th{border:1px solid #000;padding:5px}.h1{font-size:14pt;font-weight:bold;color:#C45911;margin:12pt 0 0}.h2{font-size:13pt;font-weight:bold;color:#538135;margin:2pt 0 0}.h3{font-size:12pt;font-weight:bold;color:#2E74B5;margin:2pt 0 0}.h4{font-size:11pt;font-style:italic;color:#2F5496}.subtitle{color:#7F7F7F}.caption{font-size:9pt;font-style:italic;color:#767171}.fig{background:#FFED29;color:#176A98;text-align:center;font-weight:bold;padding:7px 10px;margin:8pt 0 10pt;-webkit-print-color-adjust:exact;print-color-adjust:exact;break-inside:avoid}.bullet{display:grid;grid-template-columns:18px minmax(0,1fr);gap:5px;text-align:start}.l1{margin-inline-start:26pt}.l2{margin-inline-start:44pt}.l3{margin-inline-start:62pt}.num{display:grid;grid-template-columns:25px minmax(0,1fr);gap:5px;margin-inline-start:20pt;text-align:start}table.data{width:100%;border-collapse:collapse;table-layout:fixed;margin:3pt 0}table.data td,table.data th{border:1px solid #000;padding:5pt 6pt;vertical-align:top;overflow-wrap:anywhere}table.data thead{display:table-header-group}table.data tr{break-inside:avoid}.SideNote{color:#BF8F00}.NotesToDelete{color:#FF0000;font-weight:bold;font-size:9pt}.HighYield{color:#7030A0;font-weight:bold;text-decoration:underline}.ClinicalCorrelation{color:#39E794}h1,h2,h3,h4{break-after:avoid}.h1,.h2,.h3{font-style:normal}.h4{font-weight:400}.subtitle{font-weight:400;font-style:normal}.caption{font-weight:400}.SideNote{font-size:11pt;font-weight:400;font-style:normal}.NotesToDelete{font-style:normal}.HighYield{font-size:11pt;font-style:normal}.ClinicalCorrelation{font-size:11pt;font-weight:400;font-style:normal}`}
+function runsPrintHtml(runs,{montage=false}={}){return normalizeRuns(runs).filter(r=>!montage||!(r.marks||[]).some(m=>['script-presenter','script-review'].includes(m))).map(r=>{let h=esc(r.text).replace(/\n/g,'<br>');const m=r.marks||[];if(m.includes('bold'))h=`<strong>${h}</strong>`;if(m.includes('italic'))h=`<em>${h}</em>`;if(m.includes('underline'))h=`<u>${h}</u>`;if(m.includes('script-emphasis'))h=`<span class="script-emphasis">${h}</span>`;if(m.includes('script-repeat'))h=`<span class="script-repeat-inline">${h}</span>`;if(m.includes('script-visual-ref'))h=`<span class="script-visual-ref">${h}</span>`;if(m.includes('script-presenter'))h=`<span class="script-presenter">${h}</span>`;if(m.includes('script-review'))h=`<span class="script-review">${h}</span>`;for(const x of ['SideNote','NotesToDelete','HighYield','ClinicalCorrelation'])if(m.includes(x))h=`<span class="${x}">${h}</span>`;const fs=m.find(x=>x.startsWith('font:'));if(fs)h=`<span style="font-size:${esc(fs.split(':')[1])}pt">${h}</span>`;return h}).join('')}
+function scientificExportHtmlMetadata(d){return `<meta name="teryaq-editorial-version" content="${esc(d.metadata?.editorialVersion||'')}"><meta name="teryaq-template-id" content="${esc(d.templateId)}">`}
+function buildTextPrintHtml(d){let h1=0,h2=0,num=0;const headings=[],tables=[];let body='';for(const b of d.content.blocks){const direction=textDirection(plainText(b.runs||[]));if(b.type==='paragraph'){let cls='';let prefix='';if(b.style==='Heading1'){h1++;h2=0;cls='h1';prefix=h1+'. ';headings.push({n:h1,title:plainText(b.runs)})}else if(b.style==='Heading2'){h2++;cls='h2';prefix=h2+'. '}else if(b.style==='Heading3')cls='h3';else if(b.style==='Heading4')cls='h4';else if(b.style==='Subtitle')cls='subtitle';else if(b.style==='TableCaption')cls='caption';body+=`<div class="${cls}" dir="${direction}">${prefix}${runsPrintHtml(b.runs)}</div>`;num=0}else if(b.type==='bullet'){body+=`<div class="bullet l${b.level}" dir="${direction}"><span>${STYLE_CONTRACT.BulletLevels[b.level].marker}</span><div>${runsPrintHtml(b.runs)}</div></div>`;num=0}else if(b.type==='number'){num++;body+=`<div class="num" dir="${direction}"><span>${num}.</span><div>${runsPrintHtml(b.runs)}</div></div>`}else if(b.type==='figure_placeholder'){body+=`<div class="fig">[POSITION OF ${b.placement==='margin'?'MARGIN ':''}FIGURE ${esc(b.code)}]</div>`;num=0}else if(b.type==='table'){tables.push(b);body+=tablePrintHtml(b);num=0}}
+  const m=d.metadata||{};const metaRows=[['Name',m.name],['Version',m.editorialVersion],['Start date',m.startDate],['End date',m.endDate],['Course',m.course||m.subject],['Chapter number',m.chapterNumber],['Chapter title',m.chapterTitle]].map(x=>`<tr><td>${esc(x[0])}</td><td>${esc(x[1]||'')}</td></tr>`).join('');const reg=Array.from({length:Math.max(12,headings.length)},(_,i)=>`<tr><td style="width:9%"><b>${i+1}</b></td><td>${esc(headings[i]?.title||'')}</td></tr>`).join('');const treg=`<tr><th>Table code</th><th>Table title</th><th>Table caption</th></tr>${tables.map(t=>`<tr><td><b>${esc(t.code||'')}</b></td><td>${esc(t.title||'')}</td><td>${esc(t.caption||'')}</td></tr>`).join('')}`;
+  return `<!doctype html><html><head><meta charset="utf-8">${scientificExportHtmlMetadata(d)}<title>${esc(d.title)} — TERYAQ Version ${esc(m.editorialVersion)}</title><style>${basePrintCss()}</style></head><body><section class="cover"><table class="meta">${metaRows}</table><table class="reg"><tr><th colspan="2" style="text-align:left">Headings 1</th></tr>${reg}</table><table class="reg">${treg}</table></section><main>${body}</main></body></html>`}
+function tablePrintHtml(b){const rows=b.rows.map((r,ri)=>{const tag=b.headerRow!==false&&ri===0?'th':'td';return `<tr>${r.map((c,ci)=>`<${tag} style="width:${b.widths?.[ci]||''}%">${runsPrintHtml(c.runs)}</${tag}>`).join('')}</tr>`}).join(''),caption=tableCaptionText(b);return `<table class="data"><tbody>${rows}</tbody></table>${caption?`<div class="caption">${esc(caption)}</div>`:''}`}
+function buildFigurePrintHtml(d){const m=d.metadata||{};const cards=(d.content.figures||[]).map(f=>`<section style="break-after:page;margin-bottom:15mm"><table class="meta"><tr><td>Figure code</td><td>${esc(f.code)}</td></tr><tr><td>Figure title</td><td>${esc(f.title)}</td></tr><tr><td>Caption</td><td>${esc(f.caption)}</td></tr><tr><td>Source</td><td>${esc(f.source)}</td></tr><tr><td>Order</td><td>${esc(f.order)}</td></tr><tr><td>Details</td><td>${esc(f.details)}</td></tr><tr><td>Copyright status</td><td>${esc(f.copyright)}</td></tr><tr><td>Notes</td><td>${esc(f.notes)}</td></tr></table>${f.image?`<div style="text-align:center;margin-top:10mm"><img src="${f.image}" style="max-width:100%;max-height:120mm"></div>`:''}</section>`).join('');return `<!doctype html><html><head><meta charset="utf-8">${scientificExportHtmlMetadata(d)}<title>${esc(d.title)} — TERYAQ Version ${esc(m.editorialVersion||'')}</title><style>${basePrintCss()} img{object-fit:contain}</style></head><body><section class="cover"><table class="meta"><tr><td>Name</td><td>${esc(m.name)}</td></tr><tr><td>Version</td><td>${esc(m.editorialVersion||'')}</td></tr><tr><td>Course</td><td>${esc(m.course||m.subject)}</td></tr><tr><td>Chapter number</td><td>${esc(m.chapterNumber)}</td></tr><tr><td>Chapter title</td><td>${esc(m.chapterTitle)}</td></tr><tr><td>General notes</td><td>${esc(m.generalNotes)}</td></tr></table></section>${cards}</body></html>`}
+async function exportFigureOnlyPdf(){
+  if(state.current?.templateId!=='scientific-draft-figures')return;
+  if(!await confirmScientificExportVersion(state.current))return;
+  void saveCurrent(false);
+  const figures=(state.current.content.figures||[]).filter(f=>f.image||f.storagePath);
+  if(!figures.length)return alert('Add at least one figure image before exporting.');
+  if(figures.some(f=>!String(f.code||'').trim()))return alert('Every exported figure needs a Figure code.');
+  const popup=window.open('','_blank');if(!popup)return alert('Allow popups to save the figures PDF.');
+  popup.document.write('<!doctype html><title>Preparing figures PDF…</title><p>Preparing figure images…</p>');
+  try{
+    const cards=[];for(const f of figures){const src=f.image||await TeryaqPlatform.getAttachmentPreview(f.storagePath);if(!src)throw new Error(`Figure ${f.code} image is unavailable. Reconnect and try again.`);cards.push(`<section><img src="${src}"><div class="figure-code">Figure ${esc(f.code)}</div></section>`)}
+    const html=`<!doctype html><html><head><meta charset="utf-8"><title>${esc(state.current.title)} — Figures only — TERYAQ Version ${esc(state.current.metadata?.editorialVersion||'')}</title><style>@page{size:A4;margin:15mm}*{box-sizing:border-box}body{margin:0;font-family:Tajawal,Arial,sans-serif;color:#183c32}section{min-height:260mm;break-after:page;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10mm}section:last-child{break-after:auto}img{max-width:100%;max-height:215mm;object-fit:contain}.figure-code{text-align:center;font-size:15pt;font-weight:700}@media screen{body{background:#e8eee9}section{width:210mm;margin:12px auto;background:#fff;padding:15mm;box-shadow:0 4px 24px #0002}}</style></head><body>${cards.join('')}</body></html>`;
+    popup.document.open();popup.document.write(html);popup.document.close();await Promise.all([...popup.document.images].map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve})));popup.focus();popup.print();
+  }catch(error){popup.close();alert(error.message)}
+}
+
+// ---------------- Shooting script and live teleprompter ----------------
+const promptPlayback={playing:false,frame:0,last:0,position:0,passedSilences:new Set()};
+function scriptSettings(){const settings=state.current.settings||(state.current.settings={});return settings.teleprompter||(settings.teleprompter={})}
+function migrateScriptRepeats(){
+  const blocks=state.current.content.blocks||[];let changed=false;
+  for(let i=blocks.length-1;i>=0;i--){if(blocks[i].type!=='cue'||blocks[i].kind!=='repeat')continue;
+    const next=blocks.slice(i+1).find(b=>['paragraph','bullet','number'].includes(b.type)),previous=blocks.slice(0,i).reverse().find(b=>['paragraph','bullet','number'].includes(b.type)),target=next||previous;
+    if(!target)continue;
+    const marker={text:'×2',marks:['script-repeat']};target.runs=next?normalizeRuns([marker,{text:' ',marks:[]},...(target.runs||[])]):normalizeRuns([...(target.runs||[]),{text:' ',marks:[]},marker]);
+    blocks.splice(i,1);changed=true;
+  }
+  if(changed)markDirty(false);
+}
+function renderScriptEditor(resetSelection=true){
+  const blocks=state.current.content.blocks||[];state.current.content.blocks=blocks;migrateScriptRepeats();renderMeta();renderBlocks();observeWritingPage();
+  if(resetSelection){state.activeBlockId=blocks[0]?.id||null;state.selectionBookmark=null}
+  bindTextControls();byId('deleteSelectedBlocksBtn').onclick=deleteSelectedBlocks;updateScriptBlockButtons(getBlock());setRibbonTab(state.ribbonTab||'formatting');requestAnimationFrame(()=>{syncEditorStickyOffsets();updatePageScale()});
+}
+function scriptTargetBlock(){
+  const selection=window.getSelection?.(),node=selection?.rangeCount?selection.getRangeAt(0).startContainer:null;
+  const editable=(node?.nodeType===1?node:node?.parentElement)?.closest?.('.editable,.script-prompt-editable');
+  const liveId=editable&&byId('blockList')?.contains(editable)?editable.closest('.doc-block')?.dataset.blockId:editable&&byId('scriptPromptTrack')?.contains(editable)?editable.closest('.script-prompt-line')?.dataset.sourceId:null;
+  return getBlock(liveId||state.activeBlockId||state.selectionBookmark?.blockId);
+}
+function updateScriptBlockButtons(block){
+  const direction=block?.direction||textDirection(plainText(block?.runs||[]));
+  for(const [id,value] of [['scriptRtlBtn','rtl'],['scriptLtrBtn','ltr']])byId(id)?.setAttribute('aria-pressed',String(!!block&&direction===value));
+  for(const value of ['left','center','right'])byId(`scriptAlign${value[0].toUpperCase()+value.slice(1)}`)?.setAttribute('aria-pressed',String(!!block&&block.alignment===value));
+}
+function setScriptDirection(direction){const block=scriptTargetBlock();if(!block||!['paragraph','bullet','number'].includes(block.type))return toast('Select a line of text first');const offset=state.selectionBookmark?.blockId===block.id?state.selectionBookmark.start:plainText(block.runs).length;block.direction=direction;state.activeBlockId=block.id;markDirty(false);pushHistory('Text direction');renderBlocks();updateScriptBlockButtons(block);setTimeout(()=>focusBlock(block.id,offset),0)}
+function setScriptAlignment(alignment){const block=scriptTargetBlock();if(!block||!['paragraph','bullet','number'].includes(block.type))return toast('Select a spoken line first');const offset=state.selectionBookmark?.blockId===block.id?state.selectionBookmark.end:plainText(block.runs).length;block.alignment=alignment;state.activeBlockId=block.id;markDirty(false);pushHistory(`Align ${alignment}`);renderBlocks();updateScriptBlockButtons(block);setTimeout(()=>focusBlock(block.id,offset),0)}
+function insertScriptCue(kind){
+  const cue={id:uid('b'),type:'cue',kind,runs:['instruction','heading'].includes(kind)?[]:undefined};insertBlockAfterActive(cue);
+  if(['instruction','heading'].includes(kind))setTimeout(()=>focusBlock(cue.id,0),0);
+}
+function insertInlineScriptNote(mark,label){
+  const bookmark=state.selectionBookmark,block=getBlock(bookmark?.blockId||state.activeBlockId);
+  if(!block||!['paragraph','bullet','number'].includes(block.type))return toast('Place the cursor in a spoken line first');
+  const text=plainText(block.runs||[]),offset=bookmark?.blockId===block.id?Math.min(text.length,Math.max(bookmark.start,bookmark.end)):text.length;
+  if(bookmark?.blockId===block.id&&bookmark.selectedText&&text.slice(Math.min(bookmark.start,bookmark.end),offset)!==bookmark.selectedText)return toast('Place the cursor again before adding the note');
+  const [before,after]=splitRuns(block.runs||[],offset),ordinal=before.filter(run=>(run.marks||[]).includes(mark)).length;
+  const left=offset&&!/\s/u.test(text[offset-1])?' ':'',right=after.length&&!/^\s/u.test(plainText(after))?' ':' ';
+  block.runs=normalizeRuns([...before,...(left?[{text:left,marks:[]}]:[]),{text:label,marks:[mark]},{text:right,marks:[]},...after]);
+  markDirty(false);pushHistory(mark==='script-presenter'?'Insert presenter note':'Insert review note');renderBlocks();setTimeout(()=>focusInsideScriptNote(block.id,mark,ordinal),0);
+}
+function focusInsideScriptNote(blockId,mark,ordinal){
+  const editor=document.querySelector(`[data-block-id="${CSS.escape(blockId)}"] .editable`),marker=editor?.querySelectorAll(`[data-mark="${CSS.escape(mark)}"]`)[ordinal];
+  if(!editor||!marker)return focusBlock(blockId);editor.focus();const text=marker.firstChild;
+  if(text?.nodeType!==Node.TEXT_NODE)return focusBlock(blockId);
+  const range=document.createRange();range.setStart(text,Math.max(0,text.nodeValue.length-1));range.collapse(true);const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);setActiveBlock(blockId);captureSelection();
+}
+function insertInlineRepeat(){
+  const bookmark=state.selectionBookmark,block=getBlock(bookmark?.blockId||state.activeBlockId);
+  if(!block||!['paragraph','bullet','number'].includes(block.type))return toast('Place the cursor next to a word first');
+  const text=plainText(block.runs||[]),offset=bookmark?.blockId===block.id?Math.min(text.length,Math.max(bookmark.start,bookmark.end)):text.length;
+  if(bookmark?.blockId===block.id&&bookmark.selectedText&&text.slice(Math.min(bookmark.start,bookmark.end),offset)!==bookmark.selectedText)return toast('Select the word again');
+  const [before,after]=splitRuns(block.runs||[],offset),spacer=offset&&/\s/u.test(text[offset-1])?'':' ';
+  const markerIndex=before.filter(run=>(run.marks||[]).includes('script-repeat')).length;
+  block.runs=normalizeRuns([...before,...(spacer?[{text:spacer,marks:[]}]:[]),{text:'×2',marks:['script-repeat']},...after]);
+  markDirty(false);pushHistory('Insert ×2');renderBlocks();setTimeout(()=>focusAfterRepeat(block.id,markerIndex),0);
+}
+function focusAfterRepeat(blockId,index){
+  const ed=document.querySelector(`[data-block-id="${CSS.escape(blockId)}"] .editable`),marker=ed?.querySelectorAll('[data-mark="script-repeat"]')[index];
+  if(!ed||!marker)return focusBlock(blockId);
+  ed.focus();const range=document.createRange();range.setStartAfter(marker);range.collapse(true);const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);setActiveBlock(blockId);captureSelection();
+}
+function insertBodySpaceAfterRepeat(event,editable,block){
+  if(!isScript()||event.inputType!=='insertText'||!event.data)return;
+  const selection=window.getSelection();if(!selection?.rangeCount)return;const range=selection.getRangeAt(0);if(!range.collapsed)return;
+  const node=range.startContainer,marker=(node.nodeType===1?node:node.parentElement)?.closest?.('[data-mark="script-repeat"],[data-mark="script-visual-ref"],[data-mark="script-presenter"],[data-mark="script-review"]');
+  if(!marker||!editable.contains(marker))return;
+  const before=document.createRange();before.selectNodeContents(marker);before.setEnd(node,range.startOffset);if(before.toString().length<marker.textContent.length)return;
+  event.preventDefault();const bodyText=document.createTextNode(event.data);marker.after(bodyText);
+  range.setStart(bodyText,bodyText.length);range.collapse(true);selection.removeAllRanges();selection.addRange(range);
+  block.runs=elementToRuns(editable);captureSelection();markDirty();
+}
+function insertScriptVisualReference(){
+ const bookmark=state.selectionBookmark,block=getBlock(bookmark?.blockId||state.activeBlockId);
+ if(!block||!['paragraph','bullet','number'].includes(block.type))return toast('Place the cursor in a script line first');
+ const offset=bookmark?.blockId===block.id?Math.min(plainText(block.runs).length,Math.max(bookmark.start,bookmark.end)):plainText(block.runs).length;
+ const modal=byId('modal'),body=byId('modalBody');
+ const chooseType=()=>{
+   body.innerHTML='<div class="script-reference-dialog"><h3>إشارة إلى صورة أو جدول</h3><p>اختر أولًا نوع المرجع:</p><div class="script-reference-types"><button class="btn" type="button" data-reference-kind="Figure">Figure</button><button class="btn" type="button" data-reference-kind="Table">Table</button></div></div>';
+   body.querySelectorAll('[data-reference-kind]').forEach(button=>button.onclick=()=>chooseCode(button.dataset.referenceKind));
+ };
+ const chooseCode=kind=>{
+   body.innerHTML=`<div class="script-reference-dialog"><h3>${kind} code</h3><p>اكتب رقم ${kind==='Figure'?'الصورة':'الجدول'} كما سيظهر في السكربت.</p><form id="scriptReferenceForm"><label>Code <input name="code" inputmode="decimal" placeholder="2.1" required autocomplete="off"></label><div class="script-reference-actions"><button class="btn" id="scriptReferenceBack" type="button">Back</button><button class="btn primary" type="submit">Insert ${kind}</button></div></form></div>`;
+   body.querySelector('#scriptReferenceBack').onclick=chooseType;
+   const form=body.querySelector('#scriptReferenceForm');form.elements.code.addEventListener('input',()=>form.elements.code.setCustomValidity(''));
+   form.onsubmit=event=>{
+     event.preventDefault();const code=sanitizeNumericCode(form.elements.code.value.trim());
+     if(!/^[0-9]+(?:\.[0-9]+)*$/.test(code)){form.elements.code.setCustomValidity('اكتب رقمًا مثل 2.1');form.elements.code.reportValidity();return}
+     const [before,after]=splitRuns(block.runs||[],offset),text=plainText(block.runs||[]);
+     const prefix=offset&&!/\s/u.test(text[offset-1])?' ':'',suffix=after.length&&!/^\s/u.test(plainText(after))?' ':' ';
+     const ordinal=before.filter(run=>(run.marks||[]).includes('script-visual-ref')).length;
+     block.runs=normalizeRuns([...before,...(prefix?[{text:prefix,marks:[]}]:[]),{text:`${kind} ${code}`,marks:['script-visual-ref']},{text:suffix,marks:[]},...after]);
+     markDirty(false);pushHistory(`Insert ${kind} reference`);closeModal();renderBlocks();setTimeout(()=>focusAfterScriptReference(block.id,ordinal),0);
+   };
+   form.elements.code.focus();
+ };
+ chooseType();modal.classList.remove('hidden');
+}
+function focusAfterScriptReference(blockId,ordinal){const editable=document.querySelector(`[data-block-id="${CSS.escape(blockId)}"] .editable`),marker=editable?.querySelectorAll('[data-mark="script-visual-ref"]')[ordinal];if(!editable||!marker)return focusBlock(blockId);editable.focus();const range=document.createRange(),next=marker.nextSibling;if(next?.nodeType===Node.TEXT_NODE&&next.nodeValue.length)range.setStart(next,1);else range.setStartAfter(marker);range.collapse(true);const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);setActiveBlock(blockId);captureSelection()}
+function insertSpokenLine(){const line=normalBlock();insertBlockAfterActive(line);setTimeout(()=>focusBlock(line.id,0),0)}
+function bindScriptControls(){
+  const bindBlockButton=(id,fn)=>{const button=byId(id);bindToolbarSafe(button,fn);if(button)button.onclick=e=>{if(e.detail===0)fn()}};
+  bindBlockButton('scriptRtlBtn',()=>setScriptDirection('rtl'));
+  bindBlockButton('scriptLtrBtn',()=>setScriptDirection('ltr'));
+  for(const alignment of ['left','center','right'])bindBlockButton(`scriptAlign${alignment[0].toUpperCase()+alignment.slice(1)}`,()=>setScriptAlignment(alignment));
+  bindBlockButton('scriptHeadingBtn',()=>insertScriptCue('heading'));
+  bindBlockButton('scriptIntroBtn',()=>insertScriptCue('intro'));
+  bindBlockButton('scriptLightBreakBtn',()=>insertScriptCue('light-break'));
+  bindBlockButton('scriptVisualRefBtn',insertScriptVisualReference);
+  bindBlockButton('scriptPresenterBtn',()=>insertInlineScriptNote('script-presenter','(للمقدم: )'));
+  bindBlockButton('scriptReviewBtn',()=>insertInlineScriptNote('script-review','[ملاحظة للمراجعة: ]'));
+  bindBlockButton('scriptSilenceBtn',()=>insertScriptCue('silence'));
+  bindBlockButton('scriptRepeatBtn',insertInlineRepeat);
+  bindBlockButton('scriptLineBtn',insertSpokenLine);
+  const settings=scriptSettings();
+  const fields={scriptSpeed:'speed',scriptRegion:'region',scriptBars:'bars',scriptRegionHeight:'regionHeight',scriptRegionPosition:'regionPosition',scriptPromptFont:'fontSize',scriptPromptSpacing:'spacing'};
+  for(const [id,key] of Object.entries(fields)){
+    const input=byId(id);input[input.type==='checkbox'?'checked':'value']=settings[key]??({speed:1,region:'middle',bars:true,regionHeight:30,regionPosition:50,fontSize:46,spacing:1.6})[key];
+    input.oninput=()=>{settings[key]=input.type==='checkbox'?input.checked:input.type==='range'?Number(input.value):input.value;markDirty();applyPromptSettings();if(id==='scriptSpeed')byId('scriptPromptFloatSpeed').value=input.value};
+  }
+  byId('scriptPromptFloatSpeed').value=settings.speed??1;
+  byId('scriptPromptFloatSpeed').oninput=e=>{settings.speed=Number(e.target.value);byId('scriptSpeed').value=e.target.value;markDirty();applyPromptSettings()};
+  byId('scriptPlayBtn').onclick=togglePromptPlayback;
+  byId('scriptPromptFloatPlay').onclick=togglePromptPlayback;
+  byId('scriptThemeBtn').onclick=togglePromptTheme;
+  byId('scriptPromptFloatTheme').onclick=togglePromptTheme;
+  byId('scriptFullscreenBtn').onclick=togglePromptFullscreen;
+  byId('scriptPromptFloatExit').onclick=togglePromptFullscreen;
+  const stage=byId('scriptPromptStage');
+  stage.onpointerdown=e=>{if(e.target.closest('.script-prompt-editable'))stopPromptPlayback()};
+  stage.onwheel=()=>stopPromptPlayback();stage.ontouchstart=()=>stopPromptPlayback();
+  document.onfullscreenchange=()=>{byId('scriptTeleprompter').classList.toggle('script-is-fullscreen',document.fullscreenElement===byId('scriptTeleprompter'));requestAnimationFrame(applyPromptSettings)};
+  document.onkeydown=e=>{
+    if(e.code!=='Space'||e.repeat||!isScript()||state.ribbonTab!=='teleprompter')return;
+    const host=byId('scriptTeleprompter');if(document.fullscreenElement!==host&&!host.classList.contains('script-fallback-fullscreen'))return;
+    if(e.target.closest?.('input,textarea,select,[contenteditable="true"]'))return;
+    e.preventDefault();togglePromptPlayback();
+  };
+}
+function togglePromptTheme(){const settings=scriptSettings();settings.theme=settings.theme==='dark'?'light':'dark';markDirty();applyPromptSettings()}
+async function togglePromptFullscreen(){const host=byId('scriptTeleprompter');if(host.classList.contains('script-fallback-fullscreen')){host.classList.remove('script-fallback-fullscreen','script-is-fullscreen');document.body.classList.remove('script-body-fullscreen');applyPromptSettings();return}try{if(document.fullscreenElement===host)await document.exitFullscreen();else if(host.requestFullscreen)await host.requestFullscreen();else throw new Error('Unsupported');requestAnimationFrame(applyPromptSettings)}catch(error){host.classList.add('script-fallback-fullscreen','script-is-fullscreen');document.body.classList.add('script-body-fullscreen');requestAnimationFrame(applyPromptSettings)}}
+function promptHiddenRun(run){return (run.marks||[]).some(mark=>SCRIPT_HIDDEN_PROMPT_MARKS.includes(mark))}
+function preserveHiddenPromptRuns(previous,edited){
+  const previousRuns=normalizeRuns(previous),updated=normalizeRuns(edited),counts=new Map();
+  for(const run of updated.filter(promptHiddenRun)){const key=JSON.stringify(run);counts.set(key,(counts.get(key)||0)+1)}
+  let visibleOffset=0;
+  for(const run of previousRuns){
+    if(!promptHiddenRun(run)){visibleOffset+=run.text.length;continue}
+    const key=JSON.stringify(run),count=counts.get(key)||0;if(count){counts.set(key,count-1);continue}
+    let offset=visibleOffset,inserted=false;
+    for(let i=0;i<updated.length;i++){
+      if(promptHiddenRun(updated[i]))continue;
+      const length=updated[i].text.length;if(offset>length){offset-=length;continue}
+      const part=updated[i],before=part.text.slice(0,offset),after=part.text.slice(offset),pieces=[];
+      if(before)pieces.push({text:before,marks:[...part.marks]});pieces.push(clone(run));if(after)pieces.push({text:after,marks:[...part.marks]});
+      updated.splice(i,1,...pieces);inserted=true;break;
+    }
+    if(!inserted)updated.push(clone(run));
+  }
+  return normalizeRuns(updated);
+}
+function renderTeleprompter(){
+  if(!isScript())return;
+  stopPromptPlayback();const track=byId('scriptPromptTrack'),stage=byId('scriptPromptStage');track.replaceChildren();let num=0;
+  for(const block of state.current.content.blocks||[]){
+    if(block.type==='cue'){
+      if(block.kind==='silence'){const pause=document.createElement('div');pause.className='script-prompt-silence';pause.dataset.silenceId=block.id;pause.textContent='سكوت';track.appendChild(pause)}
+      continue;
+    }
+    if(!['paragraph','bullet','number'].includes(block.type))continue;
+    const line=document.createElement('div');line.className=`script-prompt-line script-prompt-${block.type}`;line.dir=block.direction||textDirection(plainText((block.runs||[]).filter(run=>!promptHiddenRun(run))));line.dataset.sourceId=block.id;if(['left','center','right'].includes(block.alignment))line.style.textAlign=block.alignment;
+    if(block.type==='bullet'){const marker=document.createElement('span');marker.className='script-prompt-marker';marker.textContent=({1:'●',2:'■',3:'◆'})[block.level]||'●';line.appendChild(marker)}
+    if(block.type==='number'){const marker=document.createElement('span');marker.className='script-prompt-marker';marker.textContent=`${++num}.`;line.appendChild(marker)}else num=0;
+    const editor=document.createElement('div');editor.className='script-prompt-editable';editor.contentEditable='true';editor.spellcheck=true;editor.dataset.placeholder='Type your spoken line…';editor.innerHTML=runsToHtml(block.runs||[],{teleprompter:true});
+    editor.oninput=()=>{block.runs=preserveHiddenPromptRuns(block.runs,elementToRuns(editor));markDirty();captureSelection()};
+    editor.onbeforeinput=e=>insertBodySpaceAfterRepeat(e,editor,block);
+    editor.onpaste=e=>{e.preventDefault();const text=e.clipboardData.getData('text/plain');insertPlainTextAtSelection(editor,text);editor.dispatchEvent(new Event('input',{bubbles:true}))};
+    editor.onmouseup=captureSelection;editor.onkeyup=captureSelection;
+    line.appendChild(editor);track.appendChild(line);
+  }
+  // Inline ×2 markers stay attached to their spoken words in the same source runs.
+  applyPromptSettings();requestAnimationFrame(()=>{stage.scrollTop=0;promptPlayback.passedSilences.clear()});
+}
+function applyPromptSettings(){
+  if(!isScript())return;const opts=scriptSettings(),host=byId('scriptTeleprompter'),stage=byId('scriptPromptStage');
+  host.classList.toggle('dark',opts.theme==='dark');host.classList.toggle('bars-disabled',opts.bars===false||opts.region==='free');
+  host.style.setProperty('--prompt-size',`${Number(opts.fontSize)||46}px`);host.style.setProperty('--prompt-spacing',String(Number(opts.spacing)||1.6));
+  host.style.setProperty('--region-height',`${Number(opts.regionHeight)||30}%`);
+  const center=opts.region==='top'?27:opts.region==='bottom'?73:opts.region==='custom'?Number(opts.regionPosition)||50:50;
+  host.style.setProperty('--region-center',`${center}%`);
+  host.style.setProperty('--region-top',`${Math.max(0,center-(Number(opts.regionHeight)||30)/2)}%`);
+  host.style.setProperty('--region-pad',`${Math.max(stage?.clientHeight||0,380)*center/100}px`);
+  byId('scriptSpeedValue').textContent=`${Number(opts.speed||1).toFixed(1)}×`;
+  byId('scriptPromptFloatSpeedValue').textContent=`${Number(opts.speed||1).toFixed(1)}×`;
+  byId('scriptThemeBtn').textContent=opts.theme==='dark'?'Light mode':'Dark mode';
+  if(stage)stage.style.scrollPaddingTop=`${center}%`;
+}
+function stopPromptPlayback(){promptPlayback.playing=false;cancelAnimationFrame(promptPlayback.frame);promptPlayback.frame=0;promptPlayback.last=0;for(const id of ['scriptPlayBtn','scriptPromptFloatPlay']){const button=byId(id);if(button)button.textContent='▶ Play'}}
+function togglePromptPlayback(){
+  if(promptPlayback.playing){stopPromptPlayback();return}
+  const stage=byId('scriptPromptStage');
+  promptPlayback.playing=true;promptPlayback.last=0;promptPlayback.position=stage.scrollTop;for(const id of ['scriptPlayBtn','scriptPromptFloatPlay'])byId(id).textContent='❚❚ Pause';
+  const tick=timestamp=>{
+    if(!promptPlayback.playing||!isScript()||state.ribbonTab!=='teleprompter'){stopPromptPlayback();return}
+    const delta=promptPlayback.last?Math.min(80,timestamp-promptPlayback.last):0;promptPlayback.last=timestamp;
+    const speed=Math.max(.2,Math.min(3,Number(scriptSettings().speed)||1)),end=Math.max(0,stage.scrollHeight-stage.clientHeight);
+    promptPlayback.position=Math.min(end,promptPlayback.position+(delta/1000)*48*speed);
+    stage.scrollTop=promptPlayback.position;
+    const bandCenter=stage.getBoundingClientRect().top+stage.clientHeight*(parseFloat(byId('scriptTeleprompter').style.getPropertyValue('--region-center'))||50)/100;
+    for(const cue of stage.querySelectorAll('[data-silence-id]')){
+      const id=cue.dataset.silenceId,position=cue.getBoundingClientRect().top;
+      if(!promptPlayback.passedSilences.has(id)&&position<=bandCenter+8){promptPlayback.passedSilences.add(id);stopPromptPlayback();toast('سكوت · press Play to continue');return}
+    }
+    if(promptPlayback.position>=end-.25){stopPromptPlayback();return}
+    promptPlayback.frame=requestAnimationFrame(tick);
+  };
+  promptPlayback.frame=requestAnimationFrame(tick);
+}
+function buildScriptPrintHtml(d,{montage=false}={}){
+  let body='',number=0;for(const b of d.content.blocks||[]){
+    if(b.type==='cue'){
+      if(b.kind==='instruction')body+=`<div class="script-instruction" dir="${b.direction||'auto'}">تعليمات لا تُقرأ · ${runsPrintHtml(b.runs||[])}</div>`;
+      if(b.kind==='heading')body+=`<div class="script-heading" dir="${b.direction||textDirection(plainText(b.runs||[]))}">${runsPrintHtml(b.runs||[])}</div>`;
+      if(b.kind==='intro')body+='<div class="script-intro" dir="rtl"><span>انترو</span></div>';
+      if(b.kind==='light-break')body+='<div class="script-light-break" dir="rtl"><span>فاصل خفيف</span></div>';
+      if(b.kind==='silence')body+='<div class="script-silence">سكوت</div>';
+      if(b.kind==='repeat')body+='<div class="script-repeat">×2</div>';
+      continue;
+    }
+    if(!['paragraph','bullet','number'].includes(b.type))continue;
+    const direction=b.direction||textDirection(plainText(b.runs||[])),prefix=b.type==='bullet'?({1:'●',2:'■',3:'◆'})[b.level]||'●':b.type==='number'?`${++number}.`:'';
+    if(b.type!=='number')number=0;
+    const printedRuns=montage?(b.runs||[]).filter(run=>!(run.marks||[]).some(mark=>['script-presenter','script-review'].includes(mark))):(b.runs||[]);
+    if(montage&&!plainText(printedRuns).trim())continue;
+    body+=`<div class="script-line" dir="${direction}" style="text-align:${['left','center','right'].includes(b.alignment)?b.alignment:'start'}">${prefix?`<span class="script-marker">${prefix}</span>`:''}${runsPrintHtml(printedRuns)}</div>`;
+  }
+  const css=`${basePrintCss()}body{font-size:16pt;line-height:1.6}.script-line{margin:0 0 12pt;white-space:pre-wrap;overflow-wrap:anywhere}.script-marker{margin-inline-end:10pt;color:#327762}.script-instruction{padding:8pt 12pt;margin:10pt 0;background:#e5f5ed;color:#346c56;border-inline-start:3pt solid #71b596;font-size:11pt}.script-heading{box-sizing:border-box;width:100%;padding:10pt 12pt;margin:16pt 0 10pt;background:#def1e6;color:#1e5944;border-inline-start:4pt solid #408a71;border-radius:5pt;font-size:15pt;font-weight:700;white-space:pre-wrap;overflow-wrap:anywhere;break-inside:avoid}.script-intro{padding:9pt 12pt;margin:14pt 0;background:#eaf1f9;border-inline-start:4pt solid #738eb9;color:#335075;font-weight:800;break-inside:avoid}.script-light-break{display:flex;align-items:center;gap:9pt;color:#53756b;font-size:11pt;margin:16pt 0}.script-light-break:before,.script-light-break:after{content:'';flex:1;border-top:1pt solid #9cc1af}.script-silence{text-align:center;border-block:2pt solid #80bda1;padding:6pt;margin:20pt 0;color:#327762}.script-repeat-inline{color:#147753;font-weight:900;white-space:nowrap}.script-emphasis{color:#147753;font-weight:bold;border-bottom:2pt solid #80bda1}.script-visual-ref{color:#4a5f91;background:#eaf0fb;border-radius:3pt;font-weight:700}.script-presenter{color:#2c654f;font-weight:700}.script-review{background:#fff0a8;color:#604d14;font-weight:700;border-radius:3pt}.script-export-version{font-size:10pt;color:#486556;margin:0 0 20pt}`;
+  const title=montage?`${d.title} — نسخة المونتاج`:d.title,version=String(d.metadata?.editorialVersion||'');
+  return `<!doctype html><html><head><meta charset="utf-8">${scientificExportHtmlMetadata(d)}<title>${esc(title)} — TERYAQ Version ${esc(version)}</title><style>${css}</style></head><body><main><h1>${esc(title)}</h1><p class="script-export-version">Version ${esc(version)}</p>${body}</main></body></html>`;
+}
+
+// ---------------- Figure editor ----------------
+const FIG_ORDERS=['Order 1 - KEEP as it is','Order 2 - DO the following changes','Order 3 - RECREATE with Ai','Order 4 - DESIGN by Teryaq','Order 5 - SEARCH for a Figure'];
+function renderFigureEditor(){const d=state.current,m=d.metadata;byId('addFigureBtn').onclick=()=>{d.content.figures.push(blankFigure());markDirty(false);pushHistory('Add figure');renderFigureCards();renderFigureNav();setTimeout(()=>byId(`fig-card-${d.content.figures.length}`)?.scrollIntoView({behavior:'smooth',block:'start'}),0)};const updateTitle=()=>{d.title=[m.course||m.subject,m.chapterNumber?`CH ${m.chapterNumber}`:'',m.chapterTitle].filter(Boolean).join(' — ')||'Untitled Document';byId('docTitle').textContent=d.title;markDirty()};bindMetadataCatalogFields({author:'figMetaName',category:'figMetaCategory',course:'figMetaCourse',chapter:'figMetaChapter',version:'figMetaVersion',templateId:d.templateId},m,updateTitle);const notes=byId('figMetaNotes');notes.value=m.generalNotes||'';notes.oninput=()=>{m.generalNotes=notes.value;markDirty()};renderFigureCards();renderFigureNav();renderFigureUploadSummary();}
+function renderFigureCards(){const host=byId('figureCards');host.innerHTML='';state.current.content.figures.forEach((f,i)=>host.appendChild(renderFigureCard(f,i)))}
+function renderFigureCard(f,i){const sec=document.createElement('section');sec.className='figure-card';sec.id=`fig-card-${i+1}`;sec.innerHTML=`<div class="figure-card-head"><div><strong>Figure ${i+1}</strong> <span class="chip">${esc(f.code||'No code')}</span></div><div class="card-actions"><button class="btn small duplicate">Duplicate</button><button class="btn danger small delete">Delete</button></div></div><div class="figure-card-body"><div class="figure-grid">
+<div class="field"><label>Figure code *</label><input data-k="code" value="${esc(f.code)}" placeholder="e.g., 3.1" inputmode="decimal" pattern="[0-9.]*" title="Numbers and dots only"></div><div class="field"><label>Figure title *</label><input data-k="title" value="${esc(f.title)}"></div><div class="field span-2"><label>Caption</label><textarea data-k="caption">${esc(f.caption)}</textarea></div><div class="field span-2"><label>Source *</label><input data-k="source" value="${esc(f.source)}" placeholder="URL, book + page, or Teryaq"></div><div class="field"><label>Order *</label><select data-k="order"><option value="">Select order…</option>${FIG_ORDERS.map(o=>`<option ${o===f.order?'selected':''}>${esc(o)}</option>`).join('')}</select></div><div class="field"><label>Copyright status *</label><select data-k="copyright"><option value="">Select status…</option>${['There is copyright issues','There is no copyright issues',"I don't know"].map(o=>`<option ${o===f.copyright?'selected':''}>${esc(o)}</option>`).join('')}</select></div><div class="field span-2"><label>PROMPT — Details</label><textarea data-k="details">${esc(f.details)}</textarea></div><div class="field span-2"><label>Notes</label><textarea data-k="notes">${esc(f.notes)}</textarea></div><div class="field span-2"><label>Figure / reference image</label><div class="dropzone"><div class="drop-content">${f.image?`<img src="${f.image}">`:'Click or drop image here'}</div><input type="file" accept="image/*" hidden></div><div class="figure-upload-progress ${esc(f.imageStatus||'empty')}" data-upload-figure="${esc(f.id)}"><div><span>${esc(figureUploadStatusLabel(f))}</span><b>${esc(figureUploadDetail(f))}</b></div><progress max="100" value="${figureUploadPercent(f)}"></progress></div><div class="card-actions"><button class="btn small clear-image">Clear image</button></div></div></div></div>`;
+  sec.querySelectorAll('[data-k]').forEach(el=>el.addEventListener('input',()=>{el.classList.remove('invalid-required');if(el.dataset.k==='code')el.value=sanitizeNumericCode(el.value);f[el.dataset.k]=el.value;markDirty();renderFigureNav()}));sec.querySelector('.duplicate').onclick=()=>{const c=clone(f);c.id=uid('fig');c.attachmentId='';c.storagePath='';c.imageStatus=c.image?'saved-local':'';state.current.content.figures.splice(i+1,0,c);markDirty(false);pushHistory('Duplicate figure');renderFigureCards();renderFigureNav()};sec.querySelector('.delete').onclick=()=>{if(confirm('Delete this figure?')){state.current.content.figures.splice(i,1);if(!state.current.content.figures.length)state.current.content.figures.push(blankFigure());markDirty(false);pushHistory('Delete figure');renderFigureCards();renderFigureNav()}};
+  const dz=sec.querySelector('.dropzone'),inp=dz.querySelector('input');dz.onclick=()=>inp.click();dz.ondragover=e=>e.preventDefault();dz.ondrop=e=>{e.preventDefault();if(e.dataTransfer.files[0])loadFigImage(e.dataTransfer.files[0],f)};inp.onchange=()=>inp.files[0]&&loadFigImage(inp.files[0],f);sec.querySelector('.clear-image').onclick=async()=>{if(f.attachmentId)await idbDelete('mediaQueue',f.attachmentId).catch(()=>{});Object.assign(f,{image:'',attachmentId:'',storagePath:'',imageStatus:'',imageName:'',imageSize:0,uploadedBytes:0});markDirty();renderFigureCards()};if(!f.image&&f.storagePath)void loadRemoteFigurePreview(f,sec);return sec;
+}
+function formatBytes(value){const bytes=Number(value||0);if(bytes<1024)return `${bytes} B`;if(bytes<1024*1024)return `${(bytes/1024).toFixed(1)} KB`;return `${(bytes/1024/1024).toFixed(1)} MB`}
+function figureUploadPercent(f){return f.imageSize?Math.min(100,Math.round(Number(f.uploadedBytes||0)/Number(f.imageSize)*100)):0}
+function figureUploadStatusLabel(f){return ({'saved-local':'Saved locally · waiting for sync','waiting':'Waiting to upload','uploading':'Uploading','paused-offline':'Paused · offline','uploaded':'Uploaded & synced','failed':'Upload failed · will retry'})[f.imageStatus]||(f.image?'Saved locally':'No image selected')}
+function figureUploadDetail(f){if(!f.image)return '';const parts=[`${figureUploadPercent(f)}%`,`${formatBytes(f.uploadedBytes)} / ${formatBytes(f.imageSize)}`];if(f.uploadSpeed)parts.push(`${formatBytes(f.uploadSpeed)}/s`);if(Number.isFinite(f.uploadEta)&&f.uploadEta>0)parts.push(`~${Math.ceil(f.uploadEta)}s left`);return parts.join(' · ')}
+function renderFigureUploadSummary(){const host=byId('figureUploadSummary');if(!host||state.current?.templateId!=='scientific-draft-figures')return;const figures=(state.current.content.figures||[]).filter(figure=>figure.image),total=figures.reduce((sum,figure)=>sum+Number(figure.imageSize||0),0),uploaded=figures.reduce((sum,figure)=>sum+Math.min(Number(figure.uploadedBytes||0),Number(figure.imageSize||0)),0),pending=figures.filter(figure=>figure.imageStatus!=='uploaded').length;if(!figures.length){host.classList.add('hidden');return}host.classList.remove('hidden');host.innerHTML=`<div><b>Image uploads</b><span>${pending?`${pending} waiting or uploading`:'All images uploaded & synced'}</span></div><strong>${total?Math.round(uploaded/total*100):0}% · ${formatBytes(uploaded)} / ${formatBytes(total)}</strong><progress max="100" value="${total?uploaded/total*100:0}"></progress>`}
+function updateFigureUploadProgressDom(record){const host=document.querySelector(`[data-upload-figure="${CSS.escape(record.figureId)}"]`);if(!host)return;host.className=`figure-upload-progress ${record.status||''}`;const figure=state.current?.content?.figures?.find(item=>item.id===record.figureId)||record;host.querySelector('span').textContent=figureUploadStatusLabel(figure);host.querySelector('b').textContent=figureUploadDetail(figure);host.querySelector('progress').value=figureUploadPercent(figure)}
+async function loadFigImage(file,f){if(!file.type.startsWith('image/'))return alert('Choose an image file.');if(file.size>60*1024*1024)return alert('This image is larger than 60 MB. Compress it before adding it.');const attachmentId=uid('att'),dataUrl=await blobDataUrl(file);f.image=dataUrl;Object.assign(f,{attachmentId,storagePath:'',imageStatus:navigator.onLine?'waiting':'paused-offline',imageName:file.name,imageSize:file.size,uploadedBytes:0,uploadSpeed:0,uploadEta:0});await idbPut('mediaQueue',{id:attachmentId,ownerId:TeryaqPlatform.user()?.id,documentId:state.current.id,figureId:f.id,file,fileName:file.name,contentType:file.type,size:file.size,status:f.imageStatus,uploadedBytes:0,tusUrl:'',storagePath:'',queuedAt:nowIso(),updatedAt:nowIso()});markDirty(false);pushHistory('Add figure image');renderFigureCards();TeryaqPlatform.scheduleAutoSync(0)}
+async function loadRemoteFigurePreview(f,card){const content=card.querySelector('.drop-content');content.textContent=navigator.onLine?'Loading image…':'Image available after connecting';try{const source=await TeryaqPlatform.getAttachmentPreview(f.storagePath);if(source&&card.isConnected){f.image=source;content.innerHTML=`<img src="${source}" alt="">`}}catch(error){if(card.isConnected)content.textContent='Image could not be loaded · Retry when online'}}
+function renderFigureNav(){const host=byId('figureNavButtons');host.innerHTML='';state.current.content.figures.forEach((f,i)=>{const b=document.createElement('button');b.textContent=i+1;b.title=f.title||`Figure ${i+1}`;b.onclick=()=>byId(`fig-card-${i+1}`).scrollIntoView({behavior:'smooth',block:'start'});host.appendChild(b)})}
+
+// ---------------- Responsive page scale ----------------
+function observeWritingPage(){const page=byId('writingPage');if(!page||typeof ResizeObserver==='undefined')return;if(!state.pageResizeObserver)state.pageResizeObserver=new ResizeObserver(()=>requestAnimationFrame(updatePageScale));state.pageResizeObserver.disconnect();state.pageResizeObserver.observe(page)}
+function updatePageScale(){
+  const main=document.querySelector('#textEditorArea .editor-main'),column=byId('editorContentColumn'),scaleHost=document.querySelector('#textEditorArea .page-scale-host'),wrap=byId('pageWrap'),page=byId('writingPage');if(!main||!column||!scaleHost||!wrap||!page)return;
+  const zoom=Number(state.viewZoom||1);if(innerWidth<=820){page.style.removeProperty('--page-scale');column.style.width='100%';scaleHost.style.width='100%';scaleHost.style.height='auto';wrap.style.width='100%';wrap.style.height='auto';const label=byId('zoomResetBtn');if(label)label.textContent='Fit';return}
+  const rawWidth=page.offsetWidth||794,rawHeight=Math.max(page.scrollHeight,page.offsetHeight),available=Math.max(320,main.clientWidth-28),fit=Math.max(.55,Math.min(1.45,(available-2)/rawWidth)),scale=Math.max(.45,Math.min(1.75,fit*zoom)),displayWidth=Math.round(rawWidth*scale),displayHeight=Math.ceil(rawHeight*scale);
+  page.style.setProperty('--page-scale',scale.toFixed(3));column.style.width=`${displayWidth}px`;scaleHost.style.width=`${displayWidth}px`;scaleHost.style.height=`${displayHeight}px`;wrap.style.width=`${displayWidth}px`;wrap.style.height=`${displayHeight}px`;
+  const label=byId('zoomResetBtn');if(label)label.textContent=`${Math.round(zoom*100)}%`;
+}
+
+// ---------------- Mobile fixed controls behavior ----------------
+function wireMobile(){/* CSS-driven; buttons bound in bindTextControls */}
+
+// ---------------- Init ----------------
+document.addEventListener('DOMContentLoaded',()=>boot().catch(e=>{console.error(e);alert('TERYAQ Master Tool failed to start: '+e.message)}));
+
+})();

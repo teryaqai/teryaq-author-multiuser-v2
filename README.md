@@ -1,4 +1,4 @@
-# TERYAQ Master Tool v2.8.7
+# TERYAQ Master Tool v2.8.8
 
 Current baseline package for the TERYAQ Master Tool.
 
@@ -11,3 +11,9 @@ Current baseline package for the TERYAQ Master Tool.
 
 ## Deployment
 Run `supabase/migrations/023_icon_manager.sql`, then deploy the app.
+
+## v2.8.8
+- Full icon-placement audit across navigation, chapter/workflow pages, task cards, Submission Forms, Admin, Editor, and shared controls.
+- Submission Form card icons now have independent Icon Manager keys.
+- Workflow area and task-card icons now have independent Icon Manager keys.
+- No new Supabase migration beyond 023_icon_manager.sql.
