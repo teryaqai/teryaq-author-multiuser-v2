@@ -1,7 +1,10 @@
 {
-  "appVersion": "2.8.8",
+  "appVersion": "2.8.9",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
   "cloudMigrationVersion": 23,
-  "release": "full-icon-audit"
+  "release": "full-icon-audit",
+  "version": "2.8.9",
+  "updatedAt": "2026-10-08",
+  "notes": "Full icon coverage audit + automatic deployment-managed cloud configuration."
 }

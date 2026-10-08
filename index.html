@@ -11,7 +11,8 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="styles.v2.8.8.css">
+  <link rel="stylesheet" href="styles.v2.8.9.css">
+  <script src="runtime-config.js"></script>
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
@@ -28,35 +29,14 @@
       <h1 id="authTitle">TERYAQ Master Tool</h1>
       <p>Sign in once on this device, then continue working offline with your local workspace.</p>
       <div class="field"><label for="authEmail">Email</label><input id="authEmail" type="email" autocomplete="username" placeholder="name@teryaq.com"></div>
-      <div class="field"><label for="authPassword">Password</label><div class="password-field"><input id="authPassword" type="password" autocomplete="current-password"><button class="password-toggle" id="authPasswordToggle" type="button" aria-label="Show password" aria-pressed="false" title="Show password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.6"/></svg></button></div></div>
+      <div class="field"><label for="authPassword">Password</label><div class="password-field"><input id="authPassword" type="password" autocomplete="current-password"><button class="password-toggle" id="authPasswordToggle" type="button" aria-label="Show password" aria-pressed="false" title="Show password"><span data-ui-icon="auth.password-show" aria-hidden="true"></span></button></div></div>
       <button class="btn primary auth-primary" id="signInBtn">Sign in</button>
       <div class="auth-divider hidden" id="authOfflineDivider"><span>or</span></div>
       <button class="btn hidden auth-primary auth-offline-button" id="continueOfflineBtn">Continue Offline</button>
       <p class="auth-offline-identity hidden" id="authOfflineIdentity"></p>
       <div class="auth-error" id="authError" role="alert"></div>
       <button class="auth-request-link" id="requestAccountBtn" type="button">Request an Account</button>
-      <button class="auth-cloud-toggle" id="authCloudToggle" type="button" aria-controls="authCloudPanel" aria-expanded="false">
-        <span class="auth-cloud-toggle-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 .7-7.94A6 6 0 0 0 6.25 8.7 4.6 4.6 0 0 0 7 18Z"/></svg></span>
-        <span><b>Cloud setup</b><small id="authCloudState">Configure the Supabase connection</small></span>
-        <span class="auth-cloud-toggle-arrow" data-ui-icon="arrow-right" aria-hidden="true"></span>
-      </button>
     </main>
-
-    <aside class="auth-cloud-panel" id="authCloudPanel" aria-labelledby="authCloudTitle" aria-hidden="true">
-      <div class="auth-cloud-head">
-        <span class="auth-cloud-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 .7-7.94A6 6 0 0 0 6.25 8.7 4.6 4.6 0 0 0 7 18Z"/></svg></span>
-        <div><h2 id="authCloudTitle">Cloud setup</h2><p>First-time setup on this device</p></div>
-        <button class="auth-cloud-close" id="authCloudClose" type="button" aria-label="Close cloud setup">×</button>
-      </div>
-      <div class="auth-cloud-body">
-        <div class="field"><label for="authProjectUrl">Supabase project URL</label><input id="authProjectUrl" inputmode="url" autocomplete="url" placeholder="https://xxxxx.supabase.co"></div>
-        <div class="field"><label for="authAnonKey">Publishable key</label><textarea id="authAnonKey" rows="4" autocomplete="off" spellcheck="false" placeholder="Public publishable/anon key only"></textarea></div>
-        <p class="auth-security-note"><span aria-hidden="true">⌾</span> Stored only on this device. Never enter a service-role key.</p>
-        <button class="btn auth-primary" id="saveInitialCloudConfig">Save connection</button>
-        <p class="hint auth-config-status" id="initialCloudConfigStatus" role="status"></p>
-      </div>
-    </aside>
-    <button class="auth-cloud-scrim hidden" id="authCloudScrim" type="button" aria-label="Close cloud setup"></button>
   </div>
 </div>
 <div class="account-request-modal hidden" id="accountRequestModal" role="dialog" aria-modal="true" aria-labelledby="accountRequestTitle">
@@ -74,8 +54,8 @@
 <div class="account-request-modal hidden" id="inviteSetupModal" role="dialog" aria-modal="true" aria-labelledby="inviteSetupTitle">
   <form class="account-request-card invite-setup-card" id="inviteSetupForm">
     <div class="account-request-head"><div><span class="eyebrow">ACCOUNT APPROVED</span><h2 id="inviteSetupTitle">Create your password</h2><p>Your invitation was verified. Choose the password you will use to sign in on every device.</p></div></div>
-    <div class="field"><label for="invitePassword">New password</label><div class="password-field"><input id="invitePassword" name="password" type="password" required minlength="8" autocomplete="new-password"><button class="password-toggle" id="invitePasswordToggle" type="button" aria-label="Show password" aria-pressed="false" title="Show password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.6"/></svg></button></div></div>
-    <div class="field"><label for="invitePasswordConfirm">Confirm password</label><div class="password-field"><input id="invitePasswordConfirm" type="password" required minlength="8" autocomplete="new-password"><button class="password-toggle" id="invitePasswordConfirmToggle" type="button" aria-label="Show password" aria-pressed="false" title="Show password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.6"/></svg></button></div></div>
+    <div class="field"><label for="invitePassword">New password</label><div class="password-field"><input id="invitePassword" name="password" type="password" required minlength="8" autocomplete="new-password"><button class="password-toggle" id="invitePasswordToggle" type="button" aria-label="Show password" aria-pressed="false" title="Show password"><span data-ui-icon="auth.password-show" aria-hidden="true"></span></button></div></div>
+    <div class="field"><label for="invitePasswordConfirm">Confirm password</label><div class="password-field"><input id="invitePasswordConfirm" type="password" required minlength="8" autocomplete="new-password"><button class="password-toggle" id="invitePasswordConfirmToggle" type="button" aria-label="Show password" aria-pressed="false" title="Show password"><span data-ui-icon="auth.password-show" aria-hidden="true"></span></button></div></div>
     <p class="hint" id="inviteSetupStatus" role="status"></p>
     <button class="btn primary auth-primary" id="completeInviteBtn" type="submit">Set password & continue</button>
   </form>
@@ -84,7 +64,7 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/teryaq-mark.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.8.8</span></small></div>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.8.9</span></small></div>
       <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><span data-ui-icon="panel-close"></span></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
@@ -195,8 +175,8 @@
               </div>
               <div class="control-group ribbon-panel" data-ribbon-panel="formatting" hidden>
                 <div class="control-body">
-                  <button class="btn script-only direction-button" id="scriptRtlBtn" type="button" aria-label="Right to left" title="Right to left"><span class="script-dir-glyph script-dir-rtl" aria-hidden="true"></span></button>
-                  <button class="btn script-only direction-button" id="scriptLtrBtn" type="button" aria-label="Left to right" title="Left to right"><span class="script-dir-glyph script-dir-ltr" aria-hidden="true"></span></button>
+                  <button class="btn script-only direction-button" id="scriptRtlBtn" type="button" aria-label="Right to left" title="Right to left"><span class="script-dir-glyph" data-ui-icon="editor.rtl" aria-hidden="true"></span></button>
+                  <button class="btn script-only direction-button" id="scriptLtrBtn" type="button" aria-label="Left to right" title="Left to right"><span class="script-dir-glyph" data-ui-icon="editor.ltr" aria-hidden="true"></span></button>
                   <span class="format-divider script-only" aria-hidden="true"></span>
                   <button class="btn script-only script-align-button" id="scriptAlignLeft" type="button" title="Align left" aria-label="Align left"><span class="align-glyph align-left" aria-hidden="true"></span></button>
                   <button class="btn script-only script-align-button" id="scriptAlignCenter" type="button" title="Align center" aria-label="Align center"><span class="align-glyph align-center" aria-hidden="true"></span></button>
@@ -239,7 +219,7 @@
                 <div class="control-body"><button class="btn" id="mainFigBtn">+ Figure Placeholder</button><button class="btn" id="marginFigBtn">+ Margin Figure</button><button class="btn" id="newTableBtn">+ New Table</button><button class="btn" id="importDocxTableBtn">Import DOCX Table</button></div>
               </div>
               <div class="control-group ribbon-panel" data-ribbon-panel="table" hidden>
-                <div class="control-body"><button class="btn" id="tableOutlineBtn" type="button" aria-expanded="false" aria-controls="tableOutlinePanel">Table Outline</button><button class="btn" id="rowUpBtn"><span class="table-direction-arrow arrow-up" aria-hidden="true"></span><span>Row</span></button><button class="btn" id="rowDownBtn"><span class="table-direction-arrow arrow-down" aria-hidden="true"></span><span>Row</span></button><button class="btn" id="colLeftBtn"><span class="table-direction-arrow arrow-left" aria-hidden="true"></span><span>Column</span></button><button class="btn" id="colRightBtn"><span class="table-direction-arrow arrow-right" aria-hidden="true"></span><span>Column</span></button><button class="btn danger" id="delRowBtn">Delete Row</button><button class="btn danger" id="delColBtn">Delete Col</button><button class="btn danger" id="deleteTableBtn">Delete Table</button><div class="control-row"><input id="colWidthInput" type="number" min="5" max="95" value="33" style="width:72px;border:1px solid var(--line);border-radius:8px;padding:7px"><button class="btn" id="applyColWidthBtn">Apply Width %</button><button class="btn" id="equalColsBtn">Equal Columns</button></div></div>
+                <div class="control-body"><button class="btn" id="tableOutlineBtn" type="button" aria-expanded="false" aria-controls="tableOutlinePanel">Table Outline</button><button class="btn" id="rowUpBtn"><span class="table-direction-arrow" data-ui-icon="editor.table-up" aria-hidden="true"></span><span>Row</span></button><button class="btn" id="rowDownBtn"><span class="table-direction-arrow" data-ui-icon="editor.table-down" aria-hidden="true"></span><span>Row</span></button><button class="btn" id="colLeftBtn"><span class="table-direction-arrow" data-ui-icon="editor.table-left" aria-hidden="true"></span><span>Column</span></button><button class="btn" id="colRightBtn"><span class="table-direction-arrow" data-ui-icon="editor.table-right" aria-hidden="true"></span><span>Column</span></button><button class="btn danger" id="delRowBtn">Delete Row</button><button class="btn danger" id="delColBtn">Delete Col</button><button class="btn danger" id="deleteTableBtn">Delete Table</button><div class="control-row"><input id="colWidthInput" type="number" min="5" max="95" value="33" style="width:72px;border:1px solid var(--line);border-radius:8px;padding:7px"><button class="btn" id="applyColWidthBtn">Apply Width %</button><button class="btn" id="equalColsBtn">Equal Columns</button></div></div>
                 <div class="table-outline-panel hidden" id="tableOutlinePanel" role="region" aria-label="Table outline">
                   <section class="cover-card table-information-card">
                     <div class="cover-title"><div><h2>Table Outline</h2><small>Automatically linked to every inserted table</small></div><button class="btn small" id="closeTableOutlineBtn" type="button" aria-label="Close table outline">Close</button></div>
@@ -249,13 +229,13 @@
               </div>
               <div class="control-group ribbon-panel view-ribbon-panel" data-ribbon-panel="view" hidden>
                 <div class="control-body">
-                  <button class="btn" id="viewOnlyBtn" type="button" aria-pressed="false"><span class="view-ribbon-icon view-only-icon" aria-hidden="true"></span><span>View only</span></button>
+                  <button class="btn" id="viewOnlyBtn" type="button" aria-pressed="false"><span class="view-ribbon-icon" data-ui-icon="editor.view-only" aria-hidden="true"></span><span>View only</span></button>
                   <button class="btn" id="zoomOutBtn" type="button" aria-label="Zoom out">−</button>
                   <button class="btn view-zoom-label" id="zoomResetBtn" type="button" title="Reset zoom">100%</button>
                   <button class="btn" id="zoomInBtn" type="button" aria-label="Zoom in">＋</button>
-                  <button class="btn primary" id="onePageBtn" type="button" aria-pressed="true"><img class="view-page-icon" src="icons/ui/blank-page.png" alt="">One page</button>
-                  <button class="btn" id="twoPagesBtn" type="button" aria-pressed="false"><img class="view-page-icon" src="icons/ui/two-document.png" alt="">Two pages</button>
-                  <button class="btn" id="outlineViewBtn" type="button" aria-expanded="false" aria-controls="rightPanel"><span class="view-ribbon-icon outline-icon" aria-hidden="true"></span><span>Outline</span></button>
+                  <button class="btn primary" id="onePageBtn" type="button" aria-pressed="true"><span class="view-page-icon" data-ui-icon="editor.one-page" aria-hidden="true"></span>One page</button>
+                  <button class="btn" id="twoPagesBtn" type="button" aria-pressed="false"><span class="view-page-icon" data-ui-icon="editor.two-pages" aria-hidden="true"></span>Two pages</button>
+                  <button class="btn" id="outlineViewBtn" type="button" aria-expanded="false" aria-controls="rightPanel"><span class="view-ribbon-icon" data-ui-icon="editor.outline" aria-hidden="true"></span><span>Outline</span></button>
                 </div>
               </div>
             </div>
@@ -265,7 +245,7 @@
   <main>
     <section class="view active" id="homeView">
       <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.8.8</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.8.9</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
         <div class="stat-grid" id="dashboardStats"></div>
         <section class="portal-panel dashboard-updates-panel"><div class="section-head"><div><span class="eyebrow">WHAT'S NEW</span><h3>Updates & announcements</h3></div></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
         <div class="portal-grid two-thirds">
@@ -377,10 +357,10 @@
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
-<script src="platform.v2.8.8.js"></script>
-<script src="workflow.v2.8.8.js"></script>
-<script src="guide.v2.8.8.js"></script>
-<script src="app.v2.8.8.js"></script>
-<script src="submissions.v2.8.8.js"></script>
+<script src="platform.v2.8.9.js"></script>
+<script src="workflow.v2.8.9.js"></script>
+<script src="guide.v2.8.9.js"></script>
+<script src="app.v2.8.9.js"></script>
+<script src="submissions.v2.8.9.js"></script>
 </body>
 </html>

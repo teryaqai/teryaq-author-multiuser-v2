@@ -2,5 +2,11 @@ services:
   - type: web
     name: teryaq-author
     runtime: static
-    buildCommand: echo "No build required"
+    buildCommand: >-
+      node -e "const fs=require('fs'); const c={projectUrl:process.env.TERYAQ_SUPABASE_URL||'',anonKey:process.env.TERYAQ_SUPABASE_ANON_KEY||''}; fs.writeFileSync('runtime-config.js','window.__TERYAQ_CLOUD_CONFIG__='+JSON.stringify(c)+';'); if(!c.projectUrl||!c.anonKey) console.warn('TERYAQ cloud environment is incomplete');"
     staticPublishPath: .
+    envVars:
+      - key: TERYAQ_SUPABASE_URL
+        sync: false
+      - key: TERYAQ_SUPABASE_ANON_KEY
+        sync: false
