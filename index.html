@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="styles.v2.8.9.css">
+  <link rel="stylesheet" href="styles.v2.9.0.css">
   <script src="runtime-config.js"></script>
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
@@ -64,7 +64,7 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/teryaq-mark.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.8.9</span></small></div>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.9.0</span></small></div>
       <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><span data-ui-icon="panel-close"></span></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
@@ -125,7 +125,7 @@
         </section>
       </div>
       <div class="topbar-popover-wrap">
-        <button class="profile-menu-button" id="profileMenuButton" type="button" aria-haspopup="true" aria-expanded="false"><img id="topbarAvatarImage" src="icons/ui/profile.png" alt=""><span id="topbarUsername">User</span><span data-ui-icon="chevron-down"></span></button>
+        <button class="profile-menu-button" id="profileMenuButton" type="button" aria-haspopup="true" aria-expanded="false"><img id="topbarAvatarImage" src="icons/default-avatar.svg" alt=""><span id="topbarUsername">User</span><span data-ui-icon="chevron-down"></span></button>
         <div class="topbar-popover profile-popover hidden" id="profileMenuPanel" role="menu">
           <button type="button" data-nav="profile" role="menuitem"><span data-ui-icon="user"></span><span>Profile</span></button>
           <button type="button" data-nav="settings" role="menuitem"><span data-ui-icon="settings"></span><span>Settings</span></button>
@@ -204,7 +204,7 @@
                 <button class="btn" id="scriptRepeatBtn" type="button">×2</button>
               </div></div>
               <div class="control-group ribbon-panel script-only" data-ribbon-panel="teleprompter" hidden><div class="control-body">
-                <button class="btn primary" id="scriptPlayBtn" type="button">▶ Play</button>
+                <button class="btn primary" id="scriptPlayBtn" type="button"><span data-ui-icon="shared.play"></span><span>Play</span></button>
                 <button class="btn" id="scriptFullscreenBtn" type="button">Fullscreen</button>
                 <button class="btn" id="scriptThemeBtn" type="button">Dark mode</button>
                 <label class="script-ribbon-setting">Speed <input id="scriptSpeed" type="range" min="0.2" max="3" step="0.1" value="1"><span id="scriptSpeedValue">1×</span></label>
@@ -230,9 +230,9 @@
               <div class="control-group ribbon-panel view-ribbon-panel" data-ribbon-panel="view" hidden>
                 <div class="control-body">
                   <button class="btn" id="viewOnlyBtn" type="button" aria-pressed="false"><span class="view-ribbon-icon" data-ui-icon="editor.view-only" aria-hidden="true"></span><span>View only</span></button>
-                  <button class="btn" id="zoomOutBtn" type="button" aria-label="Zoom out">−</button>
+                  <button class="btn" id="zoomOutBtn" type="button" aria-label="Zoom out"><span data-ui-icon="shared.zoom-out"></span></button>
                   <button class="btn view-zoom-label" id="zoomResetBtn" type="button" title="Reset zoom">100%</button>
-                  <button class="btn" id="zoomInBtn" type="button" aria-label="Zoom in">＋</button>
+                  <button class="btn" id="zoomInBtn" type="button" aria-label="Zoom in"><span data-ui-icon="shared.zoom-in"></span></button>
                   <button class="btn primary" id="onePageBtn" type="button" aria-pressed="true"><span class="view-page-icon" data-ui-icon="editor.one-page" aria-hidden="true"></span>One page</button>
                   <button class="btn" id="twoPagesBtn" type="button" aria-pressed="false"><span class="view-page-icon" data-ui-icon="editor.two-pages" aria-hidden="true"></span>Two pages</button>
                   <button class="btn" id="outlineViewBtn" type="button" aria-expanded="false" aria-controls="rightPanel"><span class="view-ribbon-icon" data-ui-icon="editor.outline" aria-hidden="true"></span><span>Outline</span></button>
@@ -245,7 +245,7 @@
   <main>
     <section class="view active" id="homeView">
       <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.8.9</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.9.0</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
         <div class="stat-grid" id="dashboardStats"></div>
         <section class="portal-panel dashboard-updates-panel"><div class="section-head"><div><span class="eyebrow">WHAT'S NEW</span><h3>Updates & announcements</h3></div></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
         <div class="portal-grid two-thirds">
@@ -272,7 +272,7 @@
           </div>
           <h2 id="guideTitle">How can we help?</h2>
           <p id="guideIntro">Choose a task below, or search the guide.</p>
-          <label class="guide-search" for="guideSearch"><span aria-hidden="true">⌕</span><input id="guideSearch" type="search" autocomplete="off" placeholder="Search documents, submissions, sync…"></label>
+          <label class="guide-search" for="guideSearch"><span data-ui-icon="shared.search" aria-hidden="true"></span><input id="guideSearch" type="search" autocomplete="off" placeholder="Search documents, submissions, sync…"></label>
         </div>
         <div class="guide-workspace" id="guideWorkspace">
           <nav class="guide-sections" id="guideSections" aria-label="Guide sections"></nav>
@@ -296,7 +296,7 @@
     <section class="view" id="editorView">
       <div id="textEditorArea" class="editor-view hidden">
         <div id="scriptTeleprompter" class="script-teleprompter hidden" aria-label="Teleprompter">
-          <div class="script-prompt-float"><button class="btn" id="scriptPromptFloatPlay" type="button">▶ Play</button><label>Speed <input id="scriptPromptFloatSpeed" type="range" min="0.2" max="3" step="0.1" value="1"><span id="scriptPromptFloatSpeedValue">1.0×</span></label><button class="btn" id="scriptPromptFloatTheme" type="button">◐ Theme</button><button class="btn" id="scriptPromptFloatExit" type="button">Exit fullscreen</button></div>
+          <div class="script-prompt-float"><button class="btn" id="scriptPromptFloatPlay" type="button"><span data-ui-icon="shared.play"></span><span>Play</span></button><label>Speed <input id="scriptPromptFloatSpeed" type="range" min="0.2" max="3" step="0.1" value="1"><span id="scriptPromptFloatSpeedValue">1.0×</span></label><button class="btn" id="scriptPromptFloatTheme" type="button">◐ Theme</button><button class="btn" id="scriptPromptFloatExit" type="button">Exit fullscreen</button></div>
           <div class="script-prompt-help">Edit the text here. Changes are saved in the script automatically. Scroll by hand, or press Play.</div>
           <div class="script-prompt-viewport"><div id="scriptPromptStage" class="script-prompt-stage" tabindex="0"><div id="scriptPromptTrack" class="script-prompt-track"></div></div><div class="script-reading-band" aria-hidden="true"></div></div>
         </div>
@@ -357,10 +357,10 @@
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
-<script src="platform.v2.8.9.js"></script>
-<script src="workflow.v2.8.9.js"></script>
-<script src="guide.v2.8.9.js"></script>
-<script src="app.v2.8.9.js"></script>
-<script src="submissions.v2.8.9.js"></script>
+<script src="platform.v2.9.0.js"></script>
+<script src="workflow.v2.9.0.js"></script>
+<script src="guide.v2.9.0.js"></script>
+<script src="app.v2.9.0.js"></script>
+<script src="submissions.v2.9.0.js"></script>
 </body>
 </html>
