@@ -1,11 +1,11 @@
 {
-  "appVersion": "2.9.1",
+  "appVersion": "2.9.2",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
-  "cloudMigrationVersion": 25,
-  "release": "exact-workflows-required-folders-responsive-task-ui",
-  "version": "2.9.1",
+  "cloudMigrationVersion": 26,
+  "release": "canonical-workflow-cleanup",
+  "version": "2.9.2",
   "updatedAt": "2026-10-11",
-  "notes": "Exact Scientific/Script/Montage numbering, separate Scientific Draft tasks 1-4, Required Input folders and course-wide propagation, full-width responsive status bar, checklist completion styling, and refined comments.",
+  "notes": "Canonical workflow cleanup: exact visible numbering, separate Scientific Draft tasks 1-4, no synthetic 2.1 task, full Script & Presenting sequence, exact S/V montage branches, and legacy aggregate task retirement.",
   "name": "TERYAQ Master Tool"
 }

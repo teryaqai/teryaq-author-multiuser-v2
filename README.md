@@ -1,6 +1,6 @@
-# TERYAQ Master Tool v2.9.1
+# TERYAQ Master Tool v2.9.2
 
-## v2.9.1
+## v2.9.2
 - Exact workflow numbering from the latest Scientific Draft & Design, Script & Presenting, and Montage / Video Editing workflow diagrams.
 - Scientific Draft tasks 1, 2, 3, and 4 are separate tasks; no standalone 2.1 task is created.
 - Required Files & Inputs now supports Text, Link, Files, Images, and nested Folders.

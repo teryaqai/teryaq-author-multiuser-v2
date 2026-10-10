@@ -1,4 +1,4 @@
--- TERYAQ Master Tool v2.9.1
+-- TERYAQ Master Tool v2.9.2
 -- Exact workflow numbering + Required Files folders/course propagation.
 -- Apply after 024_ai_handoff.sql.
 
