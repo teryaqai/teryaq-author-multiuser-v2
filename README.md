@@ -1,3 +1,15 @@
+# TERYAQ Master Tool v2.9.1
+
+## v2.9.1
+- Exact workflow numbering from the latest Scientific Draft & Design, Script & Presenting, and Montage / Video Editing workflow diagrams.
+- Scientific Draft tasks 1, 2, 3, and 4 are separate tasks; no standalone 2.1 task is created.
+- Required Files & Inputs now supports Text, Link, Files, Images, and nested Folders.
+- Required inputs can be applied to the same task across all chapters in the current course.
+- Status & Progress is a full-width responsive strip; mobile uses horizontal scrolling without clipping.
+- Checklist items persist their checked state and show strikethrough when completed.
+- Comment composer is smaller, rounded, responsive, and auto-grows.
+- Migration 025 is required after 024.
+
 # TERYAQ Master Tool v2.9.0
 
 Current baseline package for the TERYAQ Master Tool.

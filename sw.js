@@ -1,4 +1,4 @@
-const CACHE = 'teryaq-master-tool-v2.9.0-navy-workflow-map-logo-signout';
+const CACHE = 'teryaq-master-tool-v2.9.1-workflow-folders-responsive';
 const SCOPE_URL = new URL(self.registration.scope);
 const ROOT_URL = SCOPE_URL.href;
 const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;

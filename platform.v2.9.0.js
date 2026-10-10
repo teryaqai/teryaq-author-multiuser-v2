@@ -5,7 +5,7 @@
 (() => {
 'use strict';
 
-const APP_VERSION='2.9.0';
+const APP_VERSION='2.9.1';
 let selectedAdminTrashTab='documents';
 const DOCUMENT_SCHEMA_VERSION='2.0.0';
 const PLATFORM_SCHEMA=4;
