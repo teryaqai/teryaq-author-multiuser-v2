@@ -1,3 +1,11 @@
+# TERYAQ Master Tool v3.0.0
+
+ابدأ بملف **UPLOAD_v3.0.0.md** للتعليمات والتغييرات والفحوص.
+
+Apply **UPDATE_SUPABASE_v3.0.0.sql** after migration 026, then deploy the complete app directory. No production database or deployment was accessed during preparation.
+
+## Historical release notes
+
 # TERYAQ Master Tool v2.9.2
 
 ## v2.9.2

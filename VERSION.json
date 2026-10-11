@@ -1,11 +1,17 @@
 {
-  "appVersion": "2.9.2",
+  "appVersion": "3.0.0",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
-  "cloudMigrationVersion": 26,
-  "release": "canonical-workflow-cleanup",
-  "version": "2.9.2",
+  "cloudMigrationVersion": 30,
+  "release": "emerald-workspace-redesign",
+  "version": "3.0.0",
   "updatedAt": "2026-10-11",
-  "notes": "Canonical workflow cleanup: exact visible numbering, separate Scientific Draft tasks 1-4, no synthetic 2.1 task, full Script & Presenting sequence, exact S/V montage branches, and legacy aggregate task retirement.",
-  "name": "TERYAQ Master Tool"
+  "notes": "Emerald workspace redesign; bilingual guide; per-export save destination; optional export end date; template filename suffixes; ZIP/RAR uploads; chapter-start submission gate; UUID executor assignment fix. Apply migrations 027 and 028 after 026. Inline task-table executor picker. AI Hand Off limited to yellow workflow tasks; four unnumbered AI branches; executor-only checklist UI. Apply migrations through 029. Checklist item editing preserves ticks; all app alert/confirm/prompt dialogs use TERYAQ UI. Apply migrations through 030. Task-linked forms show named prerequisite blockers; archive-only forms explicitly warn before submission.",
+  "name": "TERYAQ Master Tool",
+  "requiredMigrations": [
+    "027_submission_chapter_start_guard.sql",
+    "028_workflow_executor_uuid_fix.sql",
+    "029_ai_workflow_scope.sql",
+    "030_edit_checklist_items.sql"
+  ]
 }

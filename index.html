@@ -12,7 +12,7 @@
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="styles.v2.9.2.css">
-  <link rel="stylesheet" href="theme.v2.9.2.css">
+  <link rel="stylesheet" href="design.v3.0.0.css">
   <script src="runtime-config.js"></script>
   <script>
     if ('serviceWorker' in navigator && location.protocol !== 'file:') {
@@ -61,11 +61,11 @@
     <button class="btn primary auth-primary" id="completeInviteBtn" type="submit">Set password & continue</button>
   </form>
 </div>
-<div class="app-shell hidden" id="appShell">
+<div class="app-shell sidebar-collapsed hidden" id="appShell">
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/teryaq-mark.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v2.9.2</span></small></div>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v3.0.0</span></small></div>
       <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><span data-ui-icon="panel-close"></span></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
@@ -79,6 +79,7 @@
       <button class="sidebar-link" data-nav="guide" title="Guide"><span class="nav-icon" data-ui-icon="guide"></span><span class="nav-label">Guide</span></button>
       <button class="sidebar-link hidden" data-nav="admin" id="adminBtn" title="Admin"><span class="nav-icon" data-ui-icon="shield"></span><span class="nav-label">Admin</span></button>
 
+      <button class="sidebar-link sidebar-settings" data-nav="settings" title="Settings & Sync"><span class="nav-icon" data-ui-icon="settings"></span><span class="nav-label">Settings & Sync</span></button>
     </nav>
   </aside>
   <div class="sidebar-scrim hidden" id="sidebarScrim"></div>
@@ -87,13 +88,17 @@
     <div class="brand">
       <button class="mobile-menu" id="sidebarToggle" aria-label="Open menu"><span data-ui-icon="menu"></span></button>
       <button class="btn back-button hidden" id="backBtn" title="Back to documents"><span data-ui-icon="arrow-left"></span><span>Back</span></button>
-      <div class="brand-copy"><h1 id="docTitle">TERYAQ Master Tool</h1><small>Offline Scientific Authoring Workspace</small></div>
+      <div class="workspace-wordmark" aria-label="TERYAQ Master Tool"><strong>TERYAQ</strong><small>Master Tool</small></div><div class="brand-copy"><h1 id="docTitle">TERYAQ Master Tool</h1><small>Offline Scientific Authoring Workspace</small></div>
     </div>
+    <nav class="workspace-nav" aria-label="Workspace navigation">
+      <button class="active" data-nav="home"><span data-ui-icon="home"></span><span>Dashboard</span></button>
+      <button data-nav="documents"><span data-ui-icon="documents"></span><span>Documents</span></button>
+      <button data-nav="courseProgress"><span data-ui-icon="courseProgress"></span><span>Courses</span></button>
+      <button data-nav="templates"><span data-ui-icon="templates"></span><span>Templates</span></button>
+    </nav>
     <div class="top-actions" id="homeActions">
-      <label class="global-search"><span data-ui-icon="search"></span><input id="globalSearch" placeholder="Search documents…"></label>
-      <div class="status-cluster">
-        <span class="sync-status" id="syncStatus">Offline</span>
-      </div>
+      <label class="global-search"><span data-ui-icon="search"></span><input id="globalSearch" placeholder="Search documents…" aria-label="Search documents"></label>
+
       <div class="action-cluster">
         <button class="btn primary" id="syncBtn" title="Sync Now" aria-label="Sync Now"><span data-ui-icon="refresh"></span><span>Sync Now</span></button>
         <button class="btn conflict-summary hidden" id="resolveConflictsBtn"><span data-ui-icon="conflict"></span><span>Conflicts</span></button>
@@ -117,6 +122,7 @@
         </div>
       </div>
     </div>
+    <div class="workspace-sync-state" role="status"><span class="sync-status" id="syncStatus">Offline</span></div>
     <div class="topbar-global-actions">
       <div class="topbar-popover-wrap">
         <button class="topbar-icon-button" id="notificationsButton" type="button" aria-label="Notifications" aria-haspopup="true" aria-expanded="false"><span data-ui-icon="bell"></span><span class="notification-badge hidden" id="notificationBadge">0</span></button>
@@ -245,15 +251,23 @@
 
   <main>
     <section class="view active" id="homeView">
-      <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v2.9.2</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
-        <div class="stat-grid" id="dashboardStats"></div>
-        <section class="portal-panel dashboard-updates-panel"><div class="section-head"><div><span class="eyebrow">WHAT'S NEW</span><h3>Updates & announcements</h3></div></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
-        <div class="portal-grid two-thirds">
-          <section class="portal-panel"><div class="section-head"><div><span class="eyebrow">Workspace</span><h3>Recent documents</h3></div><button class="text-button" data-nav="documents">View all →</button></div><div class="cards compact-cards" id="documentCards"></div></section>
-          <aside class="portal-panel"><span class="eyebrow">Quick help</span><h3>Need a hand?</h3><p class="muted">The bilingual guide explains offline work, syncing, conflicts, history, versions, and recovery.</p><button class="btn" data-nav="guide">Open guide / افتح الدليل</button></aside>
+      <div class="portal-page dashboard-v3">
+        <div class="dashboard-welcome-row">
+          <section class="hero dashboard-hero">
+            <div class="hero-copy"><span class="eyebrow">YOUR SCIENTIFIC WORKSPACE</span><h2 dir="auto">مرحبًا، <bdi id="welcomeEmail"></bdi></h2><p>Create, edit offline, and keep your scientific work in sync.</p><button class="btn primary new-document-btn" id="newDocumentBtn"><span data-ui-icon="plus"></span><span>New document</span></button></div>
+            <img class="welcome-art" src="assets/workspace.svg" alt="" aria-hidden="true">
+          </section>
+          <div class="template-quick-grid" id="dashboardTemplates" aria-label="Start from a template"></div>
         </div>
-        <section class="portal-panel"><div class="section-head"><div><span class="eyebrow">Quick start</span><h3>Start from a template</h3></div><button class="text-button" data-nav="templates">All templates →</button></div><div class="template-quick-grid" id="dashboardTemplates"></div></section>
+        <div class="stat-grid" id="dashboardStats" aria-label="Workspace summary"></div>
+        <div class="dashboard-content-grid">
+          <section class="portal-panel recent-documents-panel"><div class="section-head"><h3>Recent documents</h3><button class="text-button" data-nav="documents">View all <span data-ui-icon="arrow-right"></span></button></div><div class="recent-list-labels" aria-hidden="true"><span>Document</span><span>Edited</span><span>Status</span><span></span></div><div class="cards compact-cards" id="documentCards"></div></section>
+          <div class="dashboard-side-stack">
+            <section class="portal-panel dashboard-updates-panel"><div class="section-head"><h3>Updates & announcements</h3><span data-ui-icon="megaphone" aria-hidden="true"></span></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
+            <aside class="portal-panel dashboard-guide"><div><h3>Your workspace guide</h3><p>Offline work, syncing, history, and recovery — explained in Arabic and English.</p><button class="btn" data-nav="guide">Open guide <span data-ui-icon="arrow-right"></span></button></div><img src="assets/guide.svg" alt="" aria-hidden="true"></aside>
+          </div>
+        </div>
+        <footer class="dashboard-footer"><span>TERYAQ Master Tool</span><span class="version-badge">Version <b id="appVersionBadge">v3.0.0</b></span><button class="text-button" data-nav="templates">Browse all templates <span data-ui-icon="arrow-right"></span></button></footer>
       </div>
     </section>
 
@@ -309,7 +323,7 @@
                 <div class="cover-body">
                   <div class="meta-grid">
                     <div class="field"><label>Author</label><div id="metaName" class="author-picker-host" aria-label="Authors"></div><small class="field-hint">Select one or more authors.</small></div><div class="field"><label>Category</label><select id="metaCategory"></select></div><div class="field"><label>Course</label><select id="metaCourse"></select></div><div class="field"><label>Version</label><select id="metaVersion"></select></div>
-                    <div class="field"><label><span data-ui-icon="date"></span> Start date</label><input id="metaStart" type="date"></div><div class="field"><label><span data-ui-icon="date"></span> End date</label><input id="metaEnd" type="date"></div>
+                    <div class="field"><label><span data-ui-icon="date"></span> Start date</label><input id="metaStart" type="date"></div><div class="field"><label><span data-ui-icon="date"></span> End date (optional)</label><input id="metaEnd" type="date" aria-describedby="endDateHelp"><small class="field-hint" id="endDateHelp">Filled with today’s date when you confirm an export, if left blank.</small></div>
                     <div class="field span-2"><label>Chapter</label><select id="metaChapter"></select><small class="field-hint">Only chapters belonging to the selected course are shown.</small></div>
                     <div class="field" style="grid-column:1/-1"><label>General notes</label><textarea id="metaNotes"></textarea></div>
                   </div>
@@ -358,10 +372,11 @@
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
-<script src="platform.v2.9.2.js"></script>
-<script src="workflow.v2.9.2.js"></script>
-<script src="guide.v2.9.2.js"></script>
-<script src="app.v2.9.2.js"></script>
-<script src="submissions.v2.9.2.js"></script>
+<script src="dialogs.v3.0.0.js"></script>
+<script src="platform.v3.0.0.js"></script>
+<script src="workflow.v3.0.0.js"></script>
+<script src="guide.v3.0.0.js"></script>
+<script src="app.v3.0.0.js"></script>
+<script src="submissions.v3.0.0.js"></script>
 </body>
 </html>

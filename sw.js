@@ -1,4 +1,4 @@
-const CACHE = 'teryaq-master-tool-v2.9.2-redesign-1';
+const CACHE = 'teryaq-master-tool-v3.0.0-emerald';
 const SCOPE_URL = new URL(self.registration.scope);
 const ROOT_URL = SCOPE_URL.href;
 const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
@@ -7,12 +7,19 @@ const CORE_ASSETS = [
   ROOT_URL,
   APP_SHELL_URL,
   new URL('styles.v2.9.2.css', SCOPE_URL).href,
-  new URL('theme.v2.9.2.css', SCOPE_URL).href,
-  new URL('platform.v2.9.2.js', SCOPE_URL).href,
-  new URL('workflow.v2.9.2.js', SCOPE_URL).href,
-  new URL('guide.v2.9.2.js', SCOPE_URL).href,
-  new URL('app.v2.9.2.js', SCOPE_URL).href,
-  new URL('submissions.v2.9.2.js', SCOPE_URL).href,
+  new URL('design.v3.0.0.css', SCOPE_URL).href,
+  new URL('assets/announcement.svg', SCOPE_URL).href,
+  new URL('assets/draft.svg', SCOPE_URL).href,
+  new URL('assets/figures.svg', SCOPE_URL).href,
+  new URL('assets/guide.svg', SCOPE_URL).href,
+  new URL('assets/script.svg', SCOPE_URL).href,
+  new URL('assets/workspace.svg', SCOPE_URL).href,
+  new URL('dialogs.v3.0.0.js', SCOPE_URL).href,
+  new URL('platform.v3.0.0.js', SCOPE_URL).href,
+  new URL('workflow.v3.0.0.js', SCOPE_URL).href,
+  new URL('guide.v3.0.0.js', SCOPE_URL).href,
+  new URL('app.v3.0.0.js', SCOPE_URL).href,
+  new URL('submissions.v3.0.0.js', SCOPE_URL).href,
   new URL('vendor/jszip.min.js', SCOPE_URL).href,
   new URL('vendor/JSZip-LICENSE.md', SCOPE_URL).href,
   new URL('vendor/pdf.min.mjs', SCOPE_URL).href,
@@ -29,12 +36,7 @@ const CORE_ASSETS = [
   new URL('icons/default-avatar.svg', SCOPE_URL).href,
 ];
 
-const OPTIONAL_ASSETS = [
-  new URL('fonts/Tajawal-ExtraLight.ttf', SCOPE_URL).href,
-  new URL('fonts/Tajawal-Light.ttf', SCOPE_URL).href,
-  new URL('fonts/Tajawal-ExtraBold.ttf', SCOPE_URL).href,
-  new URL('fonts/Tajawal-Black.ttf', SCOPE_URL).href,
-];
+const OPTIONAL_ASSETS = [];
 
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
