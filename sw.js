@@ -1,4 +1,4 @@
-const CACHE = 'teryaq-master-tool-v2.9.2-hotfix-assets';
+const CACHE = 'teryaq-master-tool-v2.9.2-redesign-1';
 const SCOPE_URL = new URL(self.registration.scope);
 const ROOT_URL = SCOPE_URL.href;
 const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
@@ -7,6 +7,7 @@ const CORE_ASSETS = [
   ROOT_URL,
   APP_SHELL_URL,
   new URL('styles.v2.9.2.css', SCOPE_URL).href,
+  new URL('theme.v2.9.2.css', SCOPE_URL).href,
   new URL('platform.v2.9.2.js', SCOPE_URL).href,
   new URL('workflow.v2.9.2.js', SCOPE_URL).href,
   new URL('guide.v2.9.2.js', SCOPE_URL).href,
@@ -28,7 +29,12 @@ const CORE_ASSETS = [
   new URL('icons/default-avatar.svg', SCOPE_URL).href,
 ];
 
-const OPTIONAL_ASSETS = [];
+const OPTIONAL_ASSETS = [
+  new URL('fonts/Tajawal-ExtraLight.ttf', SCOPE_URL).href,
+  new URL('fonts/Tajawal-Light.ttf', SCOPE_URL).href,
+  new URL('fonts/Tajawal-ExtraBold.ttf', SCOPE_URL).href,
+  new URL('fonts/Tajawal-Black.ttf', SCOPE_URL).href,
+];
 
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
