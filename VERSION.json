@@ -1,17 +1,18 @@
 {
-  "appVersion": "3.0.1",
+  "appVersion": "3.0.2",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
-  "cloudMigrationVersion": 30,
-  "release": "claude-ui-filled-icons",
-  "version": "3.0.1",
+  "cloudMigrationVersion": 31,
+  "release": "ui-fixes-native-save-form-order",
+  "version": "3.0.2",
   "updatedAt": "2026-10-11",
-  "notes": "Claude visual theme merged into v3.0.0 functionality. Original filled SVG icons; preserved export, submission, assignment, AI scope, checklist and custom-dialog behavior. No new database migration; migrations through 030 remain required.",
+  "notes": "Fix View only and Outline icon backgrounds; opaque topbar and continuous canvas; direct native Save As with default starting folder; admin-controlled submission form positions. Apply migration 031 after 030.",
   "name": "TERYAQ Master Tool",
   "requiredMigrations": [
     "027_submission_chapter_start_guard.sql",
     "028_workflow_executor_uuid_fix.sql",
     "029_ai_workflow_scope.sql",
-    "030_edit_checklist_items.sql"
+    "030_edit_checklist_items.sql",
+    "031_submission_form_display_order.sql"
   ]
 }

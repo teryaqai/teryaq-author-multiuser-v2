@@ -1,5 +1,5 @@
-# TERYAQ Master Tool v3.0.1
+# TERYAQ Master Tool v3.0.2
 
-ابدأ بـ **UPLOAD_v3.0.1.md**: تعليمات النشر، حالة SQL، ما تغيّر، وما تم فحصه.
+ابدأ بـ **UPLOAD_v3.0.2.md**. يلزم تطبيق **UPDATE_SUPABASE_v3.0.2.sql** بعد التحديث 030 ثم نشر ملفات الحزمة كاملة.
 
-Claude UI + filled icons, preserving the v3.0.0 functional release. Database migration version: 030. No new migration in this update.
+UI fixes, direct native Save As, and admin-controlled submission form order.

@@ -1,0 +1,77 @@
+/* File destination chooser is shared by all download/export entry points. */
+.export-destination-dialog{width:min(530px,calc(100vw - 32px));max-height:calc(100dvh - 40px);overflow:auto;padding:32px;border:1px solid #d8e6dc;border-radius:24px;background:#fcfefc;color:#23432e;font:15px/1.5 Tajawal,Arial,sans-serif;box-shadow:0 30px 100px #173e3340}
+.export-destination-dialog::backdrop{background:#173e3366;backdrop-filter:blur(4px)}.export-destination-dialog[open]{display:block}.export-destination-dialog:not([open]){display:none}.export-destination-dialog [hidden]{display:none!important}.export-dialog-fallback{position:fixed;inset:50% auto auto 50%;transform:translate(-50%,-50%);margin:0;z-index:99999;box-shadow:0 0 0 100vmax #173e3366}.export-destination-icon{width:54px;height:54px;display:grid;place-items:center;background:#e7f2e6;color:#408a71;border-radius:17px;margin-bottom:18px}.export-destination-icon .ui-icon{width:26px;height:26px}.export-destination-kicker{font-size:10px;letter-spacing:1.3px;color:#8aa080;font-weight:700}.export-destination-dialog h2{font-size:28px;line-height:1.25;margin:9px 0;color:#173e33}.export-destination-dialog p{margin:7px 0 16px;color:#7f9474}.export-filename-field{display:grid;gap:7px;font-size:12px;font-weight:700;color:#617e53;margin-top:22px}.export-name{width:100%;padding:12px 14px;border:1px solid #d7e5ce;border-radius:11px;background:#fff;color:#274528;font-size:14px;direction:ltr}.export-destination-dialog .export-size{font-size:11px;color:#9aac8c;margin-top:7px}.export-destination-dialog .export-destination-help{font-size:13px;line-height:1.75}.export-destination-dialog .export-destination-error{color:#a74336;font-size:13px;overflow-wrap:anywhere}.export-destination-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px;margin-top:22px}.export-destination-actions .btn{padding:11px 14px;border-radius:11px;font-size:13px;border:1px solid #d9e5d3;background:#fff;cursor:pointer}.export-destination-actions .btn.primary{background:#173e33;color:#fff;border-color:#173e33}.export-destination-actions button:disabled{opacity:.5;cursor:wait}.export-destination-actions .export-cancel{margin-right:auto}.export-destination-dialog[aria-busy=true] .export-destination-icon{opacity:.5}
+@media(max-width:500px){.export-destination-dialog{padding:24px}.export-destination-dialog h2{font-size:24px}.export-destination-actions{flex-direction:column}.export-destination-actions .btn{width:100%}}
+
+.submission-chapter-start{display:block;margin-top:9px;line-height:1.7;color:#34715c}.submission-chapter-start.is-error{color:#a53732}
+
+.task-executor-trigger{font:inherit;color:inherit;background:transparent;border:1px dashed transparent;border-radius:9px;display:inline-flex;align-items:center;gap:9px;text-align:start;padding:7px 9px;margin-inline:-9px;max-width:220px;cursor:pointer}.task-executor-trigger>span:first-child{overflow-wrap:anywhere}.task-executor-trigger>span:last-child{color:#408a71}.task-executor-trigger:hover,.task-executor-trigger[aria-expanded=true]{background:#e6f0eb;border-color:#9cc6b5}.task-executor-trigger:focus-visible{outline:2px solid #408a71;outline-offset:3px}.task-executor-trigger:disabled{opacity:.6;cursor:wait}
+.table-assignment-picker{position:fixed;inset:auto;margin:0;width:360px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);padding:0;border:1px solid #dce8e2;border-radius:18px;background:#fff;color:#243d34;box-shadow:0 18px 65px #173e3330;font-family:Tajawal,Arial,sans-serif;overflow:auto}.table-assignment-picker::backdrop{background:#173e330a}.table-assignment-picker form{padding:18px}.table-assignment-picker header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:15px}.table-assignment-picker h3{margin:0 0 5px;font-size:17px}.table-assignment-picker small{display:block;color:#6d857b;line-height:1.5}.table-assignment-close{border:0;background:#eef4f1;color:#3a6352;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:22px;flex-shrink:0}.table-assignment-search{display:grid;gap:7px;font-size:12px}.table-assignment-search input{width:100%;border:1px solid #dbe6e0;padding:10px 12px;border-radius:10px;font:inherit;font-size:14px}.table-assignment-team,.table-assignment-options label{display:flex;align-items:center;gap:10px;padding:10px 8px;font-size:14px;cursor:pointer}.table-assignment-team{margin:8px 0;border-bottom:1px solid #eaf0ed}.table-assignment-options{max-height:240px;overflow:auto;overscroll-behavior:contain}.table-assignment-options label{border-radius:9px}.table-assignment-options label:hover{background:#f0f6f3}.table-assignment-options [hidden]{display:none}.table-assignment-picker input[type=checkbox]{accent-color:#408a71;flex-shrink:0}.table-assignment-picker footer{display:flex;justify-content:flex-end;gap:8px;padding-top:12px;border-top:1px solid #eaf0ed}.table-assignment-help,.table-assignment-empty{font-size:12px;color:#6c8278;line-height:1.6}.table-assignment-error{color:#a53732;font-size:13px;line-height:1.6}.table-assignment-error:empty{display:none}
+
+.task-checklist-item{display:flex;align-items:center;gap:8px;justify-content:space-between}.task-checklist-item label{flex:1;min-width:0}.checklist-edit-item{flex-shrink:0;white-space:nowrap}.teryaq-message-dialog{width:440px;max-width:calc(100vw - 28px);max-height:calc(100dvh - 36px);overflow:auto;border:1px solid #dfe9e3;border-radius:24px;padding:28px;color:#1e4134;background:#fff;box-shadow:0 28px 100px #153b3438;font-family:Tajawal,Arial,sans-serif}.teryaq-message-dialog::backdrop{background:#122f2a50;backdrop-filter:blur(4px)}.teryaq-dialog-mark{width:46px;height:46px;border-radius:14px;background:#e5f0eb;color:#408a71;display:grid;place-items:center;font:bold 24px Tajawal,Arial}.teryaq-message-dialog h2{font-size:20px;margin:18px 0 12px}.teryaq-message-dialog p{font-size:15px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 18px}.teryaq-dialog-input{display:grid;gap:8px;font-size:12px;color:#6b8278;margin-bottom:18px}.teryaq-dialog-input input{font:15px Tajawal,Arial;border:1px solid #cbded3;border-radius:11px;padding:11px;width:100%;color:#1e4134}.teryaq-message-dialog footer{display:flex;justify-content:flex-end;gap:9px}.teryaq-message-dialog [hidden]{display:none!important}.teryaq-message-dialog input:focus-visible{outline:2px solid #408a71;outline-offset:2px}
+
+.submission-link-notice{padding:16px 20px;margin-bottom:16px;border:1px solid #e5d8b1;border-radius:15px;background:#fffbef;color:#755b20;line-height:1.8}.submission-link-notice p{margin:4px 0 0;font-size:14px}
+
+/* Solid vector system: user-uploaded mask overrides remain untouched. */
+.ui-icon.ui-filled-icon{fill:currentColor!important;stroke:none!important;stroke-width:0!important;flex-shrink:0;vertical-align:middle}
+.ui-icon.ui-filled-icon *{stroke:none!important}
+@media screen{
+ .app-shell .sidebar-link .nav-icon .ui-filled-icon{width:20px!important;height:20px!important;margin:0!important}
+ .app-shell .stat-card .stat-icon .ui-filled-icon{width:22px!important;height:22px!important}
+ .app-shell .task-card-title .ui-filled-icon{width:21px;height:21px}
+ .app-shell .topbar-icon-button .ui-filled-icon{width:20px!important;height:20px!important}
+ .app-shell .task-checklist-item{gap:10px;align-items:center}
+ .app-shell .task-checklist-item label{min-width:0;overflow-wrap:anywhere}
+ .app-shell .task-checklist-item .checklist-edit-item{padding:6px 10px}
+ .ai-handoff-quick-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:16px 0}
+ .ai-handoff-details{border:1px solid #e6ecea;border-radius:16px;padding:14px;background:#fff}
+ .ai-handoff-details>summary{cursor:pointer;color:#2b6553;font-weight:700}
+ .ai-handoff-details[open]>summary{margin-bottom:14px}
+ .ai-handoff-details .ai-handoff-grid{margin-top:12px}
+ .export-destination-dialog,.teryaq-message-dialog,.table-assignment-picker{font-family:"Tajawal UI",Tajawal,Arial,sans-serif;color:#24352f;background:#fff;border-color:#e6ecea}
+ .export-destination-dialog,.teryaq-message-dialog{border-radius:28px}
+ .export-destination-dialog h2,.teryaq-message-dialog h2{color:#13211c}
+ .export-destination-dialog p,.export-destination-dialog .export-destination-help{color:#6a7a74}
+ .export-destination-icon,.teryaq-dialog-mark{background:#dcefe6;color:#408a71}
+ .export-destination-actions .btn,.teryaq-message-dialog .btn,.table-assignment-picker .btn{border-radius:999px;background:#eff3f1;color:#24352f;border-color:transparent}
+ .export-destination-actions .btn.primary,.teryaq-message-dialog .btn.primary,.table-assignment-picker .btn.primary{background:#408a71;color:#fff;border-color:#408a71}
+ .export-destination-dialog :focus-visible,.teryaq-message-dialog :focus-visible,.table-assignment-picker :focus-visible{outline:3px solid #8cc4ae;outline-offset:3px}
+}
+@media(max-width:520px){.task-checklist-item{flex-wrap:wrap}.task-checklist-item label{flex-basis:calc(100% - 80px)}}
+@media(prefers-reduced-motion:reduce){.ui-icon{transition:none!important}}
+
+/* v3.0.2 — toolbar icon hosts contain SVGs; they are not CSS masks. */
+.view-ribbon-icon[data-ui-icon]{display:inline-grid;place-items:center;flex:0 0 18px;width:18px;height:18px;background:transparent!important;-webkit-mask:none;mask:none}
+.view-ribbon-icon[data-ui-icon]>.ui-icon{display:block;width:18px;height:18px}
+
+@media screen{
+ /* One continuous canvas; remove the decorative inset board and side bands. */
+ html:not(:has(.app-shell.editor-mode)),body:not(:has(.app-shell.editor-mode)){background:#f6f8f7!important}
+ body:not(:has(.app-shell.editor-mode))::before{display:none!important}
+ .app-shell:not(.editor-mode){background:#f6f8f7!important}
+ .app-shell:not(.editor-mode) .app-frame{padding-top:12px!important;padding-inline-end:16px!important;min-width:0;min-height:100dvh}
+ .app-shell:not(.editor-mode) .portal-page{padding:24px 0 18px!important;min-width:0}
+ /* Opaque sticky header — scrolling cards cannot show through it. */
+ .app-shell:not(.editor-mode) .app-frame>.topbar{top:12px;margin:0;min-height:74px;padding:12px 18px!important;background:#fff!important;border:1px solid #e1e9e5!important;border-radius:22px!important;box-shadow:0 5px 20px rgba(31,77,63,.08)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;z-index:80}
+ .app-shell.editor-mode .app-frame>.topbar{background:#fff!important;border:1px solid #e1e9e5!important;box-shadow:0 5px 20px rgba(31,77,63,.08)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+ .app-shell:not(.editor-mode) .app-frame>.topbar .brand{min-width:0}
+ .form-order-list{display:grid;gap:10px}
+ .form-order-row{display:grid;grid-template-columns:38px minmax(0,1fr) 155px auto;align-items:center;gap:14px;padding:14px 16px;border:1px solid #e1e9e5;border-radius:16px;background:#f8faf9}
+ .form-order-number{display:grid;place-items:center;width:32px;height:32px;border-radius:11px;background:#dcefe6;color:#2b6553;font-size:16px}
+ .form-order-title{min-width:0;display:grid;gap:5px}
+ .form-order-title strong{font-size:14px;overflow-wrap:anywhere}
+ .form-order-title small{color:#6a7a74;font-size:12px}
+ .form-order-row>label{display:grid;gap:6px;font-size:12px;color:#6a7a74}
+ .form-order-row select{width:100%;min-width:0}
+ .form-order-status{min-height:1.5em;margin:12px 0 0;font-size:14px;color:#2b6553;overflow-wrap:anywhere}
+ .download-location-summary small{display:block;margin-top:6px;color:#6a7a74}
+ #exportFolderStatus:empty{display:none}
+}
+@media screen and (max-width:820px){
+ .app-shell:not(.editor-mode) .app-frame{margin-left:0!important;padding:8px 12px 0!important}
+ .app-shell:not(.editor-mode) .app-frame>.topbar{top:8px;margin:0;border-radius:18px!important;padding:10px 12px!important;min-height:64px}
+ .app-shell:not(.editor-mode) .portal-page{padding:18px 0!important}
+ .form-order-row{grid-template-columns:32px minmax(0,1fr);gap:12px}
+ .form-order-row>label{grid-column:2}
+ .form-order-row>[data-move-form]{grid-column:2;justify-self:start}
+}
