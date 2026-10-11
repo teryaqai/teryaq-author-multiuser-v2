@@ -1,12 +1,12 @@
 {
-  "appVersion": "3.0.0",
+  "appVersion": "3.0.1",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
   "cloudMigrationVersion": 30,
-  "release": "emerald-workspace-redesign",
-  "version": "3.0.0",
+  "release": "claude-ui-filled-icons",
+  "version": "3.0.1",
   "updatedAt": "2026-10-11",
-  "notes": "Emerald workspace redesign; bilingual guide; per-export save destination; optional export end date; template filename suffixes; ZIP/RAR uploads; chapter-start submission gate; UUID executor assignment fix. Apply migrations 027 and 028 after 026. Inline task-table executor picker. AI Hand Off limited to yellow workflow tasks; four unnumbered AI branches; executor-only checklist UI. Apply migrations through 029. Checklist item editing preserves ticks; all app alert/confirm/prompt dialogs use TERYAQ UI. Apply migrations through 030. Task-linked forms show named prerequisite blockers; archive-only forms explicitly warn before submission.",
+  "notes": "Claude visual theme merged into v3.0.0 functionality. Original filled SVG icons; preserved export, submission, assignment, AI scope, checklist and custom-dialog behavior. No new database migration; migrations through 030 remain required.",
   "name": "TERYAQ Master Tool",
   "requiredMigrations": [
     "027_submission_chapter_start_guard.sql",
