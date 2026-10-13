@@ -1,4 +1,4 @@
-const CACHE = 'teryaq-master-tool-v3.0.2-claude-filled';
+const CACHE = 'teryaq-master-tool-v3.0.3-claude-filled';
 const SCOPE_URL = new URL(self.registration.scope);
 const ROOT_URL = SCOPE_URL.href;
 const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
@@ -7,14 +7,14 @@ const CORE_ASSETS = [
   ROOT_URL,
   APP_SHELL_URL,
   new URL('styles.v2.9.2.css', SCOPE_URL).href,
-  new URL('theme.v3.0.2.css', SCOPE_URL).href,
-  new URL('enhancements.v3.0.2.css', SCOPE_URL).href,
-  new URL('dialogs.v3.0.2.js', SCOPE_URL).href,
-  new URL('platform.v3.0.2.js', SCOPE_URL).href,
-  new URL('workflow.v3.0.2.js', SCOPE_URL).href,
-  new URL('guide.v3.0.2.js', SCOPE_URL).href,
-  new URL('app.v3.0.2.js', SCOPE_URL).href,
-  new URL('submissions.v3.0.2.js', SCOPE_URL).href,
+  new URL('theme.v3.0.3.css', SCOPE_URL).href,
+  new URL('enhancements.v3.0.3.css', SCOPE_URL).href,
+  new URL('dialogs.v3.0.3.js', SCOPE_URL).href,
+  new URL('platform.v3.0.3.js', SCOPE_URL).href,
+  new URL('workflow.v3.0.3.js', SCOPE_URL).href,
+  new URL('guide.v3.0.3.js', SCOPE_URL).href,
+  new URL('app.v3.0.3.js', SCOPE_URL).href,
+  new URL('submissions.v3.0.3.js', SCOPE_URL).href,
   new URL('vendor/jszip.min.js', SCOPE_URL).href,
   new URL('vendor/JSZip-LICENSE.md', SCOPE_URL).href,
   new URL('vendor/pdf.min.mjs', SCOPE_URL).href,

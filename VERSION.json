@@ -1,18 +1,20 @@
 {
-  "appVersion": "3.0.2",
+  "appVersion": "3.0.3",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
-  "cloudMigrationVersion": 31,
-  "release": "ui-fixes-native-save-form-order",
-  "version": "3.0.2",
-  "updatedAt": "2026-10-11",
-  "notes": "Fix View only and Outline icon backgrounds; opaque topbar and continuous canvas; direct native Save As with default starting folder; admin-controlled submission form positions. Apply migration 031 after 030.",
+  "cloudMigrationVersion": 33,
+  "release": "profiles-task-actions-workspace-reset",
+  "version": "3.0.3",
+  "updatedAt": "2026-10-13",
+  "notes": "Admin-only profiles, automatic executor and version filenames, task-list and block-control fixes, Discard, bilingual Guide; optional work reset. Install 032 and 033.",
   "name": "TERYAQ Master Tool",
   "requiredMigrations": [
     "027_submission_chapter_start_guard.sql",
     "028_workflow_executor_uuid_fix.sql",
     "029_ai_workflow_scope.sql",
     "030_edit_checklist_items.sql",
-    "031_submission_form_display_order.sql"
+    "031_submission_form_display_order.sql",
+    "032_profiles_executor_controls.sql",
+    "033_workspace_reset.sql"
   ]
 }

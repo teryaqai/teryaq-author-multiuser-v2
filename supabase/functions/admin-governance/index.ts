@@ -26,6 +26,47 @@ Deno.serve(async (request) => {
 
     const payload = await request.json()
     const action = String(payload.action ?? '')
+    if (action === 'reset_workspace') {
+      if (payload.confirmation !== 'RESET WORKSPACE') throw new Error('Explicit reset confirmation required')
+      const expected = String(payload.generation ?? '')
+      const { error: beginError } = await adminClient.rpc('workspace_reset_begin', { p_expected: expected })
+      if (beginError) throw beginError
+      // Delete actual Storage objects through the Storage API, never via storage.objects SQL.
+      // Bounded, resumable batches: an interrupted request keeps writes paused.
+      const deadline = Date.now() + 20000
+      let removed = 0
+      while (Date.now() < deadline) {
+        const { data: files, error: filesError } = await adminClient.rpc('workspace_reset_files')
+        if (filesError) throw filesError
+        if (!files?.length) {
+          const { data: generation, error: finishError } = await adminClient.rpc('workspace_reset_finish', { p_expected: expected })
+          if (finishError) throw finishError
+          return json({ complete: true, generation, removed })
+        }
+        for (const bucket of [...new Set(files.map((f: { bucket_id: string }) => f.bucket_id))]) {
+          const paths = files.filter((f: { bucket_id: string }) => f.bucket_id === bucket).map((f: { name: string }) => f.name)
+          const { error } = await adminClient.storage.from(String(bucket)).remove(paths)
+          if (error) throw error
+          removed += paths.length
+        }
+      }
+      return json({ complete: false, removed, resume: true })
+    }
+    if (action === 'update_profile') {
+      const target = String(payload.user_id ?? '')
+      const values = payload.profile ?? {}
+      // Validate all profile values before changing Auth; no credential is returned.
+      const { data: old, error: lookupError } = await adminClient.from('profiles').select('*').eq('id', target).single()
+      if (lookupError || !old) throw new Error('Unknown account')
+      const { error: validateError } = await adminClient.rpc('admin_update_profile', { p_user: target, p_values: { ...values, email: old.email } })
+      if (validateError) throw validateError
+      const { error: authError } = await adminClient.auth.admin.updateUserById(target, { email: String(values.email), email_confirm: true })
+      if (authError) {
+        await adminClient.rpc('admin_update_profile', { p_user: target, p_values: old })
+        throw authError
+      }
+      return json({ updated: true })
+    }
     if (action === 'purge_submission') {
       const submissionId = String(payload.submission_id ?? '')
       if (!/^[0-9a-f-]{36}$/i.test(submissionId)) throw new Error('Invalid submission ID')
