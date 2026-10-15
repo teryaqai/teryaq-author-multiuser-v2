@@ -1,12 +1,12 @@
 {
-  "appVersion": "3.0.3",
+  "appVersion": "3.0.4-sheets-test.1",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
-  "cloudMigrationVersion": 33,
-  "release": "profiles-task-actions-workspace-reset",
-  "version": "3.0.3",
-  "updatedAt": "2026-10-13",
-  "notes": "Admin-only profiles, automatic executor and version filenames, task-list and block-control fixes, Discard, bilingual Guide; optional work reset. Install 032 and 033.",
+  "cloudMigrationVersion": 36,
+  "release": "single-task-google-sheets-experiment",
+  "version": "3.0.4-sheets-test.1",
+  "updatedAt": "2026-10-15",
+  "notes": "One allowlisted task mirrored to Google Sheets. Separate Edge Function and Database Webhook setup required. Columns provisional. No live deployment or credentials included.",
   "name": "TERYAQ Master Tool",
   "requiredMigrations": [
     "027_submission_chapter_start_guard.sql",
@@ -15,6 +15,9 @@
     "030_edit_checklist_items.sql",
     "031_submission_form_display_order.sql",
     "032_profiles_executor_controls.sql",
-    "033_workspace_reset.sql"
+    "033_workspace_reset.sql",
+    "034_qf_forms_and_dates.sql",
+    "035_questions_flashcards_workflow.sql",
+    "036_reset_resume_diagnostics.sql"
   ]
 }

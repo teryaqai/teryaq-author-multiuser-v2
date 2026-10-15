@@ -7,6 +7,7 @@ const corsHeaders = {
 
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+  let phase = 'authentication'
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -29,6 +30,10 @@ Deno.serve(async (request) => {
     if (action === 'reset_workspace') {
       if (payload.confirmation !== 'RESET WORKSPACE') throw new Error('Explicit reset confirmation required')
       const expected = String(payload.generation ?? '')
+      phase = 'reset_preflight'
+      const { error: preflightError } = await adminClient.rpc('workspace_reset_preview')
+      if (preflightError) throw preflightError
+      phase = 'reset_begin'
       const { error: beginError } = await adminClient.rpc('workspace_reset_begin', { p_expected: expected })
       if (beginError) throw beginError
       // Delete actual Storage objects through the Storage API, never via storage.objects SQL.
@@ -36,15 +41,18 @@ Deno.serve(async (request) => {
       const deadline = Date.now() + 20000
       let removed = 0
       while (Date.now() < deadline) {
+        phase = 'list_uploaded_files'
         const { data: files, error: filesError } = await adminClient.rpc('workspace_reset_files')
         if (filesError) throw filesError
         if (!files?.length) {
+          phase = 'reset_database'
           const { data: generation, error: finishError } = await adminClient.rpc('workspace_reset_finish', { p_expected: expected })
           if (finishError) throw finishError
           return json({ complete: true, generation, removed })
         }
         for (const bucket of [...new Set(files.map((f: { bucket_id: string }) => f.bucket_id))]) {
           const paths = files.filter((f: { bucket_id: string }) => f.bucket_id === bucket).map((f: { name: string }) => f.name)
+          phase = `delete_files:${String(bucket)}`
           const { error } = await adminClient.storage.from(String(bucket)).remove(paths)
           if (error) throw error
           removed += paths.length
@@ -124,7 +132,9 @@ Deno.serve(async (request) => {
     if (purgeError) throw purgeError
     return json(result)
   } catch (error) {
-    return json({ error: error instanceof Error ? error.message : String(error) }, 400)
+    const detail = error && typeof error === 'object' ? error as { message?: string; error?: string; code?: string; details?: string; hint?: string } : null
+    const message = detail?.message || detail?.error || (typeof error === 'string' ? error : 'Request failed')
+    return json({ error: message, phase, code: detail?.code, details: detail?.details, hint: detail?.hint }, 400)
   }
 })
 

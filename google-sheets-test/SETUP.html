@@ -1,0 +1,81 @@
+<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>تجربة ربط ترياق مع Google Sheets</title><style>@font-face{font-family:Tajawal;src:url('../fonts/Tajawal-Regular.ttf')}@font-face{font-family:Tajawal;src:url('../fonts/Tajawal-Bold.ttf');font-weight:700}*{box-sizing:border-box}body{font:18px/1.9 Tajawal,Arial;background:#f3f7f4;color:#243e35;margin:0}main{max-width:960px;margin:auto;padding:32px 20px}header,section{background:white;border:1px solid #d7e6de;border-radius:16px;padding:25px;margin-bottom:20px}header{border-top:6px solid #408a71}h1,h2{line-height:1.5}h2{color:#408a71;font-size:25px}a{color:#28765b}code,pre,input{direction:ltr;unicode-bidi:embed}code{background:#eef4f0;padding:2px 5px;border-radius:4px}pre{direction:ltr;text-align:left;font:14px/1.6 monospace;white-space:pre;overflow:auto;max-height:460px;background:#17382d;color:#effaf4;padding:18px;border-radius:12px}table{border-collapse:collapse;width:100%;font-size:16px}td,th{padding:12px;text-align:right;border:1px solid #d7e6de}th{background:#e6f1eb}button{font:700 17px Tajawal;background:#408a71;color:white;border:0;border-radius:8px;padding:12px 22px;cursor:pointer}.hint{background:#edf5f0;padding:15px;border-radius:10px}li{margin-bottom:8px}small{color:#587568}</style><main>
+<header><small>TERYAQ MASTER TOOL · 3.0.4-sheets-test.1</small><h1>تجربة متابعة مهمة واحدة في Google Sheets</h1><p>الأعمدة تجريبية وقابلة للتغيير لاحقًا. المصدر هو ترياق؛ الشيت يعرض نسخة للمتابعة. تعديل الشيت لا يعدّل ترياق.</p><p class="hint">الحزمة جاهزة للإعداد، ولم تُنشر على موقعك أو يُجرّب إرسال حي إلى حساب Google. لا يوجد فيها رموز سرية أو بيانات دخول.</p></header>
+<section><h2>1. رفع نسخة التجربة</h2><ol><li>احتفظ بنسخة موقعك الحالية للرجوع إليها. استخدم نسخة تجريبية من الموقع إن كانت متاحة.</li><li>فك ضغط الحزمة. حدّث ملفات الموقع بمحتويات مجلد المشروع، بنفس طريقة رفع تحديثاتك السابقة، مع إبقاء إعدادات Render وSupabase الحالية.</li><li>هذه الإضافة لا تحتاج تشغيل ملف SQL جديد، ولا إعادة تشغيل ملف تحديث 3.0.4 إذا كان مطبقًا بالفعل. تعتمد على قاعدة بيانات 3.0.4 المكتملة.</li><li>افتح الموقع وحدّث الصفحة. تأكد من ظهور <code>3.0.4-sheets-test.1</code>.</li><li>سجّل بحساب أدمن، وافتح <b>Admin → Google Sheets — Test</b>. اختر الكورس ثم الشابتر ثم مهمة تجريبية من أحدث دورة. انسخ معرّف المهمة الظاهر؛ ستحتاجه في الخطوة 4.</li></ol><p>لا تغيّر حالة مهمة إنتاج فعلية لمجرد الاختبار؛ يمكن اختبار الإرسال اليدوي بحالتها الحالية، أو استخدام مهمة داخل شابتر تجريبي.</p></section>
+<section><h2>2. تجهيز Google Sheet</h2><ol><li>افتح <a href="https://sheets.google.com" target="_blank" rel="noopener">Google Sheets</a> وأنشئ شيت فارغًا باسم <b>TERYAQ Progress — Test</b>.</li><li>من الشيت افتح <b>الإضافات / Extensions → Apps Script</b>.</li><li>احذف الكود الافتراضي والصق الكود أسفل هذا القسم كاملًا. إذا طبّقت الكود القديم الذي أرسلته في المحادثة، استبدله بالكامل بهذا الإصدار.</li><li>احفظ. من قائمة الدوال بالأعلى اختر <code>setup</code> ثم اضغط <b>Run</b>. اختر حسابك وامنح الصلاحيات التي يطلبها Google لتشغيل السكريبت الخاص بك.</li><li>ارجع للشيت؛ سيظهر تبويب <code>Tasks</code> مع الأعمدة.</li><li>من المحرر شغّل <code>testConnection</code>. يجب ظهور صف وهمي بمعرّف <code>TEST-001</code>. تكرار التشغيل يجب أن يحدّث نفس الصف.</li></ol><p>هذا الاختبار يثبت الكتابة داخل الشيت فقط. اختبار الربط من سيرفر ترياق يأتي لاحقًا.</p><button id="copyCode">نسخ كود Google كاملًا</button><span id="copyStatus" role="status"></span><pre id="code">// Replace the earlier experimental script with this whole file, then redeploy.
+const HEADERS = [&#x27;معرّف المهمة&#x27;,&#x27;الكورس&#x27;,&#x27;الشابتر&#x27;,&#x27;مجال العمل&#x27;,&#x27;المهمة&#x27;,
+  &#x27;المنفّذون وأكوادهم&#x27;,&#x27;الحالة&#x27;,&#x27;تاريخ البداية&#x27;,&#x27;موعد التسليم&#x27;,
+  &#x27;تاريخ التسليم الفعلي&#x27;,&#x27;آخر تحديث&#x27;,&#x27;رابط الأداة&#x27;];
+
+function setup() {
+  const book = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = book.getSheetByName(&#x27;Tasks&#x27;) || book.insertSheet(&#x27;Tasks&#x27;);
+  const props = PropertiesService.getScriptProperties();
+  props.setProperty(&#x27;SHEET_ID&#x27;, book.getId());
+  if (!props.getProperty(&#x27;SYNC_TOKEN&#x27;))
+    props.setProperty(&#x27;SYNC_TOKEN&#x27;, Utilities.getUuid() + Utilities.getUuid());
+  if (!props.getProperty(&#x27;WEBHOOK_SECRET&#x27;))
+    props.setProperty(&#x27;WEBHOOK_SECRET&#x27;, Utilities.getUuid() + Utilities.getUuid());
+  sheet.getRange(1,1,1,HEADERS.length).setValues([HEADERS])
+    .setBackground(&#x27;#408a71&#x27;).setFontColor(&#x27;#ffffff&#x27;).setFontWeight(&#x27;bold&#x27;);
+  sheet.setFrozenRows(1);
+  sheet.setRightToLeft(true);
+  sheet.autoResizeColumns(1,HEADERS.length);
+}
+
+function doPost(e) {
+  try {
+    const body = JSON.parse(e.postData.contents);
+    const token = PropertiesService.getScriptProperties().getProperty(&#x27;SYNC_TOKEN&#x27;);
+    if (!token || !body.token || body.token !== token) throw new Error(&#x27;Unauthorized&#x27;);
+    return jsonResponse(saveTask(body.task, body.observedAt));
+  } catch (error) {
+    return jsonResponse({ok:false,error:error.message});
+  }
+}
+
+function saveTask(task, observedAt) {
+  if (!task || !task.id || !task.status || !Number.isFinite(observedAt))
+    throw new Error(&#x27;Invalid task payload&#x27;);
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const props = PropertiesService.getScriptProperties();
+    const key = &#x27;LAST_SYNC_&#x27; + task.id;
+    if (Number(props.getProperty(key) || 0) &gt; observedAt) return {ok:true,stale:true};
+    const sheet = SpreadsheetApp.openById(props.getProperty(&#x27;SHEET_ID&#x27;)).getSheetByName(&#x27;Tasks&#x27;);
+    const last = sheet.getLastRow();
+    const ids = last &gt; 1 ? sheet.getRange(2,1,last-1,1).getDisplayValues().flat() : [];
+    const index = ids.indexOf(String(task.id));
+    const row = index &lt; 0 ? last + 1 : index + 2;
+    const labels = {planned:&#x27;مخططة&#x27;,ready:&#x27;جاهزة للبدء&#x27;,in_progress:&#x27;قيد التنفيذ&#x27;,
+      in_review:&#x27;بانتظار المراجعة&#x27;,approved:&#x27;معتمدة&#x27;,changes_requested:&#x27;بحاجة لتعديل&#x27;,blocked:&#x27;متوقفة&#x27;};
+    const values = [task.id,task.course,task.chapter,task.area,task.name,task.executors,
+      labels[task.status] || task.status,task.startDate,task.dueDate,task.submittedAt,
+      new Date(observedAt).toISOString(),task.url].map(value =&gt; {
+        const text = String(value == null ? &#x27;&#x27; : value);
+        return /^[=+\-@]/.test(text) ? &quot;&#x27;&quot; + text : text;
+      });
+    sheet.getRange(row,1,1,HEADERS.length).setValues([values]);
+    SpreadsheetApp.flush();
+    props.setProperty(key,String(observedAt));
+    return {ok:true};
+  } finally { lock.releaseLock(); }
+}
+
+function jsonResponse(body) {
+  return ContentService.createTextOutput(JSON.stringify(body))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function testConnection() {
+  saveTask({id:&#x27;TEST-001&#x27;,course:&#x27;كورس تجريبي&#x27;,chapter:&#x27;Chapter 1&#x27;,area:&#x27;Questions&#x27;,
+    name:&#x27;تجربة الربط&#x27;,executors:&#x27;عضو تجريبي — M001&#x27;,status:&#x27;in_review&#x27;},Date.now());
+}
+</pre></section>
+<section><h2>3. نشر سكريبت Google</h2><ol><li>من Apps Script اضغط <b>Deploy → New deployment</b>.</li><li>اضغط ترس اختيار النوع واختر <b>Web app</b>.</li><li>اجعل <b>Execute as: Me</b>، و<b>Who has access: Anyone</b>. إذا حساب المؤسسة لا يتيح Anyone، يلزم السماح به من إدارة الحساب أو اختيار طريقة ربط مختلفة.</li><li>اضغط <b>Deploy</b> وانسخ <b>Web app URL</b> المنتهي بـ <code>/exec</code>.</li><li>افتح ترس <b>Project Settings</b> في جانب المحرر، ثم <b>Script Properties</b>. انسخ <code>SYNC_TOKEN</code> و<code>WEBHOOK_SECRET</code> كلًا على حدة إلى إعداداته في Supabase بالخطوة التالية. لا ترسلهما في المحادثة.</li></ol><p class="hint">إذا عدّلت كود Google بعد النشر، افتح Deploy → Manage deployments → Edit، واختر New version ثم Deploy، حتى يستخدم رابط /exec الكود الجديد. لا تنشر الشيت نفسه للعامة.</p></section>
+<section><h2>4. إعداد الدالة في Supabase</h2><ol><li>افتح مشروع Supabase الخاص بترياق ثم <b>Edge Functions → Secrets</b>. أضف القيم التالية بالضبط.</li></ol><table><thead><tr><th>اسم الإعداد</th><th>القيمة</th></tr></thead><tbody><tr><td><code>SHEETS_SYNC_ENABLED</code></td><td><code>true</code> للتفعيل. لاحقًا <code>false</code> للإيقاف.</td></tr><tr><td><code>SHEETS_TEST_TASK_ID</code></td><td>معرّف المهمة المنسوخ من صفحة التجربة في ترياق.</td></tr><tr><td><code>SHEETS_WEB_APP_URL</code></td><td>رابط Google المنتهي بـ /exec.</td></tr><tr><td><code>SHEETS_SYNC_TOKEN</code></td><td>قيمة SYNC_TOKEN من Google Script Properties.</td></tr><tr><td><code>SHEETS_WEBHOOK_SECRET</code></td><td>قيمة WEBHOOK_SECRET من Google Script Properties؛ تختلف عن SYNC_TOKEN.</td></tr><tr><td><code>TERYAQ_PUBLIC_URL</code></td><td>اختياري: رابط موقع ترياق. يعرض رابط الأداة، وليس رابطًا عميقًا لمهمة محددة.</td></tr></tbody></table><ol start="2"><li>ارجع إلى <b>Edge Functions</b> وأنشئ دالة جديدة عبر المحرر، باسم <code>google-sheets-sync</code>.</li><li>استبدل كود <code>index.ts</code> بمحتوى الملف <code>supabase/functions/google-sheets-sync/index.ts</code> الموجود في الحزمة. انشرها عبر Deploy.</li><li>في تفاصيل أو إعدادات <b>هذه الدالة فقط</b>، أوقف خيار <b>Verify JWT / Enforce JWT verification</b>. الدالة تطبق بنفسها تحقق حساب الأدمن للطلبات اليدوية والرمز السري لطلبات الـWebhook. لا تغيّر إعدادات الدوال الأخرى.</li><li>انسخ رابط الدالة الذي ينتهي بـ <code>/functions/v1/google-sheets-sync</code>.</li></ol><p>Supabase يوفر SUPABASE_URL وSUPABASE_SERVICE_ROLE_KEY للدالة على السيرفر. لا تنقل Service Role Key إلى المتصفح أو Google Sheets. لمن يستخدم CLI: الحزمة تتضمن config.toml لهذه الدالة، وأمر النشر هو <code>supabase functions deploy google-sheets-sync --no-verify-jwt</code>.</p></section>
+<section><h2>5. أول إرسال من ترياق</h2><ol><li>افتح <b>Admin → Google Sheets — Test</b> واختر نفس المهمة.</li><li>اضغط <b>فحص الإعدادات</b>. يجب ظهور مفعّل، مكتملة، ومعرّف المهمة الصحيح. هذا يفحص وجود الإعدادات؛ إرسال الخطوة التالية يختبر صلاحيتها فعليًا.</li><li>اضغط <b>إرسال الحالة الحالية للشيت</b>.</li><li>افتح الشيت وتأكد من ظهور المهمة الفعلية، حالتها وأسماء المنفذين وأكوادهم.</li><li>اضغط الإرسال ثانية؛ يجب تحديث نفس الصف. الصف الوهمي TEST-001 مستقل ويمكن حذفه يدويًا.</li></ol></section>
+<section><h2>6. تشغيل التحديث التلقائي</h2><ol><li>في Supabase افتح <b>Database → Webhooks</b>، وفعّل الميزة إذا طُلب ذلك، ثم <b>Create webhook</b>.</li><li>الاسم: <code>teryaq_sheets_single_task_test</code>.</li><li>الجدول: <code>public.workflow_tasks</code>.</li><li>الأحداث: <b>INSERT</b> و<b>UPDATE</b> فقط.</li><li>اختر <b>HTTP Request</b>، والطريقة <b>POST</b>. ضع رابط دالة Supabase المنتهي بـ <code>/functions/v1/google-sheets-sync</code>؛ لا تضع رابط Google هنا.</li><li>أضف Header باسم <code>Content-Type</code> وقيمة <code>application/json</code>.</li><li>أضف Header باسم <code>x-teryaq-webhook</code> وقيمته نفس <code>SHEETS_WEBHOOK_SECRET</code>.</li><li>إذا ظهر Timeout فاجعله <code>30000</code> مللي ثانية، ثم احفظ. اترك جسم الحدث الافتراضي الذي يرسله Supabase.</li><li>غيّر حالة المهمة التجريبية بإجراء مسموح من داخل ترياق، وانتظر بضع ثوانٍ، ثم راقب الشيت. لا يحتاج فتح صفحة الأدمن باستمرار.</li><li>تحقق من مهمة أخرى: لن تُضاف إلى الشيت، لأن السيرفر يسمح بمعرّف المهمة المحددة فقط.</li></ol><p>اختيار مهمة التجربة لا يغيّر قواعد انتقال الحالات أو الاعتماد. أحداث الـWebhook تتبع حفظ المهمة؛ الربط يعكس النتيجة فقط.</p></section>
+<section><h2>7. ما الذي تغطيه التجربة؟</h2><ul><li>تحديث الحالة والتواريخ واسم المهمة عند تغيّر صفها في workflow_tasks.</li><li>أسماء المنفذين تُقرأ عند كل إرسال. تعديل جدول إسناد المنفذين وحده أو اسم الكورس أو بيانات العضو لا يطلق هذا الـWebhook؛ استخدم الإرسال اليدوي لتحديثها خلال التجربة.</li><li>العمود «آخر تحديث» هو وقت قراءة الحالة للمزامنة، وليس سجلًا تاريخيًا لتغييرات الحالة.</li><li>في حالة فشل Google تبقى بيانات ترياق محفوظة. لا توجد طابور إعادة محاولة دائم في نسخة التجربة؛ استخدم زر الإرسال اليدوي. لا نعتمد عليها كتقارير إنتاج حتى يكتمل اختبارها.</li><li>حذف المهمة أو تصفير مساحة العمل لا يحذف صفها من الشيت تلقائيًا في هذه النسخة. احذف الصف التجريبي يدويًا عند الانتهاء.</li><li>الأعمدة والتبويبات النهائية تُعتمد لاحقًا مع تحديثاتك القادمة.</li></ul></section>
+<section><h2>8. إيقاف التجربة والمشكلات الشائعة</h2><p>لإيقاف الإرسال: غيّر <code>SHEETS_SYNC_ENABLED</code> إلى <code>false</code>، وأوقف أو احذف Webhook التجريبي. يبقى الشيت كما هو.</p><table><tr><th>المشكلة</th><th>ما تراجعه</th></tr><tr><td>قسم الأدمن الجديد غير ظاهر</td><td>تأكد أنك أدمن وأن إصدار الموقع هو sheets-test.1. أغلق التطبيق وأعد فتحه لتحديث التخزين المؤقت.</td></tr><tr><td>فحص الإعدادات يفشل</td><td>اسم الدالة ونشرها، وحالة تسجيل الدخول، وخيار Verify JWT لهذه الدالة.</td></tr><tr><td>زر الإرسال لا يتفعل</td><td>اكتمال الإعدادات، true للتفعيل، واختيار نفس المهمة المحددة على السيرفر.</td></tr><tr><td>فشل الإرسال للشيت</td><td>رابط /exec، نشر أحدث كود Google، صلاحية Anyone، وتطابق SYNC_TOKEN. بعدها أعد الإرسال.</td></tr><tr><td>اليدوي يعمل والتلقائي لا يعمل</td><td>رابط Webhook هو رابط Supabase، والجدول والأحداث صحيحان، والـHeader السري مطابق. راجع سجل Webhook.</td></tr></table></section>
+<footer><small>مصادر الإعداد: <a href="https://developers.google.com/apps-script/guides/web">Google Apps Script Web Apps</a> · <a href="https://supabase.com/docs/guides/database/webhooks">Supabase Database Webhooks</a> · <a href="https://supabase.com/docs/guides/functions/function-configuration">Function configuration</a></small></footer></main><script>document.getElementById('copyCode').onclick=async()=>{const code=document.getElementById('code');try{await navigator.clipboard.writeText(code.textContent);document.getElementById('copyStatus').textContent=' تم النسخ'}catch{const range=document.createRange();range.selectNodeContents(code);const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);document.getElementById('copyStatus').textContent=' تم تحديد الكود؛ اضغط Ctrl+C للنسخ'}};</script></html>

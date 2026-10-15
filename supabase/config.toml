@@ -1,0 +1,2 @@
+[functions.google-sheets-sync]
+verify_jwt = false

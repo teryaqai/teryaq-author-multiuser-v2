@@ -1,0 +1,9 @@
+# Internal Questions & Flashcards audit integration
+
+The current Submission Forms renderer is used. There are exactly three native form IDs: qf-review, qf-comprehensive-audit, qf-final-outputs. The shared workflow stage is Questions & Flashcards; task keys qf-source through qf-publish carry explicit display_number strings 1–10. Legacy stages and IDs stay intact.
+
+An authenticated authorized audit tool may call public.qf_register_audit_data(p_task UUID, p_component TEXT, p_data JSONB) with component questions or flashcards, while qf-audit is ready/in progress/changes requested. The native form contains HTML reports and V2 bank JSON files, never manual Audit JSON fields. This RPC stores structured findings separately in qf_audit_data. It does not parse or manufacture audit findings from HTML. No integration with an external AI service has been deployed by this update.
+
+public.qf_review_input_data(p_task UUID) returns the linked audit submission files and structuredAudit for the authorized Round 2 task. Download V2 + Audit Review Inputs packages each unmodified bank under content, the corresponding structured findings under comprehensiveAudit (null if not registered), and the HTML reports. This is a review input envelope, not a final bank schema. Review output JSONs are submitted through the shared Review form.
+
+Audit data is cleared by the work reset; users, profiles, course settings and native form configuration remain. Role checks, chapter/task prerequisites, source/round identity, required files and final confirmations are enforced on the database side. Uploaded file paths are validated against the submission and Storage object existence. QF task outputs reuse the existing task-resource controls, with scoped executor permissions and downstream access across different file owners.
