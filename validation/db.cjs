@@ -1,5 +1,5 @@
 const {PGlite}=require('@electric-sql/pglite'),fs=require('fs'),path=require('path');
-const root=require('node:path').resolve(__dirname,'..');
+const root=require('path').resolve(__dirname,'..');
 async function setup(){const db=new PGlite();await db.exec(`create role anon;create role authenticated;create role service_role bypassrls;
 create function public.rls_auto_enable() returns void language sql as $$select$$;
 create schema auth;create table auth.users(id uuid primary key,email text,raw_user_meta_data jsonb default '{}'::jsonb);

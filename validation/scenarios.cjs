@@ -65,7 +65,8 @@ console.log('PASS manager submission and QF round routing with central author, f
 
 // Capture state then rerun the upgrade; no task numbering, files or approvals may change.
 await system();const before=JSON.stringify((await db.query('select id,status,display_number from workflow_tasks order by id')).rows);
-await db.exec(fs.readFileSync(root+'/UPDATE_SUPABASE_v3.0.5.sql','utf8'));await db.exec(fs.readFileSync(root+'/UPDATE_SUPABASE_v3.0.5.sql','utf8'));
+await db.exec(fs.readFileSync(root+'/UPDATE_SUPABASE_v3.0.6.sql','utf8'));await db.exec(fs.readFileSync(root+'/UPDATE_SUPABASE_v3.0.6.sql','utf8'));
 assert.equal(JSON.stringify((await db.query('select id,status,display_number from workflow_tasks order by id')).rows),before);await actor(3);await db.query('select workflow_visible_tasks()');await mustFail(()=>db.query('select * from workflow_team_tasks($1)',[c2]),/access required/);
 console.log('PASS reapply: numbering/status/files preserved; all new migrations rerun without permission leaks.');
+await system();fs.writeFileSync('/tmp/teryaq305-fixture.json',JSON.stringify({uids:[1,2,3,4,5,6,7,8].map(uid),cat,c1,c2,w1,w2,w3,draft,ai,cfg}));
 await db.close();})().catch(e=>{console.error('FAIL',e.message,e.code,e.detail,e.where,e.stack?.split('\n').slice(0,4).join('\n'));process.exit(1)});

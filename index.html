@@ -12,16 +12,10 @@
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="styles.v2.9.2.css">
-  <link rel="stylesheet" href="theme.v3.0.5.css">
-  <link rel="stylesheet" href="enhancements.v3.0.5.css">
+  <link rel="stylesheet" href="theme.v3.0.6.css">
+  <link rel="stylesheet" href="enhancements.v3.0.6.css">
   <script src="runtime-config.js"></script>
-  <script>
-    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-      navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
-        console.error('Offline setup failed:', error);
-      });
-    }
-  </script>
+  <script src="boot-config.v3.0.6.js"></script>
 </head>
 <body>
 <div class="auth-gate" id="authGate">
@@ -66,7 +60,7 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/teryaq-mark.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v3.0.5</span></small></div>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v3.0.6</span></small></div>
       <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><span data-ui-icon="panel-close"></span></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
@@ -247,7 +241,7 @@
   <main>
     <section class="view active" id="homeView">
       <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v3.0.5</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v3.0.6</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
         <div class="stat-grid" id="dashboardStats"></div>
         <section class="portal-panel dashboard-updates-panel"><div class="section-head"><div><span class="eyebrow">WHAT'S NEW</span><h3>Updates & announcements</h3></div></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
         <div class="portal-grid two-thirds">
@@ -346,7 +340,7 @@
           <details class="figure-guide"><summary>Steps of Creation</summary><div class="inside"><ol><li>Choose a clear, high-quality figure matching Teryaq usage.</li><li>Add it to the Figure area.</li><li>Write the figure code.</li><li>Write a short title; use Caption for extra clarification.</li><li>Always record the source.</li><li>Choose the correct Order.</li><li>Write details in PROMPT → DETAILS.</li><li>Choose copyright status; use “I don't know” when uncertain.</li><li>Add any extra notes.</li></ol></div></details>
           <section class="cover-card" style="width:100%"><div class="cover-title"><h2>Draft information</h2><span class="chip">Scientific Draft - Figures</span></div><div class="cover-body"><div class="meta-grid"><div class="field"><label>Author</label><div id="figMetaName" class="author-picker-host" aria-label="Authors"></div><small class="field-hint">Select one or more authors.</small></div><div class="field"><label>Category</label><select id="figMetaCategory"></select></div><div class="field"><label>Course</label><select id="figMetaCourse"></select></div><div class="field"><label>Version</label><select id="figMetaVersion"></select></div><div class="field span-2"><label>Chapter</label><select id="figMetaChapter"></select><small class="field-hint">Only chapters belonging to the selected course are shown.</small></div><div class="field" style="grid-column:1/-1"><label>General notes</label><textarea id="figMetaNotes"></textarea></div></div></div></section>
           <div class="figure-cards" id="figureCards"></div>
-          <div style="text-align:center;padding:18px"><button class="btn primary" onclick="(function(){const d=window.__dummy})()" id="addFigureBtn">+ Add Figure</button></div>
+          <div style="text-align:center;padding:18px"><button class="btn primary" id="addFigureBtn">+ Add Figure</button></div>
         </div>
         <aside class="fig-nav"><div style="font-size:10px;font-weight:900;text-align:center;margin-bottom:7px;color:var(--muted)">Figures</div><div id="figureNavButtons"></div></aside>
       </div>
@@ -359,11 +353,12 @@
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
-<script src="dialogs.v3.0.5.js"></script>
-<script src="platform.v3.0.5.js"></script>
-<script src="workflow.v3.0.5.js"></script>
-<script src="guide.v3.0.5.js"></script>
-<script src="app.v3.0.5.js"></script>
-<script src="submissions.v3.0.5.js"></script>
+<script src="dialogs.v3.0.6.js"></script>
+<script src="platform.v3.0.6.js"></script>
+<script src="workflow.v3.0.6.js"></script>
+<script src="direction.v3.0.6.js"></script>
+<script src="guide.v3.0.6.js"></script>
+<script src="app.v3.0.6.js"></script>
+<script src="submissions.v3.0.6.js"></script>
 </body>
 </html>

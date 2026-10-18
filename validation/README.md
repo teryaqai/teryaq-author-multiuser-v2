@@ -1,11 +1,11 @@
 # Local validation
-Run in an isolated development directory, not against a live Supabase project.
 
-Dependencies: Node 24+, @electric-sql/pglite, playwright, @sparticuz/chromium 131.0.1.
-Install them as development dependencies outside the deployed static site, then expose their node_modules through NODE_PATH if necessary.
+Requires Node.js 22+ and development dependencies @electric-sql/pglite, playwright, @sparticuz/chromium@131.0.1.
+No real accounts, cloud credentials or user data are used. Supabase Auth, Storage and APIs are mocked; SQL runs on PGlite and UI runs in Chromium.
 
-- node validation/scenarios.cjs — applies migrations 001–039 in an isolated PGlite database with mock Supabase auth/storage; tests scoped table and RPC access, roles, actual storage row permissions, native submission linkage, old-package linking, approval, downstream inputs and repeated atomic upgrade.
-- node validation/browser.cjs — launches Chromium and serves local files with test-only closure hooks; production source files are not modified. Tests refresh, comment preservation, role-specific UI, native form linkage, standalone .teryaq documents, Arabic/English direction and icon centering. Local screenshots remain in /tmp.
-- node google-sheets-test/sheets-sync.test.cjs — existing mocked Sheets integration and service worker regression tests.
+- node validation/scenarios.cjs: scope, native submissions, approval, downstream files, legacy linking and repeat atomic upgrade.
+- node validation/new-release.cjs: unique immutable codes, bulk role teams, locks, per-area AI, checklist state, RLS/RPC rejection and repeat upgrade.
+- node validation/browser.cjs: existing editor/refresh/form regression, new dashboard/team/filter/checklist/ZIP/XSS/direction checks, 4 sidebar configurations, installer persistence and exact SQL under CSP.
+- node google-sheets-test/sheets-sync.test.cjs: 15 mocked integration checks.
 
-No credentials or live data are needed. Test identities and storage records are synthetic. The browser server injects hooks only into its HTTP responses and disables normal application boot only for the test.
+Browser test mutates HTTP script responses to expose test hooks; production files are not modified. Screenshots are temporary QA files only.

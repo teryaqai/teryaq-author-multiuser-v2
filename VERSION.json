@@ -1,16 +1,18 @@
 {
-  "appVersion": "3.0.5",
+  "appVersion": "3.0.6",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
-  "cloudMigrationVersion": 39,
-  "release": "scoped-course-progress-linked-submissions-task-refresh",
-  "version": "3.0.5",
+  "cloudMigrationVersion": 41,
+  "release": "course-dashboard-role-teams-task-codes-security-review",
+  "version": "3.0.6",
   "updatedAt": "2026-10-18",
-  "notes": "Task refresh; paragraph RTL; scoped courses/chapters; AI Lead-only handoff; native form-task linkage; historical submission linking; centered navigation toggle. Includes prior SQL/reset fixes and Sheets Test integration.",
+  "notes": "Course dashboard, separate Team/Assignments, checkbox filters, role teams, immutable Task Code, full checklist editing, direction/scroll/hover fixes, ZIP packages, security review.",
   "name": "TERYAQ Master Tool",
   "requiredMigrations": [
     "037_reset_explicit_predicates.sql",
     "038_workflow_scope_ai_access.sql",
-    "039_submission_task_linking.sql"
+    "039_submission_task_linking.sql",
+    "040_role_teams_task_codes_checklists.sql",
+    "041_security_review.sql"
   ]
 }

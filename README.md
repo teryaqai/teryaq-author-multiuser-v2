@@ -1,25 +1,22 @@
-# TERYAQ Master Tool v3.0.5
+# TERYAQ Master Tool v3.0.6
 
-## التركيب من v3.0.4 أو v3.0.4 Sheets Test
-1. افتح Supabase → SQL Editor والصق كامل UPDATE_SUPABASE_v3.0.5.sql واضغط Run. يتطلب التحديث اكتمال 001–036 سابقًا، ويثبت 037–039 ضمن معاملة واحدة. لا ينفذ تصفيرًا.
-2. حدّث ملفات التطبيق بمحتويات هذا المجلد، مع إبقاء إعدادات Render ومتغيرات Supabase الحالية. الملفات المشار إليها في index.html تحمل v3.0.5.
-3. بعد نشر الملفات أعد فتح التطبيق وتأكد من ظهور v3.0.5. لا تحتاج تغيير Edge Functions لهذا التحديث إذا سبق تركيب v3.0.4.
-4. تجربة Google Sheets محفوظة كما هي: Admin → Google Sheets — Test. لا يتغير إعدادها أو أعمدتها أو المهمة التجريبية.
+Install using INSTALL_v3.0.6.html. It includes the exact SQL upgrade and a persistent user review checklist.
+The atomic UPDATE_SUPABASE_v3.0.6.sql requires completed migrations 001–036 and installs 037–041. Fresh databases use migrations 001–041 in order.
+No workspace reset, live deployment, GitHub mutation or automatic approval is performed by this release.
+Task numbers, existing records and Google Sheets Test integration are retained. Three obsolete work-area cards are removed from navigation without deleting their data.
+See SECURITY_REVIEW_v3.0.6.md for audit scope and limitations, and BUILD_VALIDATION.md for actual local tests.
 
-## التغييرات
-- Refresh داخل المهمة: الحالة وطلبات المراجعة والتسليمات والإجراءات، مع إبقاء موضع الصفحة والتعليق المكتوب. يظهر فشل التحديث ويمكن إعادة المحاولة.
-- اتجاه RTL فعلي للفقرات العربية والنصوص الملونة، وLTR للإنجليزية، مع احترام اختيار اتجاه الفقرة الصريح وتوحيد المحرر والمعاينة والتصدير.
-- Courses: المنفّذ يرى الكورس والشباتر التي لديه تعيين فيها؛ Course Lead يرى كامل كورسه؛ مسؤولو المراحل يرون شباتر نطاق مسؤوليتهم؛ الأدمن يرى الجميع. داخل الشابتر المسموح تظهر مهام التقدم، وتبقى الملفات والإجراءات حسب صلاحياتها. تمنع السياسات وRPCs تجاوز النطاق بالرابط أو API.
-- AI Handoff للـAI Lead في المساق فقط، بما فيه قراءة الإعدادات المخصصة ونسخ البرومبت والحزمة وتعديل الإعدادات. الأدمن وCourse Lead والمنفّذ لا يحصلون عليه بهذا الدور وحده. يمكن للأدمن تعيين AI Lead من إدارة أدوار الكورس.
-- Submission Forms وSubmit Work من المهمة يستخدمان نفس الربط. تُحدد المهمة حسب المعرفات الحقيقية للمساق والشابتر والفورم والنسخة، وبالجولة في QF، وتُراجع المتطلبات والصلاحيات عند الرفع والتسليم. لا تعتمد عملية التسليم على Owner/Author/Reviewer القديمة.
-- التسليم المكتمل يدخل In review وتظهر ملفاته في سجل المهمة؛ الاعتماد يتيح المخرجات للمرحلة التالية. لا تُعتمد المهمة تلقائيًا.
-- ربط التسليمات السابقة: داخل المهمة استخدم Link existing submission / ربط تسليم سابق. يظهر السجل المطابق المسموح فقط؛ تبقى الملفات وتاريخ التسليم الأصلي كما هي، ويدخل للمراجعة. لا تتغير التسليمات السابقة بمجرد تركيب التحديث.
-- توسيط أيقونة طي القائمة في الحالتين المفتوحة والمصغرة، للأيقونة الأصلية والمخصصة.
-- تحديث Guide بالعربية والإنجليزية. ترقيم الوورك فلو والمراحل الحالية محفوظ.
+## Role assignment behavior
 
-## الإصلاحات السابقة
-تتضمن ملفات المشروع إصلاح توقيع workflow_people / workflow_directory، وإصلاح WHERE في التصفير. تصفير البيانات لا يحدث إلا عند طلبه من إدارة الموقع.
-لإصدار أقدم من v3.0.4 توجد ترقية الإصدار السابق المصححة في supabase/legacy-upgrades؛ طبّقها أولًا ثم ترقية v3.0.5.
+Assignments for this role replaces executors on matching open tasks only. Approved and in-review assignments remain locked.
+Scientific Draft authors are assigned once in Scientific Draft; their review tasks in Script and QF follow the chapter assignment. AI teams remain separate per work area.
+Scientific shared roles cover scope, sources, timeline and responsibilities. Required-role classification follows canonical task keys; it does not grant management roles.
 
-## التحقق
-راجع BUILD_VALIDATION.md. الاختبارات محلية باستخدام PostgreSQL عبر PGlite وChromium، مع محاكاة حسابات Supabase وStorage وGoogle Sheets؛ لا تمثل نشرًا أو تجربةً على بيانات الموقع الحي.
+## Task Code
+
+TSK-000001, globally unique per database task, allocated by a protected sequence, immutable once assigned. The display number and existing task UUID/key remain intact. Codes may have sequence gaps after rolled-back transactions.
+
+## Hosting
+
+Render configuration includes CSP, nosniff, framing and referrer headers. Existing manually configured Render services must apply these header changes in service settings or sync their Blueprint; uploading static assets alone may not update hosting settings.
+Public clients must use only the Supabase publishable/anon key. Service role keys remain server environment variables.
