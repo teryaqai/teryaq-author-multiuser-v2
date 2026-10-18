@@ -127,6 +127,18 @@ revoke all on function public.qf_review_input_data(uuid) from public,anon;grant 
 do $$begin if to_regprocedure('public.workflow_ai_task_spec_v3_0_3(text,text)') is null then alter function public.workflow_ai_task_spec(text,text) rename to workflow_ai_task_spec_v3_0_3;end if;end$$;
 create or replace function public.workflow_ai_task_spec(p_key text,p_stage text) returns jsonb language sql immutable as $$select case when p_stage='Questions & Flashcards' then (select value from jsonb_array_elements(public.qf_workflow_steps()) where value->>'key'=p_key and p_key in ('qf-blueprint','qf-generate-v1','qf-generate-v2','qf-audit','qf-generate-v3','qf-final-qc'))||jsonb_build_object('prompt','Complete the named Questions & Flashcards task using approved scientific sources, prior outputs and review findings. Preserve IDs and metadata. For versions 2 and 3, create or revise visuals and show them to the Scientific Draft Author.','output','Task outputs and evidence following the native submission form, when assigned.') else public.workflow_ai_task_spec_v3_0_3(p_key,p_stage) end$$;
 update public.workflow_tasks set ai_handoff_enabled=true where stage='Questions & Flashcards' and task_key in ('qf-blueprint','qf-generate-v1','qf-generate-v2','qf-audit','qf-generate-v3','qf-final-qc');
+-- Compatibility with databases still using the two-column directory RPCs.
+-- Only replace a mismatched result signature. No CASCADE and no data deletion.
+do $$
+declare fn text; oid regprocedure;
+begin
+  foreach fn in array array['workflow_people','workflow_directory'] loop
+    oid := to_regprocedure('public.' || fn || '(uuid)');
+    if oid is not null and pg_get_function_result(oid) <> 'TABLE(id uuid, display_name text, avatar_path text)' then
+      execute format('drop function public.%I(uuid)', fn);
+    end if;
+  end loop;
+end $$;
 create or replace function public.workflow_people(p_course uuid)
 returns table(id uuid,display_name text,avatar_path text)
 language sql stable security definer set search_path=public as $$
@@ -149,6 +161,8 @@ language sql stable security definer set search_path=public as $$
  where p.role <> 'disabled'
  order by 2
 $$;
+revoke all on function public.workflow_people(uuid), public.workflow_directory(uuid) from public, anon;
+grant execute on function public.workflow_people(uuid), public.workflow_directory(uuid) to authenticated;
 create or replace function public.workflow_task_collaboration(p_task uuid) returns jsonb
 language plpgsql security definer set search_path=public as $$
 declare result jsonb;

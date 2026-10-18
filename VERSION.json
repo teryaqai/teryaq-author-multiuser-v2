@@ -1,23 +1,16 @@
 {
-  "appVersion": "3.0.4-sheets-test.1",
+  "appVersion": "3.0.5",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
-  "cloudMigrationVersion": 36,
-  "release": "single-task-google-sheets-experiment",
-  "version": "3.0.4-sheets-test.1",
-  "updatedAt": "2026-10-15",
-  "notes": "One allowlisted task mirrored to Google Sheets. Separate Edge Function and Database Webhook setup required. Columns provisional. No live deployment or credentials included.",
+  "cloudMigrationVersion": 39,
+  "release": "scoped-course-progress-linked-submissions-task-refresh",
+  "version": "3.0.5",
+  "updatedAt": "2026-10-18",
+  "notes": "Task refresh; paragraph RTL; scoped courses/chapters; AI Lead-only handoff; native form-task linkage; historical submission linking; centered navigation toggle. Includes prior SQL/reset fixes and Sheets Test integration.",
   "name": "TERYAQ Master Tool",
   "requiredMigrations": [
-    "027_submission_chapter_start_guard.sql",
-    "028_workflow_executor_uuid_fix.sql",
-    "029_ai_workflow_scope.sql",
-    "030_edit_checklist_items.sql",
-    "031_submission_form_display_order.sql",
-    "032_profiles_executor_controls.sql",
-    "033_workspace_reset.sql",
-    "034_qf_forms_and_dates.sql",
-    "035_questions_flashcards_workflow.sql",
-    "036_reset_resume_diagnostics.sql"
+    "037_reset_explicit_predicates.sql",
+    "038_workflow_scope_ai_access.sql",
+    "039_submission_task_linking.sql"
   ]
 }
