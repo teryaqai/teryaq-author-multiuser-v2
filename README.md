@@ -1,22 +1,11 @@
-# TERYAQ Master Tool v3.0.6
+# TERYAQ Work v3.0.7
 
-Install using INSTALL_v3.0.6.html. It includes the exact SQL upgrade and a persistent user review checklist.
-The atomic UPDATE_SUPABASE_v3.0.6.sql requires completed migrations 001–036 and installs 037–041. Fresh databases use migrations 001–041 in order.
-No workspace reset, live deployment, GitHub mutation or automatic approval is performed by this release.
-Task numbers, existing records and Google Sheets Test integration are retained. Three obsolete work-area cards are removed from navigation without deleting their data.
-See SECURITY_REVIEW_v3.0.6.md for audit scope and limitations, and BUILD_VALIDATION.md for actual local tests.
+Display name: TERYAQ Work — مساحة عمل ترياق. Existing Supabase/Render architecture and persistent browser database keys remain compatible.
 
-## Role assignment behavior
+Read INSTALL_v3.0.7.html first. Apply UPDATE_SUPABASE_v3.0.7.sql on v3.0.4–v3.0.6, replace static assets, then deploy the updated supabase/functions/admin-governance/index.ts for account deletion. No live deployment or data reset was performed. New installation: migrations 001–042.
 
-Assignments for this role replaces executors on matching open tasks only. Approved and in-review assignments remain locked.
-Scientific Draft authors are assigned once in Scientific Draft; their review tasks in Script and QF follow the chapter assignment. AI teams remain separate per work area.
-Scientific shared roles cover scope, sources, timeline and responsibilities. Required-role classification follows canonical task keys; it does not grant management roles.
+The approved Guide and Team Analytics layouts, responsive containment, single full-list checklist editing, archive links/downloads, whole-card backup checks, member tasks, chapter author propagation, document assignment picker and editor undo/redo are included. AI executors remain separate per path. Task numbers and existing Task Codes remain stable.
 
-## Task Code
+The HTML guide contains a persistent user verification checklist, notes, an exportable review report, domain instructions and the Cloudflare Access proposal. Domain DNS and Cloudflare changes are not performed. Before changing origin, sync/export local documents and reconfigure Supabase auth URLs.
 
-TSK-000001, globally unique per database task, allocated by a protected sequence, immutable once assigned. The display number and existing task UUID/key remain intact. Codes may have sequence gaps after rolled-back transactions.
-
-## Hosting
-
-Render configuration includes CSP, nosniff, framing and referrer headers. Existing manually configured Render services must apply these header changes in service settings or sync their Blueprint; uploading static assets alone may not update hosting settings.
-Public clients must use only the Supabase publishable/anon key. Service role keys remain server environment variables.
+Validation sources are in validation/. Actual production sessions, DNS and provider deployment were not tested. Security review scope is in SECURITY_REVIEW_v3.0.7.md.

@@ -22,11 +22,23 @@ Deno.serve(async (request) => {
     if (userError || !userData.user) throw new Error('Not authenticated')
 
     const { data: profile, error: profileError } = await adminClient
-      .from('profiles').select('id,role').eq('id', userData.user.id).single()
-    if (profileError || profile?.role !== 'admin') throw new Error('Admin access required')
+      .from('profiles').select('id,role,deleted_at').eq('id', userData.user.id).single()
+    if (profileError || (profile?.role !== 'admin' || profile?.deleted_at)) throw new Error('Admin access required')
 
     const payload = await request.json()
     const action = String(payload.action ?? '')
+    if (action === 'delete_account') {
+      const userId = String(payload.user_id ?? '')
+      const { data: result, error: prepareError } = await adminClient.rpc('admin_prepare_account_deletion', { p_user: userId, p_actor: userData.user.id })
+      if (prepareError) throw prepareError
+      // Profile is now inactive: existing JWTs lose database/storage access immediately.
+      // Auth deletion revokes refresh tokens; profile/history are intentionally retained.
+      const { error: deleteError } = await adminClient.auth.admin.deleteUser(userId)
+      if (deleteError && !/not found/i.test(deleteError.message)) throw new Error('Account access is blocked; retry to finish deleting the login identity. ' + deleteError.message)
+      const { error: finishError } = await adminClient.from('profiles').update({ auth_deleted_at: new Date().toISOString() }).eq('id', userId)
+      if (finishError) throw finishError
+      return json({ deleted: true, ...result })
+    }
     if (action === 'reset_workspace') {
       if (payload.confirmation !== 'RESET WORKSPACE') throw new Error('Explicit reset confirmation required')
       const expected = String(payload.generation ?? '')

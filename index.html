@@ -1,28 +1,29 @@
 <!doctype html>
 <html lang="en" dir="ltr">
 <head>
+<meta name="robots" content="noindex, nofollow, noarchive">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#408a71">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="TERYAQ Master Tool">
-  <title>TERYAQ Master Tool</title>
+  <meta name="apple-mobile-web-app-title" content="TERYAQ Work">
+  <title>TERYAQ Work</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="styles.v2.9.2.css">
-  <link rel="stylesheet" href="theme.v3.0.6.css">
-  <link rel="stylesheet" href="enhancements.v3.0.6.css">
+  <link rel="stylesheet" href="theme.v3.0.7.css">
+  <link rel="stylesheet" href="enhancements.v3.0.7.css">
   <script src="runtime-config.js"></script>
-  <script src="boot-config.v3.0.6.js"></script>
+  <script src="boot-config.v3.0.7.js"></script>
 </head>
 <body>
 <div class="auth-gate" id="authGate">
   <div class="auth-layout">
     <main class="auth-card" aria-labelledby="authTitle">
       <div class="auth-logo"><img src="icons/teryaq-mark.png" alt="TERYAQ logo"></div>
-      <h1 id="authTitle">TERYAQ Master Tool</h1>
+      <h1 id="authTitle">TERYAQ Work</h1>
       <p>Sign in once on this device, then continue working offline with your local workspace.</p>
       <div class="field"><label for="authEmail">Email</label><input id="authEmail" type="email" autocomplete="username" placeholder="name@teryaq.com"></div>
       <div class="field"><label for="authPassword">Password</label><div class="password-field"><input id="authPassword" type="password" autocomplete="current-password"><button class="password-toggle" id="authPasswordToggle" type="button" aria-label="Show password" aria-pressed="false" title="Show password"><span data-ui-icon="auth.password-show" aria-hidden="true"></span></button></div></div>
@@ -60,7 +61,7 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/teryaq-mark.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>Master Tool · <span id="sidebarAppVersion">v3.0.6</span></small></div>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>مساحة عمل ترياق · <span id="sidebarAppVersion">v3.0.7</span></small></div>
       <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><span data-ui-icon="panel-close"></span></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
@@ -82,7 +83,7 @@
     <div class="brand">
       <button class="mobile-menu" id="sidebarToggle" aria-label="Open menu"><span data-ui-icon="menu"></span></button>
       <button class="btn back-button hidden" id="backBtn" title="Back to documents"><span data-ui-icon="arrow-left"></span><span>Back</span></button>
-      <div class="brand-copy"><h1 id="docTitle">TERYAQ Master Tool</h1><small>Offline Scientific Authoring Workspace</small></div>
+      <div class="brand-copy"><h1 id="docTitle">TERYAQ Work</h1><small>Offline Scientific Authoring Workspace</small></div>
     </div>
     <div class="top-actions" id="homeActions">
       <label class="global-search"><span data-ui-icon="search"></span><input id="globalSearch" placeholder="Search documents…" aria-label="Search documents"></label>
@@ -158,9 +159,9 @@
                   </div>
                   <button class="btn" id="editorImportBtn"><span data-ui-icon="import"></span><span>Import</span></button>
                   <button class="btn" id="historyBtn" title="Recovery snapshots and earlier document states"><span data-ui-icon="history"></span><span>History / Versions</span></button>
-                  <button class="btn" id="openSubmissionBtn" type="button">Submission Forms</button>
                   <button class="btn" id="validateBtn"><span data-ui-icon="check-circle"></span><span>Validate</span></button>
                   <button class="btn" id="settingsBtnEditor"><span data-ui-icon="settings"></span><span>Settings & Sync</span></button>
+                  <button class="btn primary submit-work-editor" id="openSubmissionBtn" type="button"><span data-ui-icon="submissionForms"></span><span>Submit work / تسليم العمل</span></button>
                 </div>
               </div>
               <div class="control-group ribbon-panel" data-ribbon-panel="styles">
@@ -241,7 +242,7 @@
   <main>
     <section class="view active" id="homeView">
       <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Master Tool <b id="appVersionBadge">v3.0.6</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Work <b id="appVersionBadge">v3.0.7</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
         <div class="stat-grid" id="dashboardStats"></div>
         <section class="portal-panel dashboard-updates-panel"><div class="section-head"><div><span class="eyebrow">WHAT'S NEW</span><h3>Updates & announcements</h3></div></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
         <div class="portal-grid two-thirds">
@@ -270,11 +271,10 @@
           <p id="guideIntro">Choose a task below, or search the guide.</p>
           <label class="guide-search" for="guideSearch"><span data-ui-icon="shared.search" aria-hidden="true"></span><input id="guideSearch" type="search" autocomplete="off" placeholder="Search documents, submissions, sync…"></label>
         </div>
+        <div class="guide-quick-heading"><h3 id="guideTaskHeading">Start with a task</h3></div><div class="guide-quick" id="guideQuickTasks"></div>
         <div class="guide-workspace" id="guideWorkspace">
           <nav class="guide-sections" id="guideSections" aria-label="Guide sections"></nav>
           <div class="guide-main">
-            <h3 id="guideTaskHeading">Start with a task</h3>
-            <div class="guide-quick" id="guideQuickTasks"></div>
             <section class="guide-feature" id="guideFeature" aria-live="polite"></section>
             <div class="guide-browse-heading"><h3 id="guideBrowseHeading">Browse the guide</h3><small id="guideResultCount"></small></div>
             <div class="guide-topic-list" id="guideLibrary"></div>
@@ -303,7 +303,7 @@
                 <div class="cover-title"><h2>Draft information</h2><span class="chip">Scientific Draft - Text Content</span></div>
                 <div class="cover-body">
                   <div class="meta-grid">
-                    <div class="field"><label>Author</label><div id="metaName" class="author-picker-host" aria-label="Authors"></div><small class="field-hint">Select one or more authors.</small></div><div class="field"><label>Category</label><select id="metaCategory"></select></div><div class="field"><label>Course</label><select id="metaCourse"></select></div><div class="field"><label>Version</label><select id="metaVersion"></select></div>
+                    <div class="field"><label>Author</label><div id="metaName" class="author-picker-host" aria-label="Authors"></div><small class="field-hint">Task Executor is filled automatically.</small></div><div class="field"><label>Category</label><select id="metaCategory"></select></div><div class="field"><label>Course</label><select id="metaCourse"></select></div><div class="field"><label>Version</label><select id="metaVersion"></select></div>
                     <div class="field"><label><span data-ui-icon="date"></span> Start date</label><input id="metaStart" type="date"></div><div class="field"><label><span data-ui-icon="date"></span> End date (optional)</label><input id="metaEnd" type="date" aria-describedby="endDateHelp"><small class="field-hint" id="endDateHelp">Filled with today’s date when you confirm an export, if left blank.</small></div>
                     <div class="field span-2"><label>Chapter</label><select id="metaChapter"></select><small class="field-hint">Only chapters belonging to the selected course are shown.</small></div>
                     <div class="field" style="grid-column:1/-1"><label>General notes</label><textarea id="metaNotes"></textarea></div>
@@ -338,7 +338,7 @@
           <section class="figure-upload-summary hidden" id="figureUploadSummary" aria-live="polite"></section>
           <details class="figure-guide"><summary>Instructions & Notes</summary><div class="inside"><p><b>Order 1:</b> only when the writer is certain there are no copyright issues and the style is suitable.</p><p><b>Order 3 defaults:</b> Tajawal/English; change skin color and gender when suitable; minor color change; preserve anatomy/histology exactly; alter only non-scientific visual features; remove logos/signatures/watermarks/unnecessary titles; white background; final image 1:1. Any exception or extra change must be stated in PROMPT → DETAILS.</p><p><b>Order 4:</b> clearly define the desired final output. <b>Order 5:</b> clearly describe what should be searched for.</p><p><b>Very important:</b> figure code contains only the figure number; title is mandatory; caption is optional.</p></div></details>
           <details class="figure-guide"><summary>Steps of Creation</summary><div class="inside"><ol><li>Choose a clear, high-quality figure matching Teryaq usage.</li><li>Add it to the Figure area.</li><li>Write the figure code.</li><li>Write a short title; use Caption for extra clarification.</li><li>Always record the source.</li><li>Choose the correct Order.</li><li>Write details in PROMPT → DETAILS.</li><li>Choose copyright status; use “I don't know” when uncertain.</li><li>Add any extra notes.</li></ol></div></details>
-          <section class="cover-card" style="width:100%"><div class="cover-title"><h2>Draft information</h2><span class="chip">Scientific Draft - Figures</span></div><div class="cover-body"><div class="meta-grid"><div class="field"><label>Author</label><div id="figMetaName" class="author-picker-host" aria-label="Authors"></div><small class="field-hint">Select one or more authors.</small></div><div class="field"><label>Category</label><select id="figMetaCategory"></select></div><div class="field"><label>Course</label><select id="figMetaCourse"></select></div><div class="field"><label>Version</label><select id="figMetaVersion"></select></div><div class="field span-2"><label>Chapter</label><select id="figMetaChapter"></select><small class="field-hint">Only chapters belonging to the selected course are shown.</small></div><div class="field" style="grid-column:1/-1"><label>General notes</label><textarea id="figMetaNotes"></textarea></div></div></div></section>
+          <section class="cover-card" style="width:100%"><div class="cover-title"><h2>Draft information</h2><span class="chip">Scientific Draft - Figures</span></div><div class="cover-body"><div class="meta-grid"><div class="field"><label>Author</label><div id="figMetaName" class="author-picker-host" aria-label="Authors"></div><small class="field-hint">Task Executor is filled automatically.</small></div><div class="field"><label>Category</label><select id="figMetaCategory"></select></div><div class="field"><label>Course</label><select id="figMetaCourse"></select></div><div class="field"><label>Version</label><select id="figMetaVersion"></select></div><div class="field span-2"><label>Chapter</label><select id="figMetaChapter"></select><small class="field-hint">Only chapters belonging to the selected course are shown.</small></div><div class="field" style="grid-column:1/-1"><label>General notes</label><textarea id="figMetaNotes"></textarea></div></div></div></section>
           <div class="figure-cards" id="figureCards"></div>
           <div style="text-align:center;padding:18px"><button class="btn primary" id="addFigureBtn">+ Add Figure</button></div>
         </div>
@@ -353,12 +353,13 @@
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
-<script src="dialogs.v3.0.6.js"></script>
-<script src="platform.v3.0.6.js"></script>
-<script src="workflow.v3.0.6.js"></script>
-<script src="direction.v3.0.6.js"></script>
-<script src="guide.v3.0.6.js"></script>
-<script src="app.v3.0.6.js"></script>
-<script src="submissions.v3.0.6.js"></script>
+<script src="dialogs.v3.0.7.js"></script>
+<script src="platform.v3.0.7.js"></script>
+<script src="workflow.v3.0.7.js"></script>
+<script src="team-analytics.v3.0.7.js"></script>
+<script src="direction.v3.0.7.js"></script>
+<script src="guide.v3.0.7.js"></script>
+<script src="app.v3.0.7.js"></script>
+<script src="submissions.v3.0.7.js"></script>
 </body>
 </html>

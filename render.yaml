@@ -13,6 +13,9 @@ services:
 
     headers:
       - path: /*
+        name: X-Robots-Tag
+        value: noindex, nofollow, noarchive
+      - path: /*
         name: X-Content-Type-Options
         value: nosniff
       - path: /*
@@ -23,4 +26,4 @@ services:
         value: DENY
       - path: /*
         name: Content-Security-Policy
-        value: "default-src 'self'; script-src 'self' 'sha256-g0/ByUAUtpnkpfTPvGwpiwwUoD5oSfVQOIlFpavDfXA='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https: wss:; worker-src 'self' blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+        value: "default-src 'self'; script-src 'self' 'sha256-brnspVHqQaWvXlheEjgkfnEDtucw7wypZwaNXo+zOLc='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https: wss:; worker-src 'self' blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"

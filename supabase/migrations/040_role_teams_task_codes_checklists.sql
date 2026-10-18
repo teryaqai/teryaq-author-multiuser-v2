@@ -1,4 +1,4 @@
--- v3.0.6: stable codes, chapter role teams and full checklist editing.
+-- v3.0.7: stable codes, chapter role teams and full checklist editing.
 begin;
 create sequence if not exists public.workflow_task_code_seq;
 alter table public.workflow_tasks add column if not exists task_code text;

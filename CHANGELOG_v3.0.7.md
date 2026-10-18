@@ -1,0 +1,16 @@
+# v3.0.7 — scope
+- Role assignment chapter-wide for shared roles; AI separate per path.
+- Task tables rectangular, remove Actions, member task panels.
+- Dropdown dismissal and chevrons, chapter spacing.
+- Responsive all app surfaces and editor, overlay positioning.
+- Checklist one full-list Edit, menu deletion, aligned checkbox.
+- Guide approved redesign Arabic/English.
+- Backup cards layout and whole-card checked color.
+- Submission Download all top corner and Open linked task.
+- Team analytics filters, workload, tasks/submissions/activity, Excel export.
+- Hide account UUID; admin archive-delete preserving historical work, protect self/last admin.
+- Announcements vertical form.
+- Editor undo/redo shortcuts, pending typing flush, selection restoration.
+- Submit work last ribbon item routing to correct native form.
+- Create document only for authorized task, cascaded task picker, canonical locked identity.
+- Three deliverables: site ZIP, standalone upgrade SQL, checklist installation HTML.

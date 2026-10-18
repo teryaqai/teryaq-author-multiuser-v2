@@ -1,4 +1,4 @@
--- v3.0.6: tighten existing RPC, account validation and rich resource boundaries.
+-- v3.0.7: tighten existing RPC, account validation and rich resource boundaries.
 begin;
 create or replace function public.account_is_active(p_user uuid default auth.uid()) returns boolean
 language sql stable security definer set search_path=public,pg_temp as $$select p_user is not null and exists(select 1 from public.profiles where id=p_user and role in ('user','admin'))$$;
