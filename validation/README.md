@@ -9,3 +9,9 @@ No real accounts, cloud credentials or user data are used. Supabase Auth, Storag
 - node google-sheets-test/sheets-sync.test.cjs: 15 mocked integration checks.
 
 Browser test mutates HTTP script responses to expose test hooks; production files are not modified. Screenshots are temporary QA files only.
+
+- node validation/task-documents.cjs: 26 document-scope, analytics, deleted-account and history-retention checks.
+- node validation/release-ui.cjs: 43 new responsive, Arabic, task-picker, Excel, history and offline checks.
+- node validation/account-deletion.cjs: actual Edge handler against mocked Auth SDK, no live deletion.
+
+Node 22.13+ is needed for stripTypeScriptTypes in the Edge handler tests.
