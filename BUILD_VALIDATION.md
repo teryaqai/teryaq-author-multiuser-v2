@@ -1,14 +1,13 @@
-# TERYAQ Work v3.0.7 — local validation
+# v3.0.8 local validation
 
-- First-party JavaScript syntax checked: 10 files.
-- Migrations 001–042 applied on an isolated PGlite Supabase-like schema; standalone 037–042 upgrade reapplied with codes/numbering/data retained.
-- Previous DB scenarios passed: scope, RLS, native form linkage, second-executor and manager submissions, approval, downstream files, QF rounds and archived links.
-- Role/checklist/security regression passed: unique immutable codes, bulk author teams, locked task preservation, per-path AI, retained checklist state, comment/profile scope, anonymous and unknown-account denials.
-- New task-document/account/analytics suite: 26 checks passed, including editor variants, tampered scope, immutable closed tasks, scoped manager analytics, client deletion RPC denial, self-delete denial, Auth/profile separation, retained documents and approved attribution, and deleted JWT denial.
-- Chromium regression: 25 existing + 29 prior-release UI checks and 4 sidebar configurations passed.
-- New release UI: 43 interaction/layout checks passed, including all main mobile surfaces at 390px, desktop layouts, Arabic Guide/Analytics, multiselect dismissal and edge placement, whole-card backup style, task panels, XLSX construction, keyboard undo/redo before and after autosave, locked fields, Submit work placement and verified offline editing. No uncaught browser errors.
-- Installer: 26 persistent checkboxes, notes persistence, exported HTML review, Cloudflare future proposal, exact SQL and enforced CSP passed.
-- Account deletion function: real handler tested with mocked Auth SDK; admin/auth checks, prepare→delete→finish order, provider failure retry and no secret exposure passed.
-- Google Sheets regression: 15 mocked integration checks passed.
+Synthetic data, isolated PGlite and Chromium with mocked provider APIs. No production credentials or database were used.
 
-Validation used synthetic data and mocked provider APIs; no production database, Auth account, GitHub repository, DNS record or deployment was changed. Real Render/Supabase deployment and device/PWA verification remain the user's installation steps. Screenshots were inspected for local QA and are not shipped.
+- First-party JavaScript syntax checks passed.
+- Migrations 001–043 apply to an isolated Supabase-like schema; repeat 043 retains data/task codes.
+- Task-document/account/analytics: 33 checks. Client access to the private helper is explicitly revoked to reproduce the error. The new RPC allows an assigned member/stage lead and denies unrelated users, closed tasks, deleted accounts and anonymous callers.
+- Database regression scenarios pass: scoped tasks, native submissions, second executors, manager approval, downstream files, QF rounds, retained archive links and repeat upgrade.
+- Responsive release UI: 43 checks, no uncaught errors.
+- Targeted v3.0.8 browser suite: 41 checks covering recovery request/token use, password mismatch, keyboard accordion, dates/preserved drafts, document reuse, account button containment, plain icons, search, retained queue, report SQL/persistence/export.
+- Screenshots inspected for desktop chapters/collapsed sidebar and mobile admin. Screenshots are temporary and not shipped.
+
+Actual publication, SQL execution, email delivery, PWA refresh and the old queued sync operation require verification after installation. The production queue is not claimed fixed.

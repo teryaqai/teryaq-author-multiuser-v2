@@ -26,4 +26,4 @@ services:
         value: DENY
       - path: /*
         name: Content-Security-Policy
-        value: "default-src 'self'; script-src 'self' 'sha256-brnspVHqQaWvXlheEjgkfnEDtucw7wypZwaNXo+zOLc='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https: wss:; worker-src 'self' blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+        value: "default-src 'self'; script-src 'self' 'sha256-gs0zREZGZs/JeAICNBFFpNjvu1yaHkX2KF5wAr8XTcY=' 'sha256-brnspVHqQaWvXlheEjgkfnEDtucw7wypZwaNXo+zOLc='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https: wss:; worker-src 'self' blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"

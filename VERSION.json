@@ -1,19 +1,14 @@
 {
-  "appVersion": "3.0.7",
+  "appVersion": "3.0.8",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
-  "cloudMigrationVersion": 42,
-  "release": "teryaq-work-task-bound-documents-team-analytics-responsive-ui",
-  "version": "3.0.7",
-  "updatedAt": "2026-10-18",
-  "notes": "Assigned-task document creation, editor history, approved Guide and Team Analytics, responsive layout, archive task links and retained account history.",
+  "cloudMigrationVersion": 43,
+  "release": "teryaq-work-compact-chapters-editor-access-fix",
+  "version": "3.0.8",
+  "updatedAt": "2026-10-19",
+  "notes": "Compact chapter accordion, contained account actions, editable submission end dates, caller-bound editor RPC, resume linked documents, password recovery and sync diagnostics.",
   "name": "TERYAQ Work",
   "requiredMigrations": [
-    "037_reset_explicit_predicates.sql",
-    "038_workflow_scope_ai_access.sql",
-    "039_submission_task_linking.sql",
-    "040_role_teams_task_codes_checklists.sql",
-    "041_security_review.sql",
-    "042_team_documents_mobile.sql"
+    "043_editor_access_rpc.sql"
   ]
 }

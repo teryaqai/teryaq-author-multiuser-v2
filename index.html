@@ -13,10 +13,10 @@
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="styles.v2.9.2.css">
-  <link rel="stylesheet" href="theme.v3.0.7.css">
-  <link rel="stylesheet" href="enhancements.v3.0.7.css">
+  <link rel="stylesheet" href="theme.v3.0.8.css">
+  <link rel="stylesheet" href="enhancements.v3.0.8.css">
   <script src="runtime-config.js"></script>
-  <script src="boot-config.v3.0.7.js"></script>
+  <script src="boot-config.v3.0.8.js"></script>
 </head>
 <body>
 <div class="auth-gate" id="authGate">
@@ -27,7 +27,7 @@
       <p>Sign in once on this device, then continue working offline with your local workspace.</p>
       <div class="field"><label for="authEmail">Email</label><input id="authEmail" type="email" autocomplete="username" placeholder="name@teryaq.com"></div>
       <div class="field"><label for="authPassword">Password</label><div class="password-field"><input id="authPassword" type="password" autocomplete="current-password"><button class="password-toggle" id="authPasswordToggle" type="button" aria-label="Show password" aria-pressed="false" title="Show password"><span data-ui-icon="auth.password-show" aria-hidden="true"></span></button></div></div>
-      <button class="btn primary auth-primary" id="signInBtn">Sign in</button>
+      <button class="btn primary auth-primary" id="signInBtn">Sign in</button><button class="auth-request-link" id="forgotPasswordBtn" type="button">Forgot password? / نسيت كلمة المرور؟</button><p class="hint" id="passwordResetStatus" role="status" dir="auto"></p>
       <div class="auth-divider hidden" id="authOfflineDivider"><span>or</span></div>
       <button class="btn hidden auth-primary auth-offline-button" id="continueOfflineBtn">Continue Offline</button>
       <p class="auth-offline-identity hidden" id="authOfflineIdentity"></p>
@@ -61,8 +61,8 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/teryaq-mark.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>مساحة عمل ترياق · <span id="sidebarAppVersion">v3.0.7</span></small></div>
-      <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar"><span data-ui-icon="panel-close"></span></button>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>مساحة عمل ترياق · <span id="sidebarAppVersion">v3.0.8</span></small></div>
+      <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" aria-controls="appSidebar" title="Collapse sidebar"><span data-ui-icon="menu"></span></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
     <nav class="sidebar-nav" aria-label="Main navigation">
@@ -81,14 +81,14 @@
   <div class="app-frame">
   <header class="topbar">
     <div class="brand">
-      <button class="mobile-menu" id="sidebarToggle" aria-label="Open menu"><span data-ui-icon="menu"></span></button>
+      <button class="mobile-menu" id="sidebarToggle" aria-label="Open menu" aria-expanded="false" aria-controls="appSidebar"><span data-ui-icon="menu"></span></button>
       <button class="btn back-button hidden" id="backBtn" title="Back to documents"><span data-ui-icon="arrow-left"></span><span>Back</span></button>
       <div class="brand-copy"><h1 id="docTitle">TERYAQ Work</h1><small>Offline Scientific Authoring Workspace</small></div>
     </div>
     <div class="top-actions" id="homeActions">
       <label class="global-search"><span data-ui-icon="search"></span><input id="globalSearch" placeholder="Search documents…" aria-label="Search documents"></label>
       <div class="status-cluster">
-        <span class="sync-status" id="syncStatus">Offline</span>
+        <button type="button" class="sync-status sync-status-button" id="syncStatus" title="Sync details / تفاصيل المزامنة">Offline</button>
       </div>
       <div class="action-cluster">
         <button class="btn primary" id="syncBtn" title="Sync Now" aria-label="Sync Now"><span data-ui-icon="refresh"></span><span>Sync Now</span></button>
@@ -105,7 +105,7 @@
         </div>
         <div class="status-cluster">
           <span class="save-status" id="saveStatus">Saved <span data-ui-icon="success"></span></span>
-          <span class="sync-status" id="syncStatusEditor"></span>
+          <button type="button" class="sync-status sync-status-button" id="syncStatusEditor" title="Sync details / تفاصيل المزامنة"></button>
         </div>
         <div class="action-cluster editor-history-actions">
           <button class="btn icon-action" data-action="undo" title="Undo" aria-label="Undo"><span data-ui-icon="undo"></span></button>
@@ -242,7 +242,7 @@
   <main>
     <section class="view active" id="homeView">
       <div class="portal-page">
-        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Work <b id="appVersionBadge">v3.0.7</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
+        <div class="hero dashboard-hero"><div class="hero-copy"><span class="eyebrow">Dashboard</span><h2>Welcome, <span id="welcomeEmail"></span></h2><p>Your scientific workspace is ready. Create, edit offline, and synchronize safely when the connection returns.</p><span class="version-badge">TERYAQ Work <b id="appVersionBadge">v3.0.8</b></span></div><button class="btn primary new-document-btn" id="newDocumentBtn">+ New document</button></div>
         <div class="stat-grid" id="dashboardStats"></div>
         <section class="portal-panel dashboard-updates-panel"><div class="section-head"><div><span class="eyebrow">WHAT'S NEW</span><h3>Updates & announcements</h3></div></div><div class="dashboard-updates" id="dashboardUpdates"></div></section>
         <div class="portal-grid two-thirds">
@@ -353,13 +353,13 @@
 <div class="modal hidden" id="modal"><div class="modal-card"><div style="display:flex;justify-content:flex-end"><button class="btn" id="closeModal">Close</button></div><div id="modalBody"></div></div></div>
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
-<script src="dialogs.v3.0.7.js"></script>
-<script src="platform.v3.0.7.js"></script>
-<script src="workflow.v3.0.7.js"></script>
-<script src="team-analytics.v3.0.7.js"></script>
-<script src="direction.v3.0.7.js"></script>
-<script src="guide.v3.0.7.js"></script>
-<script src="app.v3.0.7.js"></script>
-<script src="submissions.v3.0.7.js"></script>
+<script src="dialogs.v3.0.8.js"></script>
+<script src="platform.v3.0.8.js"></script>
+<script src="workflow.v3.0.8.js"></script>
+<script src="team-analytics.v3.0.8.js"></script>
+<script src="direction.v3.0.8.js"></script>
+<script src="guide.v3.0.8.js"></script>
+<script src="app.v3.0.8.js"></script>
+<script src="submissions.v3.0.8.js"></script>
 </body>
 </html>
