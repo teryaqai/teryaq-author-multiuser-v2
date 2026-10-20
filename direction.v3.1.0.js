@@ -1,0 +1,20 @@
+/* Automatic paragraph direction for task notes, lists, forms and dialogs. */
+(()=>{'use strict';
+const direction=text=>{const first=String(text||'').match(/\p{L}/u)?.[0];return first&&/[\u0590-\u08ff\ufb1d-\ufeff]/.test(first)?'rtl':'ltr'};
+const roots='.task-title-card h2,.task-title-card p,.submission-form-card h3,.submission-form-card p,.task-info-rows strong,.instruction-rich,.required-rich-text,.workflow-rich-input,.submission-notes,.workflow-event p,.task-checklist-item label span,.checklist-builder-row input';
+function apply(root=document){for(const el of root.querySelectorAll(roots)){if(el.matches('input,textarea')){el.dir='auto';continue}const blocks=[...el.querySelectorAll('p,div,li,h1,h2,h3,h4,blockquote,ul,ol')];if(!blocks.length)el.dir=direction(el.textContent);else{el.dir='auto';for(const block of blocks)block.dir=direction(block.textContent);}}
+for(const el of root.querySelectorAll('textarea,input[type=text],input[type=search],input:not([type])'))if(!el.closest('.doc-page,.document-page,.editor-page')&&!el.hasAttribute('dir'))el.dir='auto';}
+let pending=false;const schedule=()=>{if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;apply()})};
+new MutationObserver(schedule).observe(document.documentElement,{subtree:true,childList:true,characterData:true});document.addEventListener('input',e=>{if(e.target.closest(roots))schedule()});
+document.addEventListener('paste',e=>{const editor=e.target.closest('.workflow-rich-input');if(!editor)return;e.preventDefault();const text=e.clipboardData?.getData('text/plain')||'';document.execCommand('insertText',false,text);schedule()});apply();
+let tip;
+function hideTip(){tip?.remove();tip=null;}
+function showTip(node){hideTip();if(!node)return;tip=document.createElement('div');tip.className='tq-floating-status-tip';tip.setAttribute('role','tooltip');tip.textContent=node.dataset.statusTip;document.body.append(tip);const r=node.getBoundingClientRect(),t=tip.getBoundingClientRect();tip.style.left=Math.max(8,Math.min(r.left+r.width/2-t.width/2,innerWidth-t.width-8))+'px';tip.style.top=(r.top>t.height+12?r.top-t.height-10:r.bottom+10)+'px';}
+document.addEventListener('mouseover',e=>{const node=e.target.closest('[data-status-tip]');if(node&&!node.contains(e.relatedTarget))showTip(node)});document.addEventListener('mouseout',e=>{const node=e.target.closest('[data-status-tip]');if(node&&!node.contains(e.relatedTarget))hideTip()});document.addEventListener('focusin',e=>{if(e.target.matches('[data-status-tip]'))showTip(e.target)});document.addEventListener('focusout',hideTip);window.addEventListener('scroll',hideTip,true);window.addEventListener('resize',hideTip);
+// Checkbox filter menus remain open while choosing; dismiss on outside click or Escape.
+document.addEventListener('pointerdown',e=>{document.querySelectorAll('.multi-filter[open],.instruction-options[open]').forEach(menu=>{if(!menu.contains(e.target))menu.open=false;});});
+document.addEventListener('click',e=>{const summary=e.target.closest('.multi-filter>summary,.instruction-options>summary');if(!summary)return;document.querySelectorAll('.multi-filter[open],.instruction-options[open]').forEach(menu=>{if(menu!==summary.parentElement)menu.open=false;});});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.multi-filter[open],.instruction-options[open]').forEach(menu=>menu.open=false);});
+document.addEventListener('toggle',e=>{const menu=e.target;if(!menu.matches?.('.multi-filter,.instruction-options')||!menu.open)return;requestAnimationFrame(()=>{const panel=menu.querySelector(':scope>div,:scope>button');if(!panel)return;panel.style.insetInlineStart='0';panel.style.insetInlineEnd='auto';const r=panel.getBoundingClientRect();if(r.right>innerWidth-12||r.left<12){panel.style.insetInlineStart='auto';panel.style.insetInlineEnd='0';}const box=menu.getBoundingClientRect();if(panel.tagName!=='BUTTON')panel.style.maxHeight=Math.max(120,Math.min(280,innerHeight-box.bottom-20))+'px';});},true);
+window.TeryaqDirection={apply,direction};
+})();

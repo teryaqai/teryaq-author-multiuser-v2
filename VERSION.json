@@ -1,14 +1,20 @@
 {
-  "appVersion": "3.0.8",
+  "appVersion": "3.1.0",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
-  "cloudMigrationVersion": 43,
-  "release": "teryaq-work-compact-chapters-editor-access-fix",
-  "version": "3.0.8",
-  "updatedAt": "2026-10-19",
-  "notes": "Compact chapter accordion, contained account actions, editable submission end dates, caller-bound editor RPC, resume linked documents, password recovery and sync diagnostics.",
+  "cloudMigrationVersion": 50,
+  "release": "resources-archive-script-permissions",
+  "version": "3.1.0",
+  "updatedAt": "2026-10-20",
+  "notes": "Resources, submission validation, archive sync, profile and admin UI, backups and live notifications",
   "name": "TERYAQ Work",
   "requiredMigrations": [
-    "043_editor_access_rpc.sql"
+    "044_resources_archive.sql",
+    "045_drive_jobs.sql",
+    "046_drive_scheduler.sql",
+    "047_script_automation.sql",
+    "048_permissions_and_proofs.sql",
+    "049_backup_restore.sql",
+    "050_resource_reset_integration.sql"
   ]
 }
