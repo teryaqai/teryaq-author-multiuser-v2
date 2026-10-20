@@ -1,20 +1,14 @@
 {
-  "appVersion": "3.1.0",
+  "appVersion": "3.1.1",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
-  "cloudMigrationVersion": 50,
-  "release": "resources-archive-script-permissions",
-  "version": "3.1.0",
+  "cloudMigrationVersion": 51,
+  "release": "chapter-tasks-auto-delivery",
+  "version": "3.1.1",
   "updatedAt": "2026-10-20",
-  "notes": "Resources, submission validation, archive sync, profile and admin UI, backups and live notifications",
+  "notes": "Chapter task navigation, automatic document delivery, immutable version copies, archive downloads and activity notifications",
   "name": "TERYAQ Work",
   "requiredMigrations": [
-    "044_resources_archive.sql",
-    "045_drive_jobs.sql",
-    "046_drive_scheduler.sql",
-    "047_script_automation.sql",
-    "048_permissions_and_proofs.sql",
-    "049_backup_restore.sql",
-    "050_resource_reset_integration.sql"
+    "051_chapter_delivery_notifications.sql"
   ]
 }
