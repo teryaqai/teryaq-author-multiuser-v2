@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="styles.v2.9.2.css">
   <link rel="stylesheet" href="theme.v3.1.1.css">
   <link rel="stylesheet" href="enhancements.v3.1.1.css">
+  <link rel="stylesheet" href="release-312.css">
   <script src="runtime-config.js"></script>
   <script src="boot-config.v3.1.1.js"></script>
 </head>
@@ -63,7 +64,7 @@
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
       <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/teryaq-mark.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>مساحة عمل ترياق · <span id="sidebarAppVersion">v3.1.1</span></small></div>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>مساحة عمل ترياق · <span id="sidebarAppVersion">v3.1.2</span></small></div>
       <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" aria-controls="appSidebar" title="Collapse sidebar"><span data-ui-icon="menu"></span></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
@@ -82,6 +83,7 @@
   <div class="sidebar-scrim hidden" id="sidebarScrim"></div>
   <div class="app-frame">
   <header class="topbar">
+    <a class="work-brand editor-brand" href="#" id="workBrandHome" aria-label="TERYAQ Work — Dashboard"><img src="icons/teryaq-mark.png" alt="TERYAQ"><span><strong>TERYAQ</strong> Work</span></a>
     <div class="brand">
       <button class="mobile-menu" id="sidebarToggle" aria-label="Open menu" aria-expanded="false" aria-controls="appSidebar"><span data-ui-icon="menu"></span></button>
       <button class="btn back-button hidden" id="backBtn" title="Back to documents"><span data-ui-icon="arrow-left"></span><span>Back</span></button>
@@ -215,10 +217,10 @@
                 <label class="script-ribbon-setting">Line spacing <input id="scriptPromptSpacing" type="range" min="1.2" max="2.4" step="0.1" value="1.6"></label>
               </div></div>
               <div class="control-group ribbon-panel" data-ribbon-panel="insert" hidden>
-                <div class="control-body"><button class="btn" id="mainFigBtn">+ Figure Placeholder</button><button class="btn" id="marginFigBtn">+ Margin Figure</button><button class="btn" id="newTableBtn">+ New Table</button><button class="btn" id="importDocxTableBtn">Import DOCX Table</button></div>
+                <div class="control-body"><button class="btn" id="mainFigBtn"><span data-ui-icon="figure"></span><span>Figure Placeholder</span></button><button class="btn" id="marginFigBtn"><span data-ui-icon="shared.image"></span><span>Margin Figure</span></button><button class="btn" id="newTableBtn"><span data-ui-icon="content"></span><span>New Table</span></button><button class="btn" id="importDocxTableBtn"><span data-ui-icon="import"></span><span>Import DOCX Table</span></button></div>
               </div>
               <div class="control-group ribbon-panel" data-ribbon-panel="table" hidden>
-                <div class="control-body"><button class="btn" id="tableOutlineBtn" type="button" aria-expanded="false" aria-controls="tableOutlinePanel">Table Outline</button><button class="btn" id="rowUpBtn"><span class="table-direction-arrow" data-ui-icon="editor.table-up" aria-hidden="true"></span><span>Row</span></button><button class="btn" id="rowDownBtn"><span class="table-direction-arrow" data-ui-icon="editor.table-down" aria-hidden="true"></span><span>Row</span></button><button class="btn" id="colLeftBtn"><span class="table-direction-arrow" data-ui-icon="editor.table-left" aria-hidden="true"></span><span>Column</span></button><button class="btn" id="colRightBtn"><span class="table-direction-arrow" data-ui-icon="editor.table-right" aria-hidden="true"></span><span>Column</span></button><button class="btn danger" id="delRowBtn">Delete Row</button><button class="btn danger" id="delColBtn">Delete Col</button><button class="btn danger" id="deleteTableBtn">Delete Table</button><div class="control-row"><input id="colWidthInput" type="number" min="5" max="95" value="33" style="width:72px;border:1px solid var(--line);border-radius:8px;padding:7px"><button class="btn" id="applyColWidthBtn">Apply Width %</button><button class="btn" id="equalColsBtn">Equal Columns</button></div></div>
+                <div class="control-body"><button class="btn" id="tableOutlineBtn" type="button" aria-expanded="false" aria-controls="tableOutlinePanel"><span data-ui-icon="content"></span><span>Table Outline</span></button><button class="btn" id="rowUpBtn"><span class="table-direction-arrow" data-ui-icon="editor.table-up" aria-hidden="true"></span><span>Row</span></button><button class="btn" id="rowDownBtn"><span class="table-direction-arrow" data-ui-icon="editor.table-down" aria-hidden="true"></span><span>Row</span></button><button class="btn" id="colLeftBtn"><span class="table-direction-arrow" data-ui-icon="editor.table-left" aria-hidden="true"></span><span>Column</span></button><button class="btn" id="colRightBtn"><span class="table-direction-arrow" data-ui-icon="editor.table-right" aria-hidden="true"></span><span>Column</span></button><button class="btn danger" id="delRowBtn"><span data-ui-icon="shared.delete"></span><span>Delete Row</span></button><button class="btn danger" id="delColBtn"><span data-ui-icon="shared.delete"></span><span>Delete Col</span></button><button class="btn danger" id="deleteTableBtn"><span data-ui-icon="shared.delete"></span><span>Delete Table</span></button><div class="control-row"><input id="colWidthInput" type="number" min="5" max="95" value="33" style="width:72px;border:1px solid var(--line);border-radius:8px;padding:7px"><button class="btn" id="applyColWidthBtn">Apply Width %</button><button class="btn" id="equalColsBtn">Equal Columns</button></div></div>
                 <div class="table-outline-panel hidden" id="tableOutlinePanel" role="region" aria-label="Table outline">
                   <section class="cover-card table-information-card">
                     <div class="cover-title"><div><h2>Table Outline</h2><small>Automatically linked to every inserted table</small></div><button class="btn small" id="closeTableOutlineBtn" type="button" aria-label="Close table outline">Close</button></div>
@@ -356,15 +358,19 @@
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
 <script src="dialogs.v3.1.1.js"></script>
-<script src="platform.v3.1.1.js"></script>
+<script src="platform.v3.1.2.js"></script>
 <script src="next-release.js"></script>
 <script src="release-311.js"></script>
+<script src="release-312.js"></script>
+<script src="course-hub.js"></script>
+<script src="content-setup.js"></script>
+<script src="archive-312.js"></script>
 <script src="auto-delivery.js"></script>
-<script src="workflow.v3.1.1.js"></script>
+<script src="workflow.v3.1.2.js"></script>
 <script src="team-analytics.v3.1.1.js"></script>
 <script src="direction.v3.1.1.js"></script>
 <script src="guide.v3.1.1.js"></script>
-<script src="app.v3.1.1.js"></script>
-<script src="submissions.v3.1.1.js"></script>
+<script src="app.v3.1.2.js"></script>
+<script src="submissions.v3.1.2.js"></script>
 </body>
 </html>

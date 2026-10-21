@@ -1,0 +1,15 @@
+(()=>{'use strict';const n=window.TeryaqNext,e=n.esc,api=()=>window.TeryaqPlatform;
+const safe=value=>String(value||'Unspecified').normalize('NFC').replace(/[\\/:*?"<>|\x00-\x1f]/g,'_').replace(/[. ]+$/g,'').slice(0,110)||'Unspecified';
+const version=value=>'V'+String(value||'1').replace(/^v(?:ersion)?\s*/i,'').trim();
+n.zipArchive=async(rows,title,button)=>{if(button.disabled)return;button.disabled=true;let status=button.parentElement.querySelector('[data-archive-progress]');if(!status){status=document.createElement('p');status.dataset.archiveProgress='';status.setAttribute('role','status');button.after(status)}
+ try{if(!rows.length)throw Error('لا توجد تسليمات بهذا المستوى.');if(!window.JSZip)throw Error('أداة ضغط الملفات غير متاحة.');const filename=safe(title)+'.zip',destination=await api().prepareFileExport(filename);if(destination.method==='cancelled'){status.textContent='أُلغي التنزيل.';return}if(destination.method==='failed')throw destination.error;
+ const zip=new JSZip(),manifest=[],total=rows.reduce((sum,r)=>sum+(r.files||[]).length,0);let current=0;
+ for(const row of rows){const labels=row.answers?.__labels||{},course=labels.course||row.course_id,chapter=labels.chapter||row.chapter_id,stage=row.template_id||row.form_id,ver=version(row.version_label),sequence='S'+String(row.submission_sequence||1).padStart(2,'0'),folder=[labels.category||row.category_id,course,chapter,stage,ver,sequence+'_'+row.id].map(safe).join('/'),files=[];
+ for(const [i,file]of(row.files||[]).entries()){if(!file.path)throw Error('مسار الملف مفقود: '+(file.name||file.fieldId));status.textContent=`تنزيل ${++current} / ${total}: ${file.name||file.fieldId}`;const blob=await api().downloadSubmissionFile(file.path);if(!blob?.size)throw Error('ملف فارغ: '+file.name);const original=file.name||file.path.split('/').pop(),ext=/\.([a-z0-9ترياق]{1,12})$/i.exec(original)?.[1]||'bin',name=[course,chapter,stage,ver,sequence,file.fieldId||file.label||'File',String(i+1).padStart(2,'0')].map(safe).join('_').slice(0,220)+'.'+ext;zip.file(folder+'/'+name,await blob.arrayBuffer());files.push({original_name:original,archive_name:name,field:file.fieldId,label:file.label,size:blob.size})}
+ zip.file(folder+'/Submission.json',JSON.stringify({...row,archive_files:files},null,2));manifest.push({submission_id:row.id,course,chapter,template:stage,version:ver,sequence,folder,files});
+ }
+ zip.file('Archive_Index.json',JSON.stringify({format:'TERYAQ_ARCHIVE',version:1,created_at:new Date().toISOString(),submissions:manifest},null,2));zip.file('README.txt','TERYAQ Work\nالمجلدات: الفئة / المساق / الشابتر / نوع التسليم / النسخة / محاولة التسليم.\nArchive_Index.json يسجّل الاسم الأصلي والاسم داخل الأرشيف لكل ملف.\n');
+ const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:3}},progress=>status.textContent='ضغط الحزمة '+Math.round(progress.percent)+'%');await api().downloadBlobToDevice(blob,filename,destination);status.textContent=`اكتمل: ${current} ملف من ${rows.length} تسليم.`;
+ }catch(err){status.textContent='تعذّر التنزيل: '+err.message+' — لم يتم حفظ حزمة ناقصة.'}finally{button.disabled=false}
+};
+})();
