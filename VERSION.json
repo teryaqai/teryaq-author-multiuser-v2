@@ -1,15 +1,14 @@
 {
-  "appVersion": "3.1.2",
+  "appVersion": "3.1.3",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
-  "cloudMigrationVersion": 53,
-  "release": "clean-editor-course-hub-timeline",
-  "version": "3.1.2",
-  "updatedAt": "2026-10-20",
-  "notes": "Approved editor and bottom navigation, Course Hub rewards, all-task schedules and timelines, submission grants, grouped review, handoff notes and archive packages",
+  "cloudMigrationVersion": 54,
+  "release": "navigation-delivery-access",
+  "version": "3.1.3",
+  "updatedAt": "2026-10-21",
+  "notes": "Compact bottom navigation; contained timeline scrolling; course roles and all-chapter schedule; automatic output upload; scoped file downloads",
   "name": "TERYAQ Work",
   "requiredMigrations": [
-    "052_course_hub_and_delivery.sql",
-    "053_catalog_deletion.sql"
+    "054_navigation_delivery_access.sql"
   ]
 }

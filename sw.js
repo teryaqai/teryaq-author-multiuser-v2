@@ -1,9 +1,12 @@
-const CACHE = 'teryaq-master-tool-v3.1.2';
+const CACHE = 'teryaq-master-tool-v3.1.3';
 const SCOPE_URL = new URL(self.registration.scope);
 const ROOT_URL = SCOPE_URL.href;
 const APP_SHELL_URL = new URL('index.html', SCOPE_URL).href;
 
 const CORE_ASSETS = [
+  new URL('release-313.js', SCOPE_URL).href,
+  new URL('release-313.css', SCOPE_URL).href,
+  new URL('fonts/tamema-embossed.otf', SCOPE_URL).href,
   new URL('release-312.js', SCOPE_URL).href,
   new URL('release-312.css', SCOPE_URL).href,
   new URL('course-hub.js', SCOPE_URL).href,
@@ -23,14 +26,14 @@ const CORE_ASSETS = [
   new URL('theme.v3.1.1.css', SCOPE_URL).href,
   new URL('enhancements.v3.1.1.css', SCOPE_URL).href,
   new URL('dialogs.v3.1.1.js', SCOPE_URL).href,
-  new URL('platform.v3.1.2.js', SCOPE_URL).href,
-  new URL('workflow.v3.1.2.js', SCOPE_URL).href,
+  new URL('platform.v3.1.3.js', SCOPE_URL).href,
+  new URL('workflow.v3.1.3.js', SCOPE_URL).href,
   new URL('team-analytics.v3.1.1.js', SCOPE_URL).href,
   new URL('direction.v3.1.1.js', SCOPE_URL).href,
   new URL('boot-config.v3.1.1.js', SCOPE_URL).href,
   new URL('guide.v3.1.1.js', SCOPE_URL).href,
-  new URL('app.v3.1.2.js', SCOPE_URL).href,
-  new URL('submissions.v3.1.2.js', SCOPE_URL).href,
+  new URL('app.v3.1.3.js', SCOPE_URL).href,
+  new URL('submissions.v3.1.3.js', SCOPE_URL).href,
   new URL('vendor/jszip.min.js', SCOPE_URL).href,
   new URL('vendor/JSZip-LICENSE.md', SCOPE_URL).href,
   new URL('vendor/pdf.min.mjs', SCOPE_URL).href,
