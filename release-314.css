@@ -1,0 +1,50 @@
+/* TERYAQ Work 3.1.4 — supplied brand artwork and constrained workspace surfaces. */
+#appShell .work-brand{gap:12px;flex:none;max-width:40vw;font-family:Tajawal,sans-serif}
+#appShell .work-brand>img:not(.brand-wordmark){width:44px!important;height:44px!important;object-fit:contain;border:0!important;border-radius:0!important;background:none!important}
+#appShell .work-brand>.brand-wordmark{width:200px!important;height:auto!important;max-height:48px;object-fit:contain;border:0!important;border-radius:0!important;background:none!important}
+#authTitle img{width:min(280px,85%);height:auto;object-fit:contain}
+.auth-logo,.auth-logo img,#homeBtn img{border-radius:0!important;object-fit:contain!important;background:transparent!important}
+#appShell .app-sidebar .sidebar-nav{gap:10px!important;justify-content:space-evenly!important}
+#appShell .app-sidebar .sidebar-link{border-radius:22px!important;padding:9px 16px!important}
+#appShell .app-sidebar .sidebar-link svg,#appShell .app-sidebar .sidebar-link.active svg{fill:none!important;stroke:currentColor!important;stroke-width:1.7!important;stroke-linecap:round;stroke-linejoin:round}
+#appShell .tree-status-dot.approved{border:0!important;background:transparent!important;color:#408a71!important;border-radius:0!important;width:20px!important;height:20px!important;flex:0 0 20px;display:grid;place-items:center;font-size:0!important}
+#appShell .tree-status-dot.approved svg{width:19px;height:19px}.clean-check{width:20px;height:20px;display:inline-block;vertical-align:middle;fill:none!important;stroke:currentColor!important;stroke-width:2!important}
+/* Every grid/flex ancestor must be able to shrink before the table can scroll. */
+#appShell .app-frame>main,#appShell #courseProgressView,#appShell #courseProgressView>.portal-page{width:100%!important;min-width:0!important;max-width:100%!important}
+#appShell #courseProgressBody.next-course-layout{display:grid!important;grid-template-columns:300px minmax(0,1fr)!important;gap:24px;width:100%!important;min-width:0!important;max-width:100%!important}
+#appShell #courseProgressBody>*{min-width:0!important;max-width:100%!important}
+#appShell :is(.workflow-page,#workflowContent,.chapter-workspace,.workflow-detail,#chapterTimelineHost,.course-hub,[data-hub-content],[data-course-schedule],[data-setup-table],.page-form-card,.timeline-panel){min-width:0!important;max-width:100%!important;box-sizing:border-box}
+#appShell :is(#chapterTimelineHost,[data-course-schedule],.timeline-panel){contain:inline-size}
+#appShell .workflow-page{width:100%!important}
+#appShell .chapter-task-tree{width:100%;overflow-x:hidden;overflow-y:auto}
+#appShell .workflow-view-tabs,#appShell .chapter-tabs{min-width:0;max-width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+#appShell :is(.workflow-table-wrap,.admin-table-wrap,.submission-recent-table,.submission-history-table-wrap,.documents-table-wrap){width:100%!important;min-width:0!important;max-width:100%!important;overflow:auto!important;overscroll-behavior-x:contain}
+#appShell .gantt-scroll{padding:0!important;border:1px solid #d7e1dc!important;border-radius:7px!important;max-height:600px;isolation:isolate;scroll-padding-left:260px;box-shadow:none!important}
+#appShell .gantt-table{margin:0!important;border-collapse:separate!important;border-spacing:0!important;direction:ltr;table-layout:fixed;width:max-content!important}
+#appShell .gantt-table thead th{position:sticky!important;top:0!important;z-index:3!important;background:#f3f7f5!important}
+#appShell .gantt-table th:first-child{position:sticky!important;left:0!important;inset-inline-start:0!important;width:260px!important;min-width:260px!important;max-width:260px!important;background:#fff!important;z-index:4!important;box-shadow:1px 0 0 #dce6e0;text-align:start;overflow-wrap:anywhere}
+#appShell .gantt-table thead th:first-child{z-index:6!important;background:#f3f7f5!important}
+#appShell .gantt-table .task-date-heading{width:100%;min-width:0}.task-date-heading .date-icon{align-self:start}
+#appShell .calendar-scroll{width:100%;max-width:100%;min-width:0;overflow:auto;overscroll-behavior-x:contain}
+#appShell .table-top-scroll{width:100%!important;min-width:0;overflow-x:auto;overscroll-behavior-x:contain}
+/* Connected tabs share one clipped outer shape; selected tabs have no inset gap. */
+#appShell .hub-tabs,#appShell .course-schedule-tabs{display:flex!important;flex-wrap:nowrap!important;align-items:stretch!important;gap:0!important;padding:0!important;border:1px solid #d2e1d9!important;border-radius:6px!important;background:#f1f6f3!important;overflow:auto!important;overscroll-behavior-x:contain;max-width:100%;min-height:46px;margin:16px 0 24px!important;box-shadow:none!important}
+#appShell .hub-tabs{width:100%;max-width:840px}
+#appShell .hub-tabs .btn,#appShell .course-schedule-tabs .btn{display:flex;align-items:center;justify-content:center;flex:1 0 135px!important;margin:0!important;border:0!important;border-radius:0!important;padding:12px 18px!important;min-height:46px!important;font:700 15px Tajawal,sans-serif!important;background:transparent!important;box-shadow:none!important;color:#274739!important;white-space:nowrap}
+#appShell .hub-tabs .btn.active,#appShell .course-schedule-tabs .btn.active{background:#408a71!important;color:#fff!important}
+#appShell .course-schedule-tabs{width:min(620px,100%)}
+#appShell .reward-table{min-width:640px!important;table-layout:fixed;width:100%!important}
+#appShell .reward-table th:first-child{width:32%!important;min-width:200px!important}
+#appShell .course-reward-section{margin-top:26px;border-top:1px solid #dce7df;padding-top:22px}
+#appShell .course-reward-table{width:100%;border-collapse:collapse}.course-reward-table td,.course-reward-table th{padding:14px;border:1px solid #dce7df;text-align:start}.course-reward-table th{background:#f1f6f3}.course-reward-table input{max-width:180px!important}
+#appShell .rewards-panel .hub-controls .btn{border-radius:6px!important;min-height:42px}
+#appShell .next-filters{min-width:0;max-width:100%;gap:12px}#appShell .next-filters>*{min-width:0;max-width:100%}
+@media(max-width:1100px){#appShell #courseProgressBody.next-course-layout{grid-template-columns:230px minmax(0,1fr)!important;gap:18px}}
+@media(max-width:760px){#appShell #courseProgressBody.next-course-layout{display:block!important}#appShell .chapter-task-tree{position:relative!important;top:auto!important;max-height:280px;margin-bottom:18px}#appShell .work-brand{gap:8px;max-width:60vw}#appShell .work-brand>img:not(.brand-wordmark){width:34px!important;height:34px!important}#appShell .work-brand>.brand-wordmark{width:155px!important;max-width:calc(60vw - 44px);height:auto!important}#appShell .app-sidebar .sidebar-nav{gap:2px!important}#appShell .app-sidebar .sidebar-link{padding:8px!important}#appShell .gantt-table th:first-child{width:210px!important;min-width:210px!important;max-width:210px!important}#appShell .hub-tabs .btn{font-size:14px!important;flex-basis:130px!important}#appShell .course-schedule-tabs .btn{flex-basis:170px!important;font-size:13px!important}.course-reward-table td,.course-reward-table th{padding:10px}}
+#appShell .workflow-page{grid-template-columns:minmax(0,1fr)!important}
+#appShell :is(.chapter-compact-head,.chapter-heading-copy,.chapter-primary-tabs,.chapter-compact-progress){min-width:0!important;max-width:100%!important;box-sizing:border-box}
+#appShell .chapter-compact-head h2{overflow-wrap:anywhere}
+#appShell .chapter-primary-tabs{overflow-x:auto;overscroll-behavior-x:contain;flex-wrap:nowrap}
+#appShell .chapter-primary-tabs button{flex:none;white-space:nowrap}
+#appShell [data-edit-schedule]{display:inline-grid;place-items:center;min-width:38px;min-height:38px;padding:8px!important}#appShell [data-edit-schedule] svg{width:19px;height:19px;display:block;fill:none;stroke:currentColor}
+#appShell .choice-check{background:transparent!important;border:0!important;border-radius:0!important;color:#408a71!important}

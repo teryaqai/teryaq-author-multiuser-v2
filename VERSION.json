@@ -1,14 +1,14 @@
 {
-  "appVersion": "3.1.3",
+  "appVersion": "3.1.4",
   "documentSchemaVersion": "2.0.0",
   "localDatabaseVersion": 4,
-  "cloudMigrationVersion": 54,
-  "release": "navigation-delivery-access",
-  "version": "3.1.3",
-  "updatedAt": "2026-10-21",
-  "notes": "Compact bottom navigation; contained timeline scrolling; course roles and all-chapter schedule; automatic output upload; scoped file downloads",
+  "cloudMigrationVersion": 55,
+  "release": "brand-rewards-contained-layout",
+  "version": "3.1.4",
+  "updatedAt": "2026-10-22",
+  "notes": "Updated branding, outline navigation, chapter resources, course-level rewards and contained schedule scrolling.",
   "name": "TERYAQ Work",
   "requiredMigrations": [
-    "054_navigation_delivery_access.sql"
+    "055_reward_scopes.sql"
   ]
 }

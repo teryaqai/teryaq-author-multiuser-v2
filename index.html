@@ -12,8 +12,8 @@
   <link rel="stylesheet" href="next-release.css">
 <link rel="stylesheet" href="release-311.css">
 <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icons/icon-192.png">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" href="icons/favicon-v314.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-v314.png">
   <link rel="stylesheet" href="styles.v2.9.2.css">
   <link rel="stylesheet" href="theme.v3.1.1.css">
   <link rel="stylesheet" href="enhancements.v3.1.1.css">
@@ -21,13 +21,14 @@
   <script src="runtime-config.js"></script>
   <script src="boot-config.v3.1.1.js"></script>
 <link rel="stylesheet" href="release-313.css">
+<link rel="stylesheet" href="release-314.css">
 </head>
 <body>
 <div class="auth-gate" id="authGate">
   <div class="auth-layout">
     <main class="auth-card" aria-labelledby="authTitle">
-      <div class="auth-logo"><img src="icons/teryaq-mark.png" alt="TERYAQ logo"></div>
-      <h1 id="authTitle">TERYAQ Work</h1>
+      <div class="auth-logo"><img src="icons/brand-mark-v314.png" alt="TERYAQ logo"></div>
+      <h1 id="authTitle"><img src="icons/brand-wordmark-v314.png" alt="TERYAQ Work"></h1>
       <p>Sign in once on this device, then continue working offline with your local workspace.</p>
       <div class="field"><label for="authEmail">Email</label><input id="authEmail" type="email" autocomplete="username" placeholder="name@teryaq.com"></div>
       <div class="field"><label for="authPassword">Password</label><div class="password-field"><input id="authPassword" type="password" autocomplete="current-password"><button class="password-toggle" id="authPasswordToggle" type="button" aria-label="Show password" aria-pressed="false" title="Show password"><span data-ui-icon="auth.password-show" aria-hidden="true"></span></button></div></div>
@@ -64,13 +65,12 @@
 <div class="app-shell hidden" id="appShell">
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-brand">
-      <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/teryaq-mark.png" alt="TERYAQ logo"></button>
-      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>مساحة عمل ترياق · <span id="sidebarAppVersion">v3.1.3</span></small></div>
+      <button class="brand-mark logo-mark" id="homeBtn" title="Dashboard"><img src="icons/brand-mark-v314.png" alt="TERYAQ logo"></button>
+      <div class="sidebar-brand-copy"><strong>TERYAQ</strong><small>مساحة عمل ترياق · <span id="sidebarAppVersion">v3.1.4</span></small></div>
       <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Collapse sidebar" aria-expanded="true" aria-controls="appSidebar" title="Collapse sidebar"><span data-ui-icon="menu"></span></button>
       <button class="sidebar-close" id="sidebarClose" aria-label="Close menu"><span data-ui-icon="close"></span></button>
     </div>
     <nav class="sidebar-nav" aria-label="Main navigation">
-      <button class="sidebar-link active" data-nav="home" title="Dashboard"><span class="nav-icon" data-ui-icon="home"></span><span class="nav-label">Dashboard</span></button>
       <button class="sidebar-link" data-nav="documents" title="Documents"><span class="nav-icon" data-ui-icon="documents"></span><span class="nav-label">Documents</span></button>
       <button class="sidebar-link" data-nav="templates" title="Templates"><span class="nav-icon" data-ui-icon="templates"></span><span class="nav-label">Templates</span></button>
       <button class="sidebar-link" data-nav="submissionForms" title="Submission Forms"><span class="nav-icon" data-ui-icon="submissionForms"></span><span class="nav-label">Submission Forms</span></button>
@@ -84,7 +84,7 @@
   <div class="sidebar-scrim hidden" id="sidebarScrim"></div>
   <div class="app-frame">
   <header class="topbar">
-    <a class="work-brand editor-brand" href="#" id="workBrandHome" aria-label="TERYAQ Work — Dashboard"><img src="icons/teryaq-mark.png" alt="TERYAQ"><span><strong>TERYAQ</strong> Work</span></a>
+    <a class="work-brand editor-brand" href="#" id="workBrandHome" aria-label="TERYAQ Work — Dashboard"><img src="icons/brand-mark-v314.png" alt="TERYAQ"><img class="brand-wordmark" src="icons/brand-wordmark-v314.png" alt="TERYAQ Work"></a>
     <div class="brand">
       <button class="mobile-menu" id="sidebarToggle" aria-label="Open menu" aria-expanded="false" aria-controls="appSidebar"><span data-ui-icon="menu"></span></button>
       <button class="btn back-button hidden" id="backBtn" title="Back to documents"><span data-ui-icon="arrow-left"></span><span>Back</span></button>
@@ -359,20 +359,21 @@
 <div class="toast" id="toast"></div>
 <script src="vendor/jszip.min.js"></script>
 <script src="dialogs.v3.1.1.js"></script>
-<script src="platform.v3.1.3.js"></script>
-<script src="next-release.js"></script>
-<script src="release-311.js"></script>
+<script src="platform.v3.1.4.js"></script>
+<script src="next-release.v3.1.4.js"></script>
+<script src="release-311.v3.1.4.js"></script>
 <script src="release-312.js"></script>
 <script src="release-313.js"></script>
-<script src="course-hub.js"></script>
+<script src="release-314.js"></script>
+<script src="course-hub.v3.1.4.js"></script>
 <script src="content-setup.js"></script>
 <script src="archive-312.js"></script>
 <script src="auto-delivery.js"></script>
-<script src="workflow.v3.1.3.js"></script>
+<script src="workflow.v3.1.4.js"></script>
 <script src="team-analytics.v3.1.1.js"></script>
 <script src="direction.v3.1.1.js"></script>
 <script src="guide.v3.1.1.js"></script>
-<script src="app.v3.1.3.js"></script>
-<script src="submissions.v3.1.3.js"></script>
+<script src="app.v3.1.4.js"></script>
+<script src="submissions.v3.1.4.js"></script>
 </body>
 </html>
